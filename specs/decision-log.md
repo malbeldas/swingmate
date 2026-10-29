@@ -51,6 +51,7 @@ Las que bloquean el piloto del 6 Dic están marcadas con (\*).
 **Pregunta:** ¿aprobamos el único costo variable del piloto?
 **Lo que haríamos nosotros:** sí, con una tarjeta de SwingMate en Twilio y límite de gasto de US$10.
 **Por qué:** cada SMS a Australia cuesta US$0,0515 (Twilio, consultado el 29 Oct). Verificar 20 hosts cuesta menos de US$5. El celular obligatorio para publicar es la decisión D10 y nuestra principal defensa contra avisos falsos.
+**Alternativa gratis (recomendada desde el 29 Oct, pendiente de Maxi):** sin SMS en el piloto. El host se verifica en el alta asistida por videollamada (`Q-14`) y el admin le pone el sello "Verified by SwingMate". Perdemos la verificación de celular de quien busca y el filtro "Only people with a verified phone". Cambia D10 y `BR-LST-003`. La prueba de Twilio no sirve: solo manda a números verificados en la cuenta.
 
 ### Q-04 (\*) — DNS de swingmate.au
 **Pregunta:** ¿Tomás puede cargar los registros DNS del dominio?
@@ -70,7 +71,7 @@ Mientras tanto se desarrolla en `malbeldas.github.io/swingmate`.
 **Pregunta:** ¿seguimos en el plan gratuito o pasamos a Pro (US$25 por mes) el día del piloto?
 **Lo que haríamos nosotros:** gratuito durante el desarrollo y Pro desde el 6 Dic.
 **Por qué:** el plan gratuito no tiene backups y pausa el proyecto después de una semana sin actividad (supabase.com/pricing, consultado el 29 Oct). Con usuarios reales, perder mensajes y avisos por una falla no tiene arreglo. Pro trae backups diarios por 7 días.
-**Alternativa más barata:** seguir gratis con un ping diario para que no se pause, aceptando no tener backups.
+**Alternativa gratis (recomendada desde el 29 Oct, pendiente de Maxi):** seguir gratis con un ping diario para que no se pause y un `pg_dump` diario cifrado hecho por GitHub Actions, guardado 7 días. Las fotos no entran en ese backup y restaurar es manual.
 
 ### Q-07 (\*) — Captación de los primeros 10 a 20 hosts
 **Pregunta:** ¿quién lidera la captación y desde cuándo?
@@ -135,6 +136,76 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 - 5 respuestas "Yes, through SwingMate".
 
 **Por qué:** sin objetivos escritos antes de empezar, cualquier resultado parece bueno. Los números son una propuesta nuestra sin un benchmark propio detrás. La tasa de respuesta es la métrica que más importa, porque la reunión del 25 Sep identificó la falta de respuesta como el riesgo principal.
+
+### Q-14 (\*) — Alta de hosts en el piloto
+**Pregunta:** ¿el host publica solo o con nosotros?
+**Lo que haríamos nosotros:** alta asistida por videollamada de 15 minutos: cargamos el aviso juntos y verificamos identidad. El alta sin asistencia queda para después del piloto.
+**Por qué:** con 20 hosts es manejable, da avisos de calidad y reemplaza al SMS (`Q-03`). Decide Maxi. Destraba #13.
+
+### Q-15 — Respuesta rápida del host
+**Pregunta:** ¿qué hace un host que no puede recibir a quien le escribe?
+**Lo que haríamos nosotros:** un botón "Sorry, not available" que responde con un toque y cuenta como respuesta.
+**Por qué:** el host no queda mal por no contestar y quien busca no espera en vano. Decide Maxi. Destraba #22.
+
+### Q-16 — Cierre del acuerdo
+**Pregunta:** ¿cómo sabemos que hubo convivencia?
+**Lo que haríamos nosotros:** el host marca el aviso como "Filled" y elige si fue con alguien de SwingMate; a los 14 días se pregunta a los dos (`UC-052`).
+**Por qué:** es la única forma de medir la meta del piloto (`Q-13`). Decide Maxi. Destraba #14 y #33.
+
+### Q-17 — Canal de avisos
+**Pregunta:** ¿avisamos de mensajes nuevos solo por email?
+**Lo que haríamos nosotros:** sí, solo email en el piloto; sin WhatsApp ni push.
+**Por qué:** WhatsApp cuesta y pide aprobación de Meta; push pide permisos que en el piloto no vale la pena pedir. Deciden Maxi y Tomás. Destraba #26.
+
+### Q-18 — Visitas a la casa
+**Pregunta:** ¿SwingMate agenda las visitas?
+**Lo que haríamos nosotros:** no; se coordinan en el chat con "Before you agree" a mano.
+**Por qué:** agendar es otro producto y no hace falta para el primer contacto. Decide Maxi.
+
+### Q-19 (\*) — Precio para quien solo está en R&R
+**Pregunta:** ¿qué precio ve alguien que solo duerme en la ciudad durante su R&R?
+**Lo que haríamos nosotros:** el precio semanal completo del host, más un tilde "Open to splitting with an opposite-swing housemate". Medimos cuántos lo marcan antes de modelar precios por noche.
+**Por qué:** el precio por noche complica el fit y el calendario y nadie lo pidió todavía. Deciden Maxi y Tomás. Destraba #13 y #17.
+
+### Q-20 — Un aviso, una habitación
+**Pregunta:** ¿un aviso puede tener varias habitaciones?
+**Lo que haríamos nosotros:** no; quien tiene dos habitaciones publica dos avisos.
+**Por qué:** simplifica el calendario y el fit. Decide Maxi. Destraba #13.
+
+### Q-21 (\*) — Etiqueta "Swing share"
+**Pregunta:** ¿distinguimos una casa compartida por swing de una habitación libre?
+**Lo que haríamos nosotros:** sí, con la etiqueta "Swing share" cuando la disponibilidad sale del roster del host.
+**Por qué:** es la diferencia de SwingMate y quien busca tiene que saber que comparte con alguien de swing opuesto. Deciden Maxi y Tomás. Destraba #13 y #17.
+
+### Q-22 (\*) — Estado vacío con pocos avisos
+**Pregunta:** ¿qué ve quien busca el 6 Dic si no hay avisos que le sirvan?
+**Lo que haríamos nosotros:** un estado vacío que ofrece crear una alerta. Adelantamos las alertas (#31) a D2 y pasamos la vista de métricas (#29) a D3; los eventos se registran desde el día uno.
+**Por qué:** sin alerta, quien no encuentra nada no vuelve; nunca se muestran avisos de ejemplo (`BR-TRU-006`). Deciden Maxi y Tomás. Destraba #16 y #31.
+
+### Q-23 — Estadía mínima
+**Pregunta:** ¿la estadía mínima del host filtra resultados?
+**Lo que haríamos nosotros:** no; se muestra como dato en la card y el detalle.
+**Por qué:** con pocos avisos, filtrarla vacía la lista. Decide Maxi. Destraba #17.
+
+### Q-24 — Logo en vector
+**Pregunta:** ¿tenemos el archivo original del logo?
+**Lo que haríamos nosotros:** que Tomás pase el vector (SVG, AI o PDF) del logo de Instagram; no se redibuja, solo se adapta.
+**Por qué:** hoy el favicon y el encabezado usan una adaptación. Decide Tomás.
+
+### Q-25 — Diseños de celular
+**Pregunta:** ¿hacemos diseños de celular antes de programar?
+**Lo que haríamos nosotros:** no; se construye primero para celular desde los tokens de `design-system.md` y Tomás revisa capturas a 375 y 1280 px en cada entrega, sin Figma.
+**Por qué:** los diseños aprobados son de escritorio y no hay tiempo para otra ronda. Decide Tomás.
+
+### Q-26 — Fotos de portada y páginas
+**Pregunta:** ¿qué fotos usamos fuera de los avisos?
+**Lo que haríamos nosotros:** fotos propias de Perth o de trabajadores reales con permiso; nada de stock que parezca un aviso.
+**Por qué:** una foto de stock con aspecto de aviso se lee como inventario falso. Decide Tomás. Destraba #20.
+
+### Q-27 — Textos de interfaz
+**Pregunta:** ¿quién escribe los textos en inglés australiano?
+**Lo que haríamos nosotros:** los escribimos desde `glossary.md` y Tomás los revisa en cada demo; los legales esperan a `Q-01`.
+**Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar. Decide Tomás.
 
 ## 2. Decisiones de producto
 
