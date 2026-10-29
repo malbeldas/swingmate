@@ -51,7 +51,7 @@ Las que bloquean el piloto del 6 Dic están marcadas con (\*).
 **Pregunta:** ¿aprobamos el único costo variable del piloto?
 **Lo que haríamos nosotros:** sí, con una tarjeta de SwingMate en Twilio y límite de gasto de US$10.
 **Por qué:** cada SMS a Australia cuesta US$0,0515 (Twilio, consultado el 29 Oct). Verificar 20 hosts cuesta menos de US$5. El celular obligatorio para publicar es la decisión D10 y nuestra principal defensa contra avisos falsos.
-**Estado (29 Oct):** Maxi propone pagar los SMS y dejar Supabase gratis (`Q-06`). Falta el OK de Tomás. Twilio probablemente pida una carga inicial mínima de unos US$20 para salir de la cuenta de prueba (sin confirmar). La alternativa de verificar a cada host por videollamada se descartó porque suma fricción al host.
+**Estado (29 Oct):** Maxi propone pagar los SMS y dejar Supabase gratis (`Q-06`). Falta el OK de Tomás. Twilio probablemente pida una carga inicial mínima de unos US$20 para salir de la cuenta de prueba (sin confirmar). La videollamada con cada host se descartó: suma fricción y hoy no aporta (Maxi, 29 Oct); queda como idea para después del piloto.
 
 ### Q-04 (\*) — DNS de swingmate.au
 **Pregunta:** ¿Tomás puede cargar los registros DNS del dominio?
@@ -75,7 +75,7 @@ Mientras tanto se desarrolla en `malbeldas.github.io/swingmate`.
 
 ### Q-07 (\*) — Captación de los primeros 10 a 20 hosts
 **Pregunta:** ¿quién lidera la captación y desde cuándo?
-**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Ofreceríamos ayuda para cargar el aviso a quien la quiera, sin que sea requisito, y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
+**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Cada host publica solo con la guía de la web (`Q-28`), y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
 **Por qué:**
 - Sin oferta real, el piloto no prueba nada.
 - El inventario falso está prohibido (`BR-TRU-006`).
@@ -139,8 +139,8 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 
 ### Q-14 — Alta de hosts en el piloto
 **Pregunta:** ¿el host publica solo o con nosotros?
-**Lo que haríamos nosotros:** el host publica solo (`UC-020`), con email y celular verificados. A los primeros hosts les ofrecemos ayuda para cargar el aviso, sin que sea requisito.
-**Por qué:** un alta obligatoria por videollamada suma fricción y va contra el principio de producto (Maxi, 29 Oct). Decide Maxi. Destraba #13.
+**Lo que haríamos nosotros:** el host publica solo (`UC-020`), guiado por la web (`Q-28`). Sin videollamada.
+**Por qué:** una videollamada suma fricción y hoy no aporta (Maxi, 29 Oct); queda como idea para después del piloto. Decide Maxi. Destraba #13.
 
 ### Q-15 — Respuesta rápida del host
 **Pregunta:** ¿qué hace un host que no puede recibir a quien le escribe?
@@ -206,6 +206,15 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 **Pregunta:** ¿quién escribe los textos en inglés australiano?
 **Lo que haríamos nosotros:** los escribimos desde `glossary.md` y Tomás los revisa en cada demo; los legales esperan a `Q-01`.
 **Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar. Decide Tomás.
+
+### Q-28 — Pasos de onboarding en la web
+**Pregunta:** ¿cómo guiamos al host que publica y a quien busca por primera vez?
+**Lo que haríamos nosotros:**
+- Host: el asistente de publicar muestra el paso actual ("Step 2 of 6"), un consejo corto por paso y la vista previa de cómo lo ve quien busca antes de "Publish".
+- Quien busca, primera visita: una tira de 3 pasos que se puede cerrar ("Add your roster", "See who fits", "Message the host, you only need an account when you send"). Recordar que se cerró no guarda datos personales.
+
+Sumarlo como escenarios de #13 y #15, en la primera entrega. En v0.1 no hay reservas: el recorrido de quien busca termina en el primer mensaje.
+**Por qué:** Maxi pidió que la web guíe sola en lugar de una videollamada (29 Oct). Decide Maxi. Destraba #13 y #15.
 
 ## 2. Decisiones de producto
 
