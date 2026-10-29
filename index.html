@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <!-- Not indexed until the pilot opens with Terms and Privacy in place (decision-log.md Q-01). -->
+  <meta name="robots" content="noindex">
+  <title>SwingMate · Find a home that fits your roster</title>
+  <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they are actually in town.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/base.css">
+  <script type="module" src="app/pages/home.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./" aria-label="SwingMate home">
+        <img class="brand-mark" src="assets/favicon.svg" alt="" width="40" height="40">
+        <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#how-it-works">How it works</a>
+        <a href="#safety">Safety</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap stack">
+        <span class="pill">Pilot opening soon in Perth</span>
+        <p class="micro">For FIFO, DIDO &amp; BIBO workers</p>
+        <h1>Find a home that fits <span class="accent">your roster</span></h1>
+        <p class="tagline">Different swings. Same home.</p>
+        <p class="lead">SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
+        <ul class="ticks">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Hosts verify their email and mobile before listing</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Message hosts directly in SwingMate</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="your-nights" aria-labelledby="your-nights-title">
+      <div class="wrap">
+        <div class="card stack">
+          <h2 id="your-nights-title">See the nights you need</h2>
+          <p class="muted small">Pick your roster. We work out which nights you sleep in town, including the night you fly home.</p>
+          <form class="controls" id="roster-form">
+            <label class="field">Your roster
+              <select name="pattern" id="pattern"></select>
+            </label>
+            <label class="field">Your next swing starts
+              <input type="date" name="anchor" id="anchor" required>
+            </label>
+            <label class="check"><input type="checkbox" name="fliesHome" id="fliesHome" checked>Do you fly home on the last day of your swing?</label>
+            <label class="check"><input type="checkbox" name="fliesOut" id="fliesOut" checked>Do you fly out on the first day of your next swing?</label>
+          </form>
+          <p class="result" id="nights-summary" aria-live="polite"></p>
+          <p class="small" id="next-stay"></p>
+          <div class="strip" id="strip" role="list" aria-label="Your next four weeks"></div>
+          <div class="legend" aria-hidden="true">
+            <span><i class="swatch away"></i>Away on site</span>
+            <span><i class="swatch travel"></i>Flying home</span>
+            <span><i class="swatch home"></i>In town</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works" aria-labelledby="how-title">
+      <div class="wrap stack">
+        <h2 id="how-title">How it works</h2>
+        <div class="grid-2">
+          <div class="card stack">
+            <h3>Looking for a place</h3>
+            <ol class="steps">
+              <li>Search by suburb and add your dates or your roster.</li>
+              <li>See which homes are free for the nights you need.</li>
+              <li>Message the host. You only need an account when you send.</li>
+            </ol>
+          </div>
+          <div class="card stack">
+            <h3>Have a room to share</h3>
+            <ol class="steps">
+              <li>List your room and mark when it's free, or let your own roster fill the calendar.</li>
+              <li>Verify your email and mobile, then publish.</li>
+              <li>Hear from people whose roster fits your home.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="safety" aria-labelledby="safety-title">
+      <div class="wrap stack">
+        <h2 id="safety-title">Built for trust</h2>
+        <ul class="ticks">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Your exact address is never shown. Listings show an approximate area only.</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Your email, mobile and employer stay private.</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Report or block anyone, any time.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      <a href="https://www.instagram.com/swingmate.au/" rel="noopener">Instagram @swingmate.au</a>
+    </div>
+  </footer>
+</body>
+</html>

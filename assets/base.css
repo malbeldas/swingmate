@@ -1,0 +1,86 @@
+/* Base layout and components. Values only from tokens.css (engineering-constitution.md §6). */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+}
+
+h1, h2, h3 { font-family: var(--font-display); margin: 0; }
+h1 { font-size: var(--t-h1); line-height: var(--t-h1-lh); font-weight: 800; }
+h2 { font-size: var(--t-h2); line-height: var(--t-h2-lh); font-weight: 800; }
+h3 { font-size: var(--t-h3); line-height: var(--t-h3-lh); font-weight: 700; }
+p { margin: 0; }
+a { color: var(--navy); }
+
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.stack { display: flex; flex-direction: column; gap: var(--s-4); }
+.muted { color: var(--muted); }
+.small { font-size: var(--t-small); line-height: var(--t-small-lh); }
+.micro { font-size: var(--t-micro); line-height: var(--t-micro-lh); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--muted); }
+
+/* Header and logo (design-system.md §1: the existing logo, never redrawn) */
+.site-header { background: var(--white); border-bottom: 1px solid var(--line); }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); padding-top: var(--s-3); padding-bottom: var(--s-3); }
+.brand { display: flex; align-items: center; gap: var(--s-3); text-decoration: none; }
+.brand-mark { width: 40px; height: 40px; flex: none; }
+.wordmark { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; color: var(--navy); }
+.wordmark .mate { color: var(--amber); }
+.site-nav { display: flex; gap: var(--s-4); font-size: var(--t-small); font-weight: 600; }
+.site-nav a { text-decoration: none; }
+.site-nav a:hover { text-decoration: underline; }
+
+/* Hero */
+.hero { padding: var(--s-8) 0 var(--s-6); }
+.hero h1 { font-size: var(--t-hero); line-height: var(--t-hero-lh); letter-spacing: -0.02em; }
+.hero h1 .accent { color: var(--amber-ink); }
+.tagline { font-family: var(--font-display); font-weight: 800; font-size: var(--t-h3); line-height: var(--t-h3-lh); }
+.lead { color: var(--text-2); max-width: 46ch; }
+.ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+.ticks li { display: flex; gap: var(--s-2); align-items: flex-start; }
+.ticks svg { flex: none; margin-top: 2px; color: var(--teal); }
+.pill { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--s-2); background: var(--teal-soft); color: var(--teal-ink); border-radius: var(--r-pill); padding: var(--s-1) var(--s-3); font-size: var(--t-small); font-weight: 600; }
+
+/* Cards and sections */
+.section { padding: var(--s-8) 0; }
+.card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-card); padding: var(--s-5); }
+.grid-2 { display: grid; gap: var(--s-4); }
+@media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.steps { margin: 0; padding-left: var(--s-5); display: flex; flex-direction: column; gap: var(--s-2); color: var(--text-2); }
+
+/* Form controls */
+.field { display: flex; flex-direction: column; gap: var(--s-1); font-size: var(--t-small); font-weight: 600; }
+.field select, .field input[type='date'] {
+  height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3);
+  font: inherit; font-weight: 400; color: var(--navy); background: var(--white); width: 100%;
+}
+.check { display: flex; gap: var(--s-2); align-items: flex-start; font-size: var(--t-small); }
+.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--navy); }
+.controls { display: grid; gap: var(--s-3); }
+@media (min-width: 768px) { .controls { grid-template-columns: 1fr 1fr; } }
+
+/* Roster strip (design-system.md §7): never color only, every night has a label */
+.strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-1); }
+.night { border-radius: var(--r-cell); min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--t-micro); line-height: 14px; }
+.night .dow { opacity: 0.8; }
+.night.away { background: var(--navy); color: var(--cream); }
+.night.travel { background: var(--peach-soft); color: var(--peach-ink); }
+.night.home { background: var(--amber); color: var(--navy); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-3); font-size: var(--t-small); color: var(--text-2); }
+.legend span { display: inline-flex; align-items: center; gap: var(--s-1); }
+.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.swatch.away { background: var(--navy); }
+.swatch.travel { background: var(--peach-soft); border: 1px solid var(--peach-ink); }
+.swatch.home { background: var(--amber); }
+.result { font-family: var(--font-display); font-weight: 800; font-size: var(--t-h3); line-height: var(--t-h3-lh); }
+
+.site-footer { border-top: 1px solid var(--line); background: var(--white); padding: var(--s-6) 0; font-size: var(--t-small); color: var(--muted); }
+.site-footer .wrap { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between; }

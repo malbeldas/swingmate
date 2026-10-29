@@ -1,0 +1,48 @@
+/* Design tokens: specs/design-system.md §2 to §4. Change values there first. */
+@font-face { font-family: 'Manrope'; font-weight: 700; font-display: swap; src: url('fonts/manrope-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Manrope'; font-weight: 800; font-display: swap; src: url('fonts/manrope-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap; src: url('fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-600-normal.woff2') format('woff2'); }
+
+:root {
+  --navy: #152238;
+  --navy-ink: #0D1626;
+  --amber: #E68A4B;
+  --amber-ink: #C96B2C;
+  --cream: #FAF6EF;
+  --white: #FFFFFF;
+  --line: #E3D9C4;
+  --sand: #F1E9D8;
+  --text-2: #3C4656;
+  --muted: #5C6470;
+  --teal: #2C7A76;
+  --teal-ink: #1F5E5A;
+  --teal-soft: #DCEDEB;
+  --peach-soft: #F7DEC3;
+  --peach-ink: #7A3E12;
+  --unavail: #E3D9C4;
+  --danger: #B4452A;
+  --away-dim: #45597A;
+
+  --font-display: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --t-hero: 28px; --t-hero-lh: 34px;
+  --t-h1: 28px; --t-h1-lh: 34px;
+  --t-h2: 22px; --t-h2-lh: 28px;
+  --t-h3: 18px; --t-h3-lh: 24px;
+  --t-body: 15px; --t-body-lh: 22px;
+  --t-small: 13px; --t-small-lh: 18px;
+  --t-micro: 12px; --t-micro-lh: 16px;
+
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-12: 48px;
+  --gutter: 16px;
+  --max: 1180px;
+
+  --r-sm: 8px; --r-md: 14px; --r-pill: 999px; --r-cell: 4px;
+  --shadow-card: 0 1px 2px rgb(21 34 56 / 6%), 0 4px 16px rgb(21 34 56 / 6%);
+}
+
+@media (min-width: 768px) {
+  :root { --t-hero: 40px; --t-hero-lh: 46px; --gutter: 24px; }
+}

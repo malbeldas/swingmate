@@ -1,0 +1,40 @@
+{
+  "description": "BR-ROS-003 cases shared by core/roster.js and, later, the SQL twin. Night d is the night that starts on day d.",
+  "cases": [
+    {
+      "name": "14:7 with defaults needs 8 nights per cycle",
+      "roster": { "daysOn": 14, "daysOff": 7, "anchor": "2026-10-19", "fliesHomeLastDay": true, "fliesOutFirstDay": true },
+      "from": "2026-10-19",
+      "count": 21,
+      "needed": ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07", "2026-11-08"]
+    },
+    {
+      "name": "14:7 not flying home on the last day drops the travel night",
+      "roster": { "daysOn": 14, "daysOff": 7, "anchor": "2026-10-19", "fliesHomeLastDay": false, "fliesOutFirstDay": true },
+      "from": "2026-10-19",
+      "count": 21,
+      "needed": ["2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07", "2026-11-08"]
+    },
+    {
+      "name": "14:7 flying out the day before drops the last R&R night",
+      "roster": { "daysOn": 14, "daysOff": 7, "anchor": "2026-10-19", "fliesHomeLastDay": true, "fliesOutFirstDay": false },
+      "from": "2026-10-19",
+      "count": 21,
+      "needed": ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07"]
+    },
+    {
+      "name": "8:6 with defaults, window starting before the anchor",
+      "roster": { "daysOn": 8, "daysOff": 6, "anchor": "2026-11-02", "fliesHomeLastDay": true, "fliesOutFirstDay": true },
+      "from": "2026-10-26",
+      "count": 15,
+      "needed": ["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01", "2026-11-09"]
+    },
+    {
+      "name": "7:7 across the AEDT change in early October keeps whole nights",
+      "roster": { "daysOn": 7, "daysOff": 7, "anchor": "2026-09-28", "fliesHomeLastDay": true, "fliesOutFirstDay": true },
+      "from": "2026-09-28",
+      "count": 14,
+      "needed": ["2026-10-04", "2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11"]
+    }
+  ]
+}

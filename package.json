@@ -1,0 +1,17 @@
+{
+  "name": "swingmate",
+  "private": true,
+  "description": "SwingMate: shared homes for FIFO, DIDO and BIBO workers, matched by roster.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"tests/unit/**/*.test.js\"",
+    "test:e2e": "playwright test",
+    "serve": "node tests/e2e/server.js 4173"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
