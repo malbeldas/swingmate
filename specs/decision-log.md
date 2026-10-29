@@ -51,7 +51,7 @@ Las que bloquean el piloto del 6 Dic están marcadas con (\*).
 **Pregunta:** ¿aprobamos el único costo variable del piloto?
 **Lo que haríamos nosotros:** sí, con una tarjeta de SwingMate en Twilio y límite de gasto de US$10.
 **Por qué:** cada SMS a Australia cuesta US$0,0515 (Twilio, consultado el 29 Oct). Verificar 20 hosts cuesta menos de US$5. El celular obligatorio para publicar es la decisión D10 y nuestra principal defensa contra avisos falsos.
-**Alternativa gratis (recomendada desde el 29 Oct, pendiente de Maxi):** sin SMS en el piloto. El host se verifica en el alta asistida por videollamada (`Q-14`) y el admin le pone el sello "Verified by SwingMate". Perdemos la verificación de celular de quien busca y el filtro "Only people with a verified phone". Cambia D10 y `BR-LST-003`. La prueba de Twilio no sirve: solo manda a números verificados en la cuenta.
+**Estado (29 Oct):** Maxi propone pagar los SMS y dejar Supabase gratis (`Q-06`). Falta el OK de Tomás. Twilio probablemente pida una carga inicial mínima de unos US$20 para salir de la cuenta de prueba (sin confirmar). La alternativa de verificar a cada host por videollamada se descartó porque suma fricción al host.
 
 ### Q-04 (\*) — DNS de swingmate.au
 **Pregunta:** ¿Tomás puede cargar los registros DNS del dominio?
@@ -69,13 +69,13 @@ Mientras tanto se desarrolla en `malbeldas.github.io/swingmate`.
 
 ### Q-06 (\*) — Plan de Supabase al abrir a usuarios reales
 **Pregunta:** ¿seguimos en el plan gratuito o pasamos a Pro (US$25 por mes) el día del piloto?
-**Lo que haríamos nosotros:** gratuito durante el desarrollo y Pro desde el 6 Dic.
+**Lo que haríamos nosotros:** gratuito durante el desarrollo y también en el piloto, con el backup propio de abajo; Pro si pasamos de unos 50 avisos.
 **Por qué:** el plan gratuito no tiene backups y pausa el proyecto después de una semana sin actividad (supabase.com/pricing, consultado el 29 Oct). Con usuarios reales, perder mensajes y avisos por una falla no tiene arreglo. Pro trae backups diarios por 7 días.
-**Alternativa gratis (recomendada desde el 29 Oct, pendiente de Maxi):** seguir gratis con un ping diario para que no se pause y un `pg_dump` diario cifrado hecho por GitHub Actions, guardado 7 días. Las fotos no entran en ese backup y restaurar es manual.
+**Lo que haríamos ahora (29 Oct, propuesta de Maxi):** seguir gratis con un ping diario para que no se pause y un `pg_dump` diario cifrado hecho por GitHub Actions, guardado 7 días. Las fotos no entran en ese backup y restaurar es manual.
 
 ### Q-07 (\*) — Captación de los primeros 10 a 20 hosts
 **Pregunta:** ¿quién lidera la captación y desde cuándo?
-**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Haríamos onboarding asistido (cargar el aviso juntos por videollamada) y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
+**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Ofreceríamos ayuda para cargar el aviso a quien la quiera, sin que sea requisito, y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
 **Por qué:**
 - Sin oferta real, el piloto no prueba nada.
 - El inventario falso está prohibido (`BR-TRU-006`).
@@ -137,10 +137,10 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 
 **Por qué:** sin objetivos escritos antes de empezar, cualquier resultado parece bueno. Los números son una propuesta nuestra sin un benchmark propio detrás. La tasa de respuesta es la métrica que más importa, porque la reunión del 25 Sep identificó la falta de respuesta como el riesgo principal.
 
-### Q-14 (\*) — Alta de hosts en el piloto
+### Q-14 — Alta de hosts en el piloto
 **Pregunta:** ¿el host publica solo o con nosotros?
-**Lo que haríamos nosotros:** alta asistida por videollamada de 15 minutos: cargamos el aviso juntos y verificamos identidad. El alta sin asistencia queda para después del piloto.
-**Por qué:** con 20 hosts es manejable, da avisos de calidad y reemplaza al SMS (`Q-03`). Decide Maxi. Destraba #13.
+**Lo que haríamos nosotros:** el host publica solo (`UC-020`), con email y celular verificados. A los primeros hosts les ofrecemos ayuda para cargar el aviso, sin que sea requisito.
+**Por qué:** un alta obligatoria por videollamada suma fricción y va contra el principio de producto (Maxi, 29 Oct). Decide Maxi. Destraba #13.
 
 ### Q-15 — Respuesta rápida del host
 **Pregunta:** ¿qué hace un host que no puede recibir a quien le escribe?
