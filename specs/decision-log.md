@@ -75,7 +75,7 @@ Mientras tanto se desarrolla en `malbeldas.github.io/swingmate`.
 
 ### Q-07 (\*) — Captación de los primeros 10 a 20 hosts
 **Pregunta:** ¿quién lidera la captación y desde cuándo?
-**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Cada host publica solo con la guía de la web (`Q-28`), y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
+**Lo que haríamos nosotros:** que la lidere Tomás desde el 15 Nov, con su red y los grupos FIFO de Facebook. Cada host publica solo con la guía de la web (`DEC-016`), y empezaríamos por Perth sur (Rockingham, Baldivis, Kwinana).
 **Por qué:**
 - Sin oferta real, el piloto no prueba nada.
 - El inventario falso está prohibido (`BR-TRU-006`).
@@ -136,11 +136,6 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 - 5 respuestas "Yes, through SwingMate".
 
 **Por qué:** sin objetivos escritos antes de empezar, cualquier resultado parece bueno. Los números son una propuesta nuestra sin un benchmark propio detrás. La tasa de respuesta es la métrica que más importa, porque la reunión del 25 Sep identificó la falta de respuesta como el riesgo principal.
-
-### Q-14 — Alta de hosts en el piloto
-**Pregunta:** ¿el host publica solo o con nosotros?
-**Lo que haríamos nosotros:** el host publica solo (`UC-020`), guiado por la web (`Q-28`). Sin videollamada.
-**Por qué:** una videollamada suma fricción y hoy no aporta (Maxi, 29 Oct); queda como idea para después del piloto. Decide Maxi. Destraba #13.
 
 ### Q-15 — Respuesta rápida del host
 **Pregunta:** ¿qué hace un host que no puede recibir a quien le escribe?
@@ -207,15 +202,6 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 **Lo que haríamos nosotros:** los escribimos desde `glossary.md` y Tomás los revisa en cada demo; los legales esperan a `Q-01`.
 **Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar. Decide Tomás.
 
-### Q-28 — Pasos de onboarding en la web
-**Pregunta:** ¿cómo guiamos al host que publica y a quien busca por primera vez?
-**Lo que haríamos nosotros:**
-- Host: el asistente de publicar muestra el paso actual ("Step 2 of 6"), un consejo corto por paso y la vista previa de cómo lo ve quien busca antes de "Publish".
-- Quien busca, primera visita: una tira de 3 pasos que se puede cerrar ("Add your roster", "See who fits", "Message the host, you only need an account when you send"). Recordar que se cerró no guarda datos personales.
-
-Sumarlo como escenarios de #13 y #15, en la primera entrega. En v0.1 no hay reservas: el recorrido de quien busca termina en el primer mensaje.
-**Por qué:** Maxi pidió que la web guíe sola en lugar de una videollamada (29 Oct). Decide Maxi. Destraba #13 y #15.
-
 ## 2. Decisiones de producto
 
 | ID | Fecha | Decisión | Quién | Alternativas descartadas | Reglas |
@@ -235,6 +221,7 @@ Sumarlo como escenarios de #13 y #15, en la primera entrega. En v0.1 no hay rese
 | DEC-013 | 27 Oct 2026 | Cards de la home 2 por fila con fechas e iconos; estructura tipo Flatmates pero conservando la tira de 4 semanas. | Tomás y Maxi | Calendario mensual en la card | BR-FIT-005 |
 | DEC-014 | 27 Oct 2026 | Mapa de zona aproximada, nunca la dirección. | Tomás y Maxi | Pin exacto | BR-LST-004 |
 | DEC-015 | 27 Oct 2026 | Tomás lidera lo visual y la estética; Maxi lidera los flujos. Las propuestas de uno se discuten con razones. | Maxi y Tomás | — | — |
+| DEC-016 | 29 Oct 2026 | El host publica solo y la web guía: el asistente muestra "Step N of 5", un consejo por paso y la vista previa antes de "Publish"; quien busca ve en su primera visita una tira de 3 pasos hasta el primer mensaje. Va en #13 y #15. | Maxi | Alta asistida por videollamada (suma fricción; idea para después del piloto) y una historia de onboarding aparte | UC-020, UC-002 |
 
 ## 3. Decisiones técnicas
 

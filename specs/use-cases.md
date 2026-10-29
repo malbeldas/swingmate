@@ -102,6 +102,7 @@
 7. El sistema guarda el roster en el perfil o, si no hay sesión, en la sesión del navegador (`BR-ROS-006`).
 
 **Flujos alternativos:**
+- **A0 — Primera visita:** la home y los resultados muestran una tira de 3 pasos que se puede cerrar: "Add your roster", "See who fits" y "Message the host. You only need an account when you send." Tocar el primero abre este caso de uso (`DEC-016`).
 - **A1 — No fixed roster:** se borra el roster y la búsqueda pasa a pedir fechas (`BR-ROS-005`).
 - **A2 — Other pattern:** se piden días en el sitio y días en la ciudad, de 1 a 42 cada uno.
 
@@ -117,6 +118,7 @@
 - AC-002-2: si la persona responde "no" a volar el primer día del swing, la última noche del R&R deja de figurar como necesaria.
 - AC-002-3: cambiar el roster no altera las fechas de consultas ya enviadas.
 - AC-002-4: el roster de un visitante se ofrece precargado al registrarse.
+- AC-002-5: la tira de primera visita deja de aparecer en ese navegador después de cerrarla o de guardar un roster, sin guardar datos personales.
 
 **Reglas referenciadas:** BR-ROS-001, BR-ROS-002, BR-ROS-003, BR-ROS-004, BR-ROS-005, BR-ROS-006.
 
@@ -306,8 +308,10 @@
 3. Paso 3: título, descripción, fotos, reglas fijas, "Other house rules" y extras FIFO con "+".
 4. Paso 4: disponibilidad (`BR-AVL-003`) con vista previa de 12 semanas y excepciones.
 5. Paso 5: verificar celular (UC-021) y aceptar la declaración de veracidad.
-6. Toca "Publish".
-7. El sistema calcula el círculo del mapa (`BR-LST-004`), publica y muestra el aviso como lo verá quien busca.
+6. Revisa la vista previa del aviso tal como lo verá quien busca y toca "Publish".
+7. El sistema calcula el círculo del mapa (`BR-LST-004`), publica y muestra el aviso publicado.
+
+Cada paso muestra "Step N of 5" y un consejo corto que se puede cerrar (`DEC-016`).
 
 **Flujos alternativos:**
 - **A1 — Guardar borrador:** en cualquier paso, "Save and finish later" deja el aviso en `draft`.
@@ -331,6 +335,8 @@
 - AC-020-4: un borrador no aparece en búsquedas ni por link directo para otros usuarios.
 - AC-020-5: "Other house rules" no acepta más de 200 caracteres.
 - AC-020-6: no se pueden sumar más de 10 features o extras propios.
+- AC-020-7: cada paso muestra "Step N of 5" y su consejo; cerrar el consejo no borra lo cargado.
+- AC-020-8: antes de "Publish" el host ve la vista previa del aviso como la verá quien busca, sin la dirección exacta.
 
 **Reglas referenciadas:** BR-LST-001, BR-LST-002, BR-LST-003, BR-LST-004, BR-LST-005, BR-LST-006, BR-LST-007, BR-AVL-001, BR-AVL-003, BR-PRV-002.
 
