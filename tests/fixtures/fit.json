@@ -1,0 +1,90 @@
+{
+  "description": "Regression of the prototype v10 fit (frontend-migration.md §3). Day 0 of the prototype is 2026-10-12, which is also `today` and `start`; the roster is a 14:7 whose swing starts on 2026-10-19 with the default answers. Each listing carries the 84-night string listing_nights would return from `start`. Expected classes come from the prototype formula.",
+  "today": "2026-10-12",
+  "start": "2026-10-12",
+  "roster": {
+    "daysOn": 14,
+    "daysOff": 7,
+    "anchor": "2026-10-19",
+    "fliesHomeLastDay": true,
+    "fliesOutFirstDay": true
+  },
+  "listings": [
+    {
+      "id": "baldivis",
+      "priceWeekly": 320,
+      "availability": "111111100000001111111111111100000001111111111111100000001111111111111100000001111111"
+    },
+    {
+      "id": "scarborough",
+      "priceWeekly": 450,
+      "availability": "111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "id": "success",
+      "priceWeekly": 280,
+      "availability": "111111111111110000000111111011111110000000111111111111110000000111111111111110000000"
+    },
+    {
+      "id": "wellard",
+      "priceWeekly": 390,
+      "availability": "111111011111111111111111111111111111111111111111011111111111111111111111111111111111"
+    },
+    {
+      "id": "rockingham",
+      "priceWeekly": 260,
+      "availability": "111111111000001111111110000011111111100000111111111000001111111110000011111111100000"
+    },
+    {
+      "id": "mandurah",
+      "priceWeekly": 240,
+      "availability": "000000011111111111111000000011111111111111000000011111111111111000000011111111111111"
+    }
+  ],
+  "byRoster": {
+    "baldivis": "full",
+    "scarborough": "full",
+    "success": "partial",
+    "wellard": "strong",
+    "rockingham": "partial",
+    "mandurah": "poor"
+  },
+  "byDates": [
+    {
+      "checkIn": "2026-11-02",
+      "checkOut": "2026-11-09",
+      "expected": {
+        "baldivis": "full",
+        "scarborough": "full",
+        "success": "partial",
+        "wellard": "full",
+        "rockingham": "poor",
+        "mandurah": "poor"
+      }
+    },
+    {
+      "checkIn": "2026-10-17",
+      "checkOut": "2026-10-24",
+      "expected": {
+        "baldivis": "poor",
+        "scarborough": "full",
+        "success": "full",
+        "wellard": "partial",
+        "rockingham": "poor",
+        "mandurah": "partial"
+      }
+    },
+    {
+      "checkIn": "2026-11-21",
+      "checkOut": "2026-12-01",
+      "expected": {
+        "baldivis": "strong",
+        "scarborough": "full",
+        "success": "partial",
+        "wellard": "strong",
+        "rockingham": "partial",
+        "mandurah": "poor"
+      }
+    }
+  ]
+}
