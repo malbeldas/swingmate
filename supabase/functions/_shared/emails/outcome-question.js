@@ -1,0 +1,33 @@
+import { button, layout, paragraph, escapeHtml, SIGN_OFF, tidy } from './layout.js';
+
+// NTF-005 (specs/notifications-outcome-question.md). Cannot be turned off and has no settings link;
+// replies go to support@swingmate.au.
+export const OUTCOME_ANSWERS = [
+  { answer: 'found_here', label: 'Yes, through SwingMate' },
+  { answer: 'found_elsewhere', label: 'Yes, somewhere else' },
+  { answer: 'not_yet', label: 'Not yet' },
+];
+
+// `answerUrl(answer)` builds outcome.html?t=<token>&a=<answer>.
+export function outcomeQuestionEmail({ seekerName, listingTitle, hostName, answerUrl }) {
+  const subject = `Did you find a place, ${seekerName}?`;
+  const text = tidy(`Hi ${seekerName},
+
+Two weeks ago you messaged ${hostName} about ${listingTitle}. Did you find a place?
+
+${OUTCOME_ANSWERS.map((o) => `${o.label}: ${answerUrl(o.answer)}`).join('\n')}
+
+One tap is enough. It helps us make SwingMate better for people on rosters.
+If you want to tell us more, just reply to this email.
+
+${SIGN_OFF}`);
+  const html = layout({
+    preheader: 'One tap is enough.',
+    body: paragraph(`Hi ${escapeHtml(seekerName)},`)
+      + paragraph(`Two weeks ago you messaged ${escapeHtml(hostName)} about <strong>${escapeHtml(listingTitle)}</strong>. Did you find a place?`)
+      + OUTCOME_ANSWERS.map((o) => button(answerUrl(o.answer), o.label, { secondary: true })).join('')
+      + paragraph('One tap is enough. It helps us make SwingMate better for people on rosters.')
+      + paragraph('If you want to tell us more, just reply to this email.'),
+  });
+  return { subject, text, html };
+}
