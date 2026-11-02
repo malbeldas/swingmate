@@ -1,0 +1,53 @@
+{
+  "description": "BR-AVL-002/003/004 cases shared by core/availability.js and, once the database exists, the SQL function listing_nights (parity test, engineering-constitution.md §7). Expected is the '1'/'0' string from `start` for `n` nights; nights before `today` are always '0'.",
+  "cases": [
+    {
+      "name": "from_date: free from the chosen night on",
+      "listing": { "availabilityType": "from_date", "availableFrom": "2026-11-05" },
+      "start": "2026-11-01", "n": 10, "today": "2026-11-01",
+      "expected": "0000111111"
+    },
+    {
+      "name": "from_date: nights before today are Unavailable",
+      "listing": { "availabilityType": "from_date", "availableFrom": "2026-11-05" },
+      "start": "2026-11-01", "n": 10, "today": "2026-11-07",
+      "expected": "0000001111"
+    },
+    {
+      "name": "ranges: end night is exclusive",
+      "listing": { "availabilityType": "ranges", "ranges": [{ "startNight": "2026-11-03", "endExclusive": "2026-11-06" }, { "startNight": "2026-11-08", "endExclusive": "2026-11-09" }] },
+      "start": "2026-11-01", "n": 10, "today": "2026-11-01",
+      "expected": "0011100100"
+    },
+    {
+      "name": "ranges: exceptions block and open single nights over the rule",
+      "listing": { "availabilityType": "ranges", "ranges": [{ "startNight": "2026-11-03", "endExclusive": "2026-11-06" }, { "startNight": "2026-11-08", "endExclusive": "2026-11-09" }], "exceptions": [{ "night": "2026-11-04", "available": false }, { "night": "2026-11-10", "available": true }] },
+      "start": "2026-11-01", "n": 10, "today": "2026-11-01",
+      "expected": "0010100101"
+    },
+    {
+      "name": "an exception never opens a past night",
+      "listing": { "availabilityType": "from_date", "availableFrom": "2026-10-01", "exceptions": [{ "night": "2026-11-02", "available": true }] },
+      "start": "2026-11-01", "n": 5, "today": "2026-11-03",
+      "expected": "00111"
+    },
+    {
+      "name": "roster 14:7 with defaults: free while the host is on site, not on the travel night",
+      "listing": { "availabilityType": "roster", "roster": { "daysOn": 14, "daysOff": 7, "anchor": "2026-11-01", "fliesHomeLastDay": true, "fliesOutFirstDay": true } },
+      "start": "2026-11-01", "n": 21, "today": "2026-11-01",
+      "expected": "111111111111100000000"
+    },
+    {
+      "name": "roster 14:7, host stays the last night and flies out the day before: both nights free",
+      "listing": { "availabilityType": "roster", "roster": { "daysOn": 14, "daysOff": 7, "anchor": "2026-11-01", "fliesHomeLastDay": false, "fliesOutFirstDay": false } },
+      "start": "2026-11-01", "n": 21, "today": "2026-11-01",
+      "expected": "111111111111110000001"
+    },
+    {
+      "name": "roster 8:6 with defaults, window starting before the anchor",
+      "listing": { "availabilityType": "roster", "roster": { "daysOn": 8, "daysOff": 6, "anchor": "2026-11-05", "fliesHomeLastDay": true, "fliesOutFirstDay": true } },
+      "start": "2026-11-01", "n": 14, "today": "2026-11-01",
+      "expected": "00001111111000"
+    }
+  ]
+}
