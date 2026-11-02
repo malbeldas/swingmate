@@ -1,12 +1,12 @@
 # Decision log — SwingMate
 
-> **Propósito.** Registra las decisiones de producto y técnicas: qué se evaluó, qué se eligió, por qué y quién lo decidió. También lista lo que falta decidir, cada punto con nuestra recomendación.
+> **Propósito.** Registra las decisiones de producto y técnicas: qué se evaluó, qué se eligió y por qué. También lista lo que falta decidir, cada punto con nuestra recomendación.
 >
-> **Cómo se usa.** Antes de reabrir un tema, se busca acá. Una decisión nueva entra con su ID (`DEC-NNN`); una pendiente, con `Q-NN`. Cuando una pendiente se resuelve, se mueve a decisiones con la fecha y quién decidió.
+> **Cómo se usa.** Antes de reabrir un tema, se busca acá. Una decisión nueva entra con su ID (`DEC-NNN`); una pendiente, con `Q-NN`. Cuando una pendiente se resuelve, se mueve a decisiones con la fecha.
 >
 > **Qué NO va en este documento.** Las reglas que resultan de cada decisión (están en `business-rules.md` y se citan desde acá) ni el detalle técnico (`engineering-constitution.md`).
 >
-> **Regla de trabajo entre socios.** Maxi y Tomás deciden como socios. Toda pregunta para Tomás lleva lo que haríamos nosotros y por qué. Cuando no coincidimos con una propuesta, lo decimos con razones y evidencia (Maxi, 27 y 29 Oct 2026).
+> **Regla de trabajo entre socios.** Todas las decisiones son de Maxi y Tomás juntos, así que no se anota quién decide cada punto (Maxi, 2 Nov 2026). Toda pregunta para Tomás lleva lo que haríamos nosotros y por qué. Cuando no coincidimos con una propuesta, lo decimos con razones y evidencia (Maxi, 27 y 29 Oct 2026).
 
 ---
 
@@ -140,99 +140,99 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 ### Q-15 — Respuesta rápida del host
 **Pregunta:** ¿qué hace un host que no puede recibir a quien le escribe?
 **Lo que haríamos nosotros:** un botón "Sorry, not available" que responde con un toque y cuenta como respuesta.
-**Por qué:** el host no queda mal por no contestar y quien busca no espera en vano. Decide Maxi. Destraba #22.
+**Por qué:** el host no queda mal por no contestar y quien busca no espera en vano.. Destraba #22.
 
 ### Q-16 — Cierre del acuerdo
 **Pregunta:** ¿cómo sabemos que hubo convivencia?
 **Lo que haríamos nosotros:** el host marca el aviso como "Filled" y elige si fue con alguien de SwingMate; a los 14 días se pregunta a los dos (`UC-052`).
-**Por qué:** es la única forma de medir la meta del piloto (`Q-13`). Decide Maxi. Destraba #14 y #33.
+**Por qué:** es la única forma de medir la meta del piloto (`Q-13`).. Destraba #14 y #33.
 
 ### Q-17 — Canal de avisos
 **Pregunta:** ¿avisamos de mensajes nuevos solo por email?
 **Lo que haríamos nosotros:** sí, solo email en el piloto; sin WhatsApp ni push.
-**Por qué:** WhatsApp cuesta y pide aprobación de Meta; push pide permisos que en el piloto no vale la pena pedir. Deciden Maxi y Tomás. Destraba #26.
+**Por qué:** WhatsApp cuesta y pide aprobación de Meta; push pide permisos que en el piloto no vale la pena pedir.. Destraba #26.
 
 ### Q-18 — Visitas a la casa
 **Pregunta:** ¿SwingMate agenda las visitas?
 **Lo que haríamos nosotros:** no; se coordinan en el chat con "Before you agree" a mano.
-**Por qué:** agendar es otro producto y no hace falta para el primer contacto. Decide Maxi.
+**Por qué:** agendar es otro producto y no hace falta para el primer contacto..
 
 ### Q-19 (\*) — Precio para quien solo está en R&R
 **Pregunta:** ¿qué precio ve alguien que solo duerme en la ciudad durante su R&R?
 **Lo que haríamos nosotros:** el precio semanal completo del host, más un tilde "Open to splitting with an opposite-swing housemate". Medimos cuántos lo marcan antes de modelar precios por noche.
-**Por qué:** el precio por noche complica el fit y el calendario y nadie lo pidió todavía. Deciden Maxi y Tomás. Destraba #13 y #17.
+**Por qué:** el precio por noche complica el fit y el calendario y nadie lo pidió todavía.. Destraba #13 y #17.
 
 ### Q-20 — Un aviso, una habitación
 **Pregunta:** ¿un aviso puede tener varias habitaciones?
 **Lo que haríamos nosotros:** no; quien tiene dos habitaciones publica dos avisos.
-**Por qué:** simplifica el calendario y el fit. Decide Maxi. Destraba #13.
+**Por qué:** simplifica el calendario y el fit.. Destraba #13.
 
 ### Q-21 (\*) — Etiqueta "Swing share"
 **Pregunta:** ¿distinguimos una casa compartida por swing de una habitación libre?
 **Lo que haríamos nosotros:** sí, con la etiqueta "Swing share" cuando la disponibilidad sale del roster del host.
-**Por qué:** es la diferencia de SwingMate y quien busca tiene que saber que comparte con alguien de swing opuesto. Deciden Maxi y Tomás. Destraba #13 y #17.
+**Por qué:** es la diferencia de SwingMate y quien busca tiene que saber que comparte con alguien de swing opuesto.. Destraba #13 y #17.
 
 ### Q-22 (\*) — Estado vacío con pocos avisos
 **Pregunta:** ¿qué ve quien busca el 6 Dic si no hay avisos que le sirvan?
 **Lo que haríamos nosotros:** un estado vacío que ofrece crear una alerta. Adelantamos las alertas (#31) a D2 y pasamos la vista de métricas (#29) a D3; los eventos se registran desde el día uno.
-**Por qué:** sin alerta, quien no encuentra nada no vuelve; nunca se muestran avisos de ejemplo (`BR-TRU-006`). Deciden Maxi y Tomás. Destraba #16 y #31.
+**Por qué:** sin alerta, quien no encuentra nada no vuelve; nunca se muestran avisos de ejemplo (`BR-TRU-006`).. Destraba #16 y #31.
 
 ### Q-23 — Estadía mínima
 **Pregunta:** ¿la estadía mínima del host filtra resultados?
 **Lo que haríamos nosotros:** no; se muestra como dato en la card y el detalle.
-**Por qué:** con pocos avisos, filtrarla vacía la lista. Decide Maxi. Destraba #17.
+**Por qué:** con pocos avisos, filtrarla vacía la lista.. Destraba #17.
 
 ### Q-24 — Logo en vector
 **Pregunta:** ¿tenemos el archivo original del logo?
 **Lo que haríamos nosotros:** que Tomás pase el vector (SVG, AI o PDF) del logo de Instagram; no se redibuja, solo se adapta.
-**Por qué:** hoy el favicon y el encabezado usan una adaptación. Decide Tomás.
+**Por qué:** hoy el favicon y el encabezado usan una adaptación..
 
 ### Q-25 — Diseños de celular
 **Pregunta:** ¿hacemos diseños de celular antes de programar?
 **Lo que haríamos nosotros:** no; se construye primero para celular desde los tokens de `design-system.md` y Tomás revisa capturas a 375 y 1280 px en cada entrega, sin Figma.
-**Por qué:** los diseños aprobados son de escritorio y no hay tiempo para otra ronda. Decide Tomás.
+**Por qué:** los diseños aprobados son de escritorio y no hay tiempo para otra ronda..
 
 ### Q-26 — Fotos de portada y páginas
 **Pregunta:** ¿qué fotos usamos fuera de los avisos?
 **Lo que haríamos nosotros:** fotos propias de Perth o de trabajadores reales con permiso; nada de stock que parezca un aviso.
-**Por qué:** una foto de stock con aspecto de aviso se lee como inventario falso. Decide Tomás. Destraba #20.
+**Por qué:** una foto de stock con aspecto de aviso se lee como inventario falso.. Destraba #20.
 
 ### Q-27 — Textos de interfaz
 **Pregunta:** ¿quién escribe los textos en inglés australiano?
 **Lo que haríamos nosotros:** los escribimos desde `glossary.md` y Tomás los revisa en cada demo; los legales esperan a `Q-01`.
-**Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar. Decide Tomás.
+**Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar..
 
 ## 2. Decisiones de producto
 
-| ID | Fecha | Decisión | Quién | Alternativas descartadas | Reglas |
-|---|---|---|---|---|---|
-| DEC-001 | 25 Sep 2026 | Web responsive primero; app nativa después si la validación lo justifica. | Tomás | App nativa | — |
-| DEC-002 | 25 Sep 2026 | Una sola cuenta que puede buscar, publicar o ambas. | Tomás | Cuentas separadas de host e inquilino | BR-ACC-001 |
-| DEC-003 | 25 Sep 2026 | Chat dentro de SwingMate, sin bloquear datos de contacto. | Tomás | Bloquear teléfonos y links | BR-MSG-004 |
-| DEC-004 | 25 Sep 2026 | Nunca inventario falso en producción. | Recomendación aceptada | Casas o perfiles inventados para que el sitio no se vea vacío | BR-TRU-006 |
-| DEC-005 | 25 Sep 2026 | El host no necesita roster; la disponibilidad es del aviso. | Tomás | Disponibilidad igual al roster del host | BR-AVL-001 |
-| DEC-006 | 6 Oct 2026 | Búsqueda = ubicación + fechas + roster opcional. Las fechas mandan. | Tomás y Maxi | Solo por roster | BR-SRC-001 |
-| DEC-007 | 6 Oct 2026 | Se navega sin cuenta; el registro aparece al enviar el primer mensaje y el borrador se conserva. | Tomás y Maxi | Registro para ver avisos | BR-ACC-005 |
-| DEC-008 | 6 Oct 2026 | Cards con foto grande y 4 semanas con fechas; nada de bloques sin unidad de tiempo. | Tomás y Maxi | Puntaje numérico, bloques abstractos | BR-FIT-002 |
-| DEC-009 | 18 Oct 2026 | D1 a D9 de la Revisión integral, todos aceptados como los recomendamos (fit por defecto, etiquetas, perfil mínimo, celular opcional para quien busca, guardados, resultado a 14 días, Google + email, "No fixed roster"). | Maxi | Ver Revisión integral | BR-FIT-003, BR-FIT-002, BR-ACC-003, BR-TRU-004, BR-MAIL-003, BR-ACC-002, BR-ROS-005 |
-| DEC-010 | 18 Oct 2026 | D10: el host verifica su celular para publicar. | Maxi | Opcional | BR-LST-003 |
-| DEC-011 | 27 Oct 2026 | D7: el tagline es "Different swings. Same home."; "half the rent" va como atributo en otro lugar. | Tomás y Maxi | "Different weeks off. Half the rent." | — |
-| DEC-012 | 27 Oct 2026 | Cálculo por noches con la noche de viaje del último día del swing. | Tomás (observación) y Maxi | Por días | BR-ROS-003 |
-| DEC-013 | 27 Oct 2026 | Cards de la home 2 por fila con fechas e iconos; estructura tipo Flatmates pero conservando la tira de 4 semanas. | Tomás y Maxi | Calendario mensual en la card | BR-FIT-005 |
-| DEC-014 | 27 Oct 2026 | Mapa de zona aproximada, nunca la dirección. | Tomás y Maxi | Pin exacto | BR-LST-004 |
-| DEC-015 | 27 Oct 2026 | Tomás lidera lo visual y la estética; Maxi lidera los flujos. Las propuestas de uno se discuten con razones. | Maxi y Tomás | — | — |
-| DEC-016 | 29 Oct 2026 | El host publica solo y la web guía: el asistente muestra "Step N of 5", un consejo por paso y la vista previa antes de "Publish"; quien busca ve en su primera visita una tira de 3 pasos hasta el primer mensaje. Va en #13 y #15. | Maxi | Alta asistida por videollamada (suma fricción; idea para después del piloto) y una historia de onboarding aparte | UC-020, UC-002 |
+| ID | Fecha | Decisión | Alternativas descartadas | Reglas |
+|---|---|---|---|---|
+| DEC-001 | 25 Sep 2026 | Web responsive primero; app nativa después si la validación lo justifica. | App nativa | — |
+| DEC-002 | 25 Sep 2026 | Una sola cuenta que puede buscar, publicar o ambas. | Cuentas separadas de host e inquilino | BR-ACC-001 |
+| DEC-003 | 25 Sep 2026 | Chat dentro de SwingMate, sin bloquear datos de contacto. | Bloquear teléfonos y links | BR-MSG-004 |
+| DEC-004 | 25 Sep 2026 | Nunca inventario falso en producción. | Casas o perfiles inventados para que el sitio no se vea vacío | BR-TRU-006 |
+| DEC-005 | 25 Sep 2026 | El host no necesita roster; la disponibilidad es del aviso. | Disponibilidad igual al roster del host | BR-AVL-001 |
+| DEC-006 | 6 Oct 2026 | Búsqueda = ubicación + fechas + roster opcional. Las fechas mandan. | Solo por roster | BR-SRC-001 |
+| DEC-007 | 6 Oct 2026 | Se navega sin cuenta; el registro aparece al enviar el primer mensaje y el borrador se conserva. | Registro para ver avisos | BR-ACC-005 |
+| DEC-008 | 6 Oct 2026 | Cards con foto grande y 4 semanas con fechas; nada de bloques sin unidad de tiempo. | Puntaje numérico, bloques abstractos | BR-FIT-002 |
+| DEC-009 | 18 Oct 2026 | D1 a D9 de la Revisión integral, todos aceptados como los recomendamos (fit por defecto, etiquetas, perfil mínimo, celular opcional para quien busca, guardados, resultado a 14 días, Google + email, "No fixed roster"). | Ver Revisión integral | BR-FIT-003, BR-FIT-002, BR-ACC-003, BR-TRU-004, BR-MAIL-003, BR-ACC-002, BR-ROS-005 |
+| DEC-010 | 18 Oct 2026 | D10: el host verifica su celular para publicar. | Opcional | BR-LST-003 |
+| DEC-011 | 27 Oct 2026 | D7: el tagline es "Different swings. Same home."; "half the rent" va como atributo en otro lugar. | "Different weeks off. Half the rent." | — |
+| DEC-012 | 27 Oct 2026 | Cálculo por noches con la noche de viaje del último día del swing. | Por días | BR-ROS-003 |
+| DEC-013 | 27 Oct 2026 | Cards de la home 2 por fila con fechas e iconos; estructura tipo Flatmates pero conservando la tira de 4 semanas. | Calendario mensual en la card | BR-FIT-005 |
+| DEC-014 | 27 Oct 2026 | Mapa de zona aproximada, nunca la dirección. | Pin exacto | BR-LST-004 |
+| DEC-015 | 27 Oct 2026 | Tomás lidera lo visual y la estética; Maxi lidera los flujos. Las propuestas de uno se discuten con razones. | — | — |
+| DEC-016 | 29 Oct 2026 | El host publica solo y la web guía: el asistente muestra "Step N of 5", un consejo por paso y la vista previa antes de "Publish"; quien busca ve en su primera visita una tira de 3 pasos hasta el primer mensaje. Va en #13 y #15. | Alta asistida por videollamada (suma fricción; idea para después del piloto) y una historia de onboarding aparte | UC-020, UC-002 |
 
 ## 3. Decisiones técnicas
 
-| ID | Fecha | Decisión | Quién | Alternativas descartadas | Por qué |
-|---|---|---|---|---|---|
-| DEC-101 | 29 Oct 2026 | Stack: HTML/JS sin build en GitHub Pages + Supabase en Sídney. **Pendiente de confirmar (Q-02).** | Propuesta de Claude | Next.js + Supabase en Vercel (el plan gratuito de Vercel no permite uso comercial); Firebase (base NoSQL: las consultas por fechas y los permisos por fila son más simples en Postgres) | Tiempo, costo cero, patrón conocido |
-| DEC-102 | 29 Oct 2026 | Specs en nivel `full`, en `specs/`. | Maxi (pidió seguir los skills) | `light` en un solo `SPEC.md` | 150+ horas, varias superficies (público, host, admin, emails), datos personales y legales |
-| DEC-103 | 29 Oct 2026 | Repo público `malbeldas/swingmate`. | Maxi | Privado con GitHub Pro (US$4/mes) u otro hosting | GitHub Pages gratis y mismo flujo que Catálogo web. Lo sensible queda en Drive. |
-| DEC-104 | 29 Oct 2026 | El fit se calcula en el navegador con `core/fit.js`; la base devuelve la disponibilidad por noche. | Propuesta de Claude | Materializar el fit en una tabla (Reglas §23) | Con decenas o cientos de avisos alcanza y deja la lógica en un solo lugar testeable |
-| DEC-105 | 29 Oct 2026 | Analytics y errores en una tabla propia de Postgres. | Propuesta de Claude | GA4, PostHog, Sentry | Sin scripts de terceros ni cookies, y control total de qué se mide (`BR-ANL-002`) |
-| DEC-106 | 29 Oct 2026 | El host marca su casa tocando el mapa; no se usa geocodificación externa. | Propuesta de Claude | Google Places, Mapbox | La dirección no sale a terceros y cuesta cero |
+| ID | Fecha | Decisión | Alternativas descartadas | Por qué |
+|---|---|---|---|---|
+| DEC-101 | 29 Oct 2026 | Stack: HTML/JS sin build en GitHub Pages + Supabase en Sídney. **Pendiente de confirmar (Q-02).** | Next.js + Supabase en Vercel (el plan gratuito de Vercel no permite uso comercial); Firebase (base NoSQL: las consultas por fechas y los permisos por fila son más simples en Postgres) | Tiempo, costo cero, patrón conocido |
+| DEC-102 | 29 Oct 2026 | Specs en nivel `full`, en `specs/`. | `light` en un solo `SPEC.md` | 150+ horas, varias superficies (público, host, admin, emails), datos personales y legales |
+| DEC-103 | 29 Oct 2026 | Repo público `malbeldas/swingmate`. | Privado con GitHub Pro (US$4/mes) u otro hosting | GitHub Pages gratis y mismo flujo que Catálogo web. Lo sensible queda en Drive. |
+| DEC-104 | 29 Oct 2026 | El fit se calcula en el navegador con `core/fit.js`; la base devuelve la disponibilidad por noche. | Materializar el fit en una tabla (Reglas §23) | Con decenas o cientos de avisos alcanza y deja la lógica en un solo lugar testeable |
+| DEC-105 | 29 Oct 2026 | Analytics y errores en una tabla propia de Postgres. | GA4, PostHog, Sentry | Sin scripts de terceros ni cookies, y control total de qué se mide (`BR-ANL-002`) |
+| DEC-106 | 29 Oct 2026 | El host marca su casa tocando el mapa; no se usa geocodificación externa. | Google Places, Mapbox | La dirección no sale a terceros y cuesta cero |
 
 ## 4. Descartadas que podrían volver
 
