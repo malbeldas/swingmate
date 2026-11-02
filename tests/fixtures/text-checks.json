@@ -1,0 +1,31 @@
+{
+  "description": "BR-MSG-008 and BR-LST-005 cases shared by core/text-checks.js and, once the database exists, the trigger messages_before_insert that sets messages.risk_flag (risk only). `risk` and `discrimination` are the expected results.",
+  "cases": [
+    { "text": "Can you send the bond via PayID before the inspection?", "risk": true, "discrimination": false },
+    { "text": "Send me the deposit and the room is yours", "risk": true, "discrimination": false },
+    { "text": "I can hold it for you with a $200 holding fee", "risk": true, "discrimination": false },
+    { "text": "Pay-ID or bank transfer is fine", "risk": true, "discrimination": false },
+    { "text": "I'm overseas, I'll post the keys once you pay through Western Union", "risk": true, "discrimination": false },
+    { "text": "Please send a photo of your driver’s licence and your last 2 payslips", "risk": true, "discrimination": false },
+    { "text": "What's your passport number?", "risk": true, "discrimination": false },
+    { "text": "Bond is 2 weeks, paid at move-in after you see the room", "risk": false, "discrimination": false },
+    { "text": "Happy to show you around on Saturday, what time suits?", "risk": false, "discrimination": false },
+    { "text": "No smoking inside, quiet after 10pm", "risk": false, "discrimination": false },
+    { "text": "White goods included, blackout blinds in the room", "risk": false, "discrimination": false },
+    { "text": "Police background check required", "risk": false, "discrimination": false },
+    { "text": "Older style home, please be gentle with the floors", "risk": false, "discrimination": false },
+    { "text": "Over 18 only", "risk": false, "discrimination": false },
+    { "text": "Trades welcome, no backpackers", "risk": false, "discrimination": false },
+    { "text": "LGBTQ friendly household", "risk": false, "discrimination": false },
+    { "text": "All nationalities and religions welcome", "risk": false, "discrimination": false },
+    { "text": "Christians welcome, no Muslims", "risk": false, "discrimination": true },
+    { "text": "Female only house", "risk": false, "discrimination": true },
+    { "text": "No guys, sorry", "risk": false, "discrimination": true },
+    { "text": "Christian household, no drinking", "risk": false, "discrimination": true },
+    { "text": "Under 30s preferred", "risk": false, "discrimination": true },
+    { "text": "Ideal for 25-35 year olds", "risk": false, "discrimination": true },
+    { "text": "Aussies only please", "risk": false, "discrimination": true },
+    { "text": "No Indians", "risk": false, "discrimination": true },
+    { "text": "LGBTQ friendly is fine but straight only for the main room", "risk": false, "discrimination": true }
+  ]
+}
