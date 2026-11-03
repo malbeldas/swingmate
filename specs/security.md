@@ -102,7 +102,7 @@
 
 ## 8. Web: headers, XSS y dependencias
 
-- **SEC-22:** GitHub Pages no permite headers propios, así que cada página lleva una CSP por `<meta http-equiv>`: `default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'`.
+- **SEC-22:** GitHub Pages no permite headers propios, así que cada página lleva una CSP por `<meta http-equiv>`: `default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'`. Excepción de la página Coming Soon (`DEC-019`): suma GA4 con `https://www.googletagmanager.com` en `script-src`, `https://*.google-analytics.com https://*.googletagmanager.com` en `img-src` y `https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com` en `connect-src`. El script de GA4 no carga si la página tiene la base configurada, así que nunca convive con una sesión, un formulario de datos personales ni un link de un solo uso.
 - **SEC-23:** sin `innerHTML` con datos de usuario; sin `eval`; sin handlers inline.
 - **SEC-24:** las dependencias del navegador están vendorizadas con versión exacta y su hash anotado en `vendor/README.md`. Se actualizan con un PR propio.
 
