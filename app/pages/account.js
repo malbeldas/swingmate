@@ -2,15 +2,16 @@
 // account screen (frontend-migration.md). Other sections (saved homes, alerts, messages, privacy)
 // arrive with their own issues.
 import { getClient } from '../db.js';
-import { getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
+import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
+import { openRosterPicker, rosterLegend, weekGrid } from '../ui/roster-picker.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
 import { INTENTS, TEXTS } from '../../core/account.js';
-import { formatDay } from '../../core/dates.js';
+import { formatDay, todayIn } from '../../core/dates.js';
 import { AVATAR_MAX_PX, JPEG_QUALITY, PHOTO_INPUT_TYPES, PHOTO_TEXTS, avatarPath, photoIssue, scaleToFit } from '../../core/photo.js';
-import { cycleLength, neededNights, rosterLabel, rosterWithArticle } from '../../core/roster.js';
+import { rosterDetailText, rosterSummaryText, rosterWeeks, rosterWithArticle } from '../../core/roster.js';
 import {
   BIO_MAX, DISPLAY_NAME_MAX, TEXTS as PROFILE_TEXTS, WORK_TYPE_LABELS, profileIssues, publicBioText, publicCardLine,
 } from '../../core/trust.js';
@@ -189,46 +190,65 @@ function profileSection(ctx) {
   status);
 
   renderPreview();
+  ctx.onRosterChange = renderPreview; // the card shows the roster pattern too
   return el('section', { class: 'card stack', 'aria-labelledby': 'profile-title' }, el('h2', { id: 'profile-title' }, 'Profile'), form, preview);
 }
 
 // ---------------------------------------------------------------------------------------------
-// Roster (BR-ROS-006, AC-002-4)
+// Roster (UC-002, BR-ROS-004 to BR-ROS-006, AC-002-4)
 // ---------------------------------------------------------------------------------------------
 
-function rosterSummary(roster) {
-  const cycle = cycleLength(roster);
-  const nights = neededNights(roster, roster.anchor, cycle).length;
-  return `${rosterLabel(roster)} roster starting ${formatDay(roster.anchor)} · ${nights} nights in town every ${cycle} days`;
-}
+const MY_ROSTER_WEEKS = 12;
+const todayInPerth = () => todayIn('Australia/Perth'); // BR-AVL-005
 
 function rosterSection(ctx) {
   const body = el('div', { class: 'stack', id: 'roster-body' });
-  const section = el('section', { class: 'card stack', 'aria-labelledby': 'roster-title' }, el('h2', { id: 'roster-title' }, 'My roster'), body);
+  const section = el('section', { class: 'card stack', 'aria-labelledby': 'my-roster-title' },
+    el('h2', { id: 'my-roster-title' }, ctx.roster ? `My roster · next ${MY_ROSTER_WEEKS} weeks` : 'My roster'), body);
+  const error = el('p', { class: 'form-error', role: 'alert', hidden: true });
+
+  // UC-002 step 7 and A1: a roster is saved in the profile; "No fixed roster" deletes it.
+  const store = async (roster) => {
+    const { error: saveError } = roster ? await saveOwnRoster(ctx.user.id, roster) : await deleteOwnRoster(ctx.user.id);
+    if (saveError) return { error: saveError };
+    clearVisitorRoster();
+    ctx.roster = roster;
+    render();
+    ctx.onRosterChange?.();
+    return {};
+  };
+  const openPicker = (roster) => openRosterPicker({ roster, today: todayInPerth(), onSave: store });
+
   const render = () => {
+    const today = todayInPerth();
+    section.querySelector('h2').textContent = ctx.roster ? `My roster · next ${MY_ROSTER_WEEKS} weeks` : 'My roster';
     if (ctx.roster) {
       body.replaceChildren(
-        el('strong', { id: 'roster-summary' }, rosterSummary(ctx.roster)),
-        el('span', { class: 'small text-2' }, 'Every search and listing uses this roster to show how well a home fits your weeks off.'));
+        el('strong', { id: 'roster-summary' }, rosterSummaryText(ctx.roster, today)),
+        el('span', { class: 'small text-2', id: 'roster-detail' }, rosterDetailText(ctx.roster, today)),
+        weekGrid(rosterWeeks(ctx.roster, today, MY_ROSTER_WEEKS)),
+        rosterLegend(),
+        el('span', { class: 'small text-2' }, 'Every search and listing uses this roster to show how well a home fits your weeks off.'),
+        el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: () => openPicker(ctx.roster) }, 'Change roster'));
       return;
     }
     const tried = readVisitorRoster();
-    if (!tried) {
-      body.replaceChildren(el('span', { class: 'small text-2' }, 'No roster saved yet. Try the calculator on the home page and save it here.'),
-        el('a', { class: 'link-btn', href: './#your-nights' }, 'Try your roster'));
+    if (tried) {
+      body.replaceChildren(
+        el('span', {}, `You tried ${rosterWithArticle(tried)} starting ${formatDay(tried.anchor)}.`),
+        error,
+        el('div', { class: 'cta-row' },
+          el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: async () => {
+            const result = await store(tried);
+            if (result.error) { error.textContent = TEXTS.generic; error.hidden = false; }
+          } }, 'Save roster'),
+          el('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: () => openPicker(tried) }, 'Edit first')));
       return;
     }
-    const error = el('p', { class: 'form-error', role: 'alert', hidden: true });
     body.replaceChildren(
-      el('span', {}, `You tried ${rosterWithArticle(tried)} starting ${formatDay(tried.anchor)}.`),
-      error,
-      el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: async () => {
-        const { error: saveError } = await saveOwnRoster(ctx.user.id, tried);
-        if (saveError) { error.textContent = TEXTS.generic; error.hidden = false; return; }
-        clearVisitorRoster();
-        ctx.roster = tried;
-        render();
-      } }, 'Save roster'));
+      el('strong', { id: 'roster-summary' }, rosterSummaryText(null, today)),
+      el('span', { class: 'small text-2', id: 'roster-detail' }, rosterDetailText(null, today)),
+      el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: () => openPicker(null) }, 'Add my roster'));
   };
   render();
   return section;

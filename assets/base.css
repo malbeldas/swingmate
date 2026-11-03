@@ -169,3 +169,18 @@ label.btn { cursor: pointer; }
 .account-name { text-decoration: none; }
 .account-name:hover { text-decoration: underline; }
 @media (min-width: 640px) { .account-page .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+/* Roster picker and My roster (UC-002). */
+.field input[type='number'] { height: 48px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3); font: inherit; font-weight: 400; color: var(--navy); background: var(--white); width: 100%; }
+.field input[aria-invalid='true'] { border-color: var(--danger); }
+.grid-2.tight { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.weeks { display: flex; flex-direction: column; gap: var(--s-1); width: 100%; }
+.week { display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); gap: var(--s-1); align-items: center; }
+.week.head span { font-size: var(--t-micro); color: var(--muted); text-align: center; font-weight: 600; }
+.week-label { font-size: var(--t-micro); color: var(--muted); font-weight: 600; }
+.weeks .night { min-height: 32px; font-size: var(--t-micro); }
+.weeks.compact .week { grid-template-columns: 52px repeat(7, minmax(0, 1fr)); }
+.weeks.compact .night { min-height: 16px; }
+.cta-row .btn-sm { border: 0; }
+.cta-row .btn-secondary.btn-sm { border: 1.5px solid var(--navy); }
+.weeks .night.past { opacity: 0.35; }
