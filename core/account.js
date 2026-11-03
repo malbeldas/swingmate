@@ -14,6 +14,8 @@ export const TEXTS = {
   notConfirmed: 'Confirm your email first. We can send you a new code.',
   googleDown: "Google sign-in isn't working right now. Use your email instead.",
   termsRequired: 'Accept the Terms of Use and Privacy Policy to continue',
+  resetExpired: 'That reset link has expired or was already used. Ask for a new one below.',
+  samePassword: 'Choose a password different from your current one.',
   generic: 'Something went wrong. Try again.',
 };
 
@@ -33,11 +35,15 @@ export function intentFlags(intent) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export function isEmail(email) {
+  return EMAIL_RE.test(String(email ?? '').trim());
+}
+
 // UC-030 E1 and E3: checked before sending; the database checks the email again (sign-up hook).
 export function signupIssues({ email, password }) {
   const out = [];
   const clean = String(email ?? '').trim();
-  if (!EMAIL_RE.test(clean)) out.push('emailInvalid');
+  if (!isEmail(clean)) out.push('emailInvalid');
   else if (isDisposableEmail(clean)) out.push('emailDisposable');
   if (String(password ?? '').length < PASSWORD_MIN) out.push('passwordShort');
   return out;
@@ -66,6 +72,24 @@ export function authErrorText(error) {
   if (code === 'email_not_confirmed') return TEXTS.notConfirmed;
   if (code.startsWith('over_') || error.status === 429) return TEXTS.rateLimited;
   if (code === 'weak_password') return TEXTS.passwordShort;
+  if (code === 'same_password') return TEXTS.samePassword;
   if (code === 'email_address_invalid') return TEXTS.emailInvalid;
   return TEXTS.generic;
+}
+
+// UC-031 E1 and AC-031-1: the same words whether or not the email has an account.
+export function resetSentText(email) {
+  return `If there's an account for ${String(email ?? '').trim()}, a reset link is on its way. It works for 1 hour. Check your spam folder too.`;
+}
+
+// NTF-002: the reset email links to the site with `?token_hash=…&type=recovery`. The page reads it,
+// spends it once and removes it from the address bar. Returns null for any other URL.
+export function readRecoveryLink(href) {
+  let url;
+  try { url = new URL(href); } catch { return null; }
+  const tokenHash = url.searchParams.get('token_hash');
+  if (url.searchParams.get('type') !== 'recovery' || !tokenHash) return null;
+  url.searchParams.delete('token_hash');
+  url.searchParams.delete('type');
+  return { tokenHash, cleanUrl: url.pathname + url.search + url.hash };
 }

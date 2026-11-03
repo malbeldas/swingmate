@@ -1,35 +1,9 @@
 // UC-030 against the local Supabase (engineering-constitution.md §7). Needs `supabase start`
 // and `npm run local:config`, which CI runs before Playwright. Emails are read from Mailpit.
 import { test, expect } from '@playwright/test';
-import { existsSync, readFileSync } from 'node:fs';
+import { PASSWORD, codeFor, local, requireLocalSupabase, sheet, uniqueEmail } from './auth-helpers.js';
 
-const configFile = new URL('../../app/config.local.json', import.meta.url);
-const local = existsSync(configFile) ? JSON.parse(readFileSync(configFile, 'utf8')) : null;
-const PASSWORD = 'pilot-perth-2026';
-
-test.beforeAll(() => {
-  if (!local?.url) throw new Error('No local Supabase: run `supabase start` and `npm run local:config` first.');
-});
-
-function uniqueEmail(testInfo, who = 'ana') {
-  return `${who}.${Date.now()}.${testInfo.project.name}.${testInfo.retry}@example.com`;
-}
-
-// NTF-001: the code is in the subject, "Your SwingMate code: 123456".
-async function codeFor(request, email) {
-  for (let i = 0; i < 30; i++) {
-    const res = await request.get(`${local.mailpitUrl}/api/v1/search`, { params: { query: `to:"${email}"` } });
-    const { messages = [] } = await res.json();
-    const match = messages[0]?.Subject?.match(/Your SwingMate code: (\d{6})/);
-    if (match) return match[1];
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error(`No code email for ${email}`);
-}
-
-function sheet(page) {
-  return page.locator('#auth-sheet');
-}
+test.beforeAll(requireLocalSupabase);
 
 async function signUpWithEmail(page, email) {
   await page.getByRole('button', { name: 'Sign up', exact: true }).click();

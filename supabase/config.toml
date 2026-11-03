@@ -254,6 +254,11 @@ otp_expiry = 3600
 subject = "Your SwingMate code: {{ .Token }}"
 content_path = "./supabase/templates/email-code.html"
 
+# NTF-002: the reset link opens the site with a one-time token_hash (UC-031).
+[auth.email.template.recovery]
+subject = "Reset your SwingMate password"
+content_path = "./supabase/templates/password-reset.html"
+
 # [auth.email.template.invite]
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"

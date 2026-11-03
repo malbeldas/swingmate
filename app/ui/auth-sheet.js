@@ -1,13 +1,19 @@
 // Sign up and log in sheet (UC-030, frontend-migration.md: steps and texts from the prototype).
-// Steps: signup, login, verify (6-digit email code), profile (minimum profile, BR-ACC-003).
+// Steps: signup, login, verify (6-digit email code), profile (minimum profile, BR-ACC-003),
+// forgot and newPassword (UC-031, NTF-002).
 // The sheet opens over the current page and closes there, so the person stays where they were
 // (AC-030-3). Google returns to the same URL (redirectTo = current page).
 import { getClient } from '../db.js';
 import { TERMS_VERSION, getOwnProfile, profileComplete } from '../session.js';
-import { INTENTS, PASSWORD_MIN, TEXTS, authErrorText, cleanCode, intentFlags, passwordHint, signupIssues } from '../../core/account.js';
+import {
+  INTENTS, PASSWORD_MIN, TEXTS, authErrorText, cleanCode, intentFlags, isEmail, passwordHint, resetSentText, signupIssues,
+} from '../../core/account.js';
 import { TEXTS as PROFILE_TEXTS, profileIssues, DISPLAY_NAME_MAX } from '../../core/trust.js';
 
-const STEP_LABELS = { signup: 'Create account', login: 'Log in', verify: 'Verify email', profile: 'Your profile' };
+const STEP_LABELS = {
+  signup: 'Create account', login: 'Log in', verify: 'Verify email', profile: 'Your profile',
+  forgot: 'Reset password', newPassword: 'Reset password',
+};
 
 let dialog;
 let state;
@@ -103,7 +109,54 @@ function loginStep() {
     googleButton('Log in with Google'),
     el('div', { class: 'divider', 'aria-hidden': 'true' }, 'or'),
     form,
-    linkButton('New to SwingMate? Sign up', () => go('signup')),
+    el('div', { class: 'link-row' },
+      linkButton('Forgot password?', () => go('forgot', { email: email.value.trim(), sent: false })),
+      linkButton('New to SwingMate? Sign up', () => go('signup'))),
+  ];
+}
+
+// UC-031: the answer is the same whether or not the email has an account (AC-031-1).
+function forgotStep() {
+  if (state.sent) {
+    return [
+      el('h2', { id: 'auth-title' }, 'Check your email'),
+      el('p', { class: 'notice', role: 'status', id: 'reset-sent' }, resetSentText(state.email)),
+      linkButton('Back to log in', () => go('login')),
+    ];
+  }
+  const email = el('input', { type: 'email', name: 'email', autocomplete: 'email', required: true, value: state.email });
+  const form = el(
+    'form',
+    { class: 'stack', novalidate: true, onsubmit: (e) => { e.preventDefault(); sendResetLink(email.value); } },
+    el('label', { class: 'field' }, 'Email', email),
+    errorBox(),
+    el('button', { type: 'submit', class: 'btn btn-primary btn-block' }, 'Send reset link'),
+  );
+  return [
+    el('h2', { id: 'auth-title' }, 'Reset your password'),
+    el('p', { class: 'muted' }, "Enter the email you signed up with and we'll send you a link to choose a new password."),
+    form,
+    linkButton('Back to log in', () => go('login')),
+  ];
+}
+
+// Reached from the NTF-002 link, already signed in with the one-time link.
+function newPasswordStep() {
+  const password = el('input', { type: 'password', name: 'password', autocomplete: 'new-password', required: true, minlength: String(PASSWORD_MIN) });
+  const hint = el('span', { class: 'hint', id: 'password-hint' }, passwordHint(''));
+  password.setAttribute('aria-describedby', 'password-hint');
+  password.addEventListener('input', () => { hint.textContent = passwordHint(password.value); });
+  const form = el(
+    'form',
+    { class: 'stack', novalidate: true, onsubmit: (e) => { e.preventDefault(); saveNewPassword(password.value); } },
+    el('label', { class: 'field' }, 'New password', password, hint),
+    errorBox(),
+    el('button', { type: 'submit', class: 'btn btn-primary btn-block' }, 'Save new password'),
+  );
+  return [
+    el('h2', { id: 'auth-title' }, 'Choose a new password'),
+    el('p', { class: 'muted' }, "Once it's saved, you'll be logged out on your other devices."),
+    form,
   ];
 }
 
@@ -158,7 +211,10 @@ function profileStep() {
   return [el('h2', { id: 'auth-title' }, 'A few details hosts need'), form];
 }
 
-const STEPS = { signup: signupStep, login: loginStep, verify: verifyStep, profile: profileStep };
+const STEPS = {
+  signup: signupStep, login: loginStep, verify: verifyStep, profile: profileStep,
+  forgot: forgotStep, newPassword: newPasswordStep,
+};
 
 function render() {
   const body = dialog.querySelector('.sheet-body');
@@ -216,6 +272,30 @@ async function logInWithEmail(emailValue, password) {
     return go('verify', { email, resent: true });
   }
   if (error) return go('login', { email, error: authErrorText(error) });
+  await afterSignIn(data.user);
+}
+
+async function sendResetLink(emailValue) {
+  const email = emailValue.trim();
+  if (!isEmail(email)) return go('forgot', { email, error: TEXTS.emailInvalid });
+  setBusy(true);
+  const db = await getClient();
+  const { error } = await db.auth.resetPasswordForEmail(email);
+  // AC-031-1: an answer from Supabase Auth, even a refusal such as the 1-per-minute limit (SEC-08),
+  // shows the same words, so the screen never tells whether the email has an account. Only a
+  // failure to reach the server shows an error.
+  if (error && !(error.status >= 400 && error.status < 500)) return go('forgot', { email, error: TEXTS.generic });
+  go('forgot', { email, sent: true });
+}
+
+async function saveNewPassword(password) {
+  if (password.length < PASSWORD_MIN) return go('newPassword', { error: TEXTS.passwordShort });
+  setBusy(true);
+  const db = await getClient();
+  const { data, error } = await db.auth.updateUser({ password });
+  if (error) return go('newPassword', { error: authErrorText(error) });
+  // UC-031 postcondition and NTF-002 AC-2: every other session ends.
+  await db.auth.signOut({ scope: 'others' });
   await afterSignIn(data.user);
 }
 
@@ -299,11 +379,14 @@ function build() {
   document.body.append(dialog);
 }
 
-// step: 'signup' | 'login' | 'profile'. onDone runs with the signed-in user.
-export async function openAuthSheet({ step = 'signup', user = null, onDone = () => {} } = {}) {
+// step: 'signup' | 'login' | 'profile' | 'forgot' | 'newPassword'. onDone runs with the signed-in user.
+// error: a message to show on the first step (an expired reset link).
+export async function openAuthSheet({ step = 'signup', user = null, error = '', onDone = () => {} } = {}) {
   if (!dialog) build();
   onDoneCallback = onDone;
-  state = { step, email: '', error: '', resent: false, intent: 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null };
+  state = {
+    step, email: '', error, resent: false, sent: false, intent: 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null,
+  };
   if (step === 'profile' && user) {
     state.name = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
   }
