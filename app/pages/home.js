@@ -1,6 +1,7 @@
 import { addDays, dayNumber, mod } from '../../core/dates.js';
 import { ROSTER_PATTERNS, cycleLength, makeRoster, nightKind, neededBlocks, neededNights } from '../../core/roster.js';
 import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel } from '../../core/fit.js';
+import { writeVisitorRoster } from '../visitor-roster.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 
 const WEEKS = 4;
@@ -117,6 +118,9 @@ function init() {
   form.anchor.value = nextMonday(today);
   form.anchor.min = addDays(today, -365);
   form.addEventListener('input', () => render(form, today));
+  // BR-ROS-006: once the visitor changes the calculator, their roster is kept for this session,
+  // so signing up can offer to save it (AC-002-4).
+  form.addEventListener('input', () => writeVisitorRoster(readRoster(form)));
   form.addEventListener('submit', (e) => e.preventDefault());
   render(form, today);
 }
