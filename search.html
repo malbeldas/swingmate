@@ -41,19 +41,21 @@
       </aside>
 
       <form class="search-bar card" id="search-form" novalidate>
-        <label class="field search-place">Location
-          <input type="text" name="place" list="place-list" autocomplete="off" placeholder="Suburb or city" required>
+        <div class="search-place stack-tight">
+          <label class="field">Location
+            <input type="text" name="place" list="place-list" autocomplete="off" placeholder="Suburb or city" required aria-describedby="place-error">
+          </label>
           <datalist id="place-list"></datalist>
           <span class="form-error" id="place-error" role="alert" hidden></span>
-        </label>
+        </div>
         <label class="field">Radius
           <select name="radius" id="radius"></select>
         </label>
         <label class="field">From
-          <input type="date" name="checkIn">
+          <input type="date" name="checkIn" aria-describedby="dates-error">
         </label>
         <label class="field">To
-          <input type="date" name="checkOut">
+          <input type="date" name="checkOut" aria-describedby="dates-error">
         </label>
         <div class="field">My roster
           <button type="button" class="btn btn-secondary btn-sm roster-btn" id="roster-btn"><span id="roster-summary">Add my roster</span></button>

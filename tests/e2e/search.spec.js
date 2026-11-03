@@ -70,7 +70,7 @@ test('AC-001-1 AC-001-3 AC-001-4 dates set the nights, Great before Good, Partia
   expect(await titles(page)).toEqual([SEED.allFree, SEED.oneTaken, SEED.most]);
   await expect(card(page, SEED.most).locator('.fit-badge')).toHaveText('Partial fit');
   expect(await titles(page)).not.toContain(SEED.half);
-  await expect(page.getByText("Homes that don't fit are never shown.").first()).toBeVisible();
+  await expect(page.locator('#results').getByText("Homes that don't fit are never shown.")).toBeVisible();
 });
 
 test('BR-FIT-006 without dates or roster homes show without a fit label', async ({ page }) => {
@@ -112,13 +112,13 @@ test('UC-001 E1 and E2 an unknown place or bad dates do not search', async ({ pa
   await expect(cards(page)).toHaveCount(0);
 
   await page.getByLabel('Location').fill('Baldivis, WA');
-  await page.getByLabel('From').fill(perthDay(10));
-  await page.getByLabel('To').fill(perthDay(5));
+  await page.getByLabel('From', { exact: true }).fill(perthDay(10));
+  await page.getByLabel('To', { exact: true }).fill(perthDay(5));
   await page.getByRole('button', { name: 'Search homes' }).click();
   await expect(page.getByText('Check-out is after check-in')).toBeVisible();
   await expect(cards(page)).toHaveCount(0);
 
-  await page.getByLabel('To').fill(perthDay(12));
+  await page.getByLabel('To', { exact: true }).fill(perthDay(12));
   await page.getByRole('button', { name: 'Search homes' }).click();
   await expect(page.locator('#results-heading')).toBeVisible();
   await expect(page).toHaveURL(new RegExp(`place=${BALDIVIS}&radius=15&in=${perthDay(10)}&out=${perthDay(12)}`));

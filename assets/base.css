@@ -192,6 +192,7 @@ label.btn { cursor: pointer; }
 .first-visit-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
 .search-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); align-items: end; }
 .search-bar .search-place, .search-bar .search-actions, .search-bar .search-hint, .search-bar .search-dates-error { grid-column: 1 / -1; }
+.search-place > .field { align-self: stretch; }
 .search-bar .field input[type='date'], .search-bar .field select { width: 100%; min-width: 0; }
 .search-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 .roster-btn { width: 100%; justify-content: flex-start; text-align: left; }
