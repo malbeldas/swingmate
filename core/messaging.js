@@ -1,5 +1,5 @@
-import { daysBetween } from './dates.js';
-import { nightsFromDates } from './fit.js';
+import { daysBetween, formatRange } from './dates.js';
+import { nightsFromDates, validateStay } from './fit.js';
 import { rosterLabel } from './roster.js';
 
 // Who can start a conversation and what a message may contain (UC-004, BR-MSG, BR-TRU-004).
@@ -28,6 +28,25 @@ export const TEXTS = {
   phone: 'This host only takes messages from people with a verified mobile',
   dailyLimit: 'You’ve messaged 10 hosts today. You can message more tomorrow.',
   hourlyLimit: 'You’re sending messages too fast. Try again in a few minutes.',
+  // The message box on the listing detail (UC-004; texts from the prototype, frontend-migration.md).
+  dates: 'Add your move-in and move-out dates.',
+  checkIn: 'Move-in has to be between today and a year from now.',
+  checkOut: 'Move-out has to be after move-in.',
+  failed: 'We couldn’t send your message. It’s still here, so you can try again.',
+  enquiry: 'This is an enquiry, not a booking.',
+  nudge: 'Optional: add a line about you and verify your phone. Hosts see them next to your message.',
+  completeProfile: 'Complete my profile',
+  confirm: 'You’re signed in. Check your message and press Send.',
+};
+
+// The heading, hints and sent state of the message box, with the host's display name.
+export const BOX_TEXTS = {
+  heading: (host) => `Message ${host}`,
+  sendHint: (signedIn, host) => (signedIn
+    ? `Sends straight to ${host}. Your dates go with the message.`
+    : 'You’ll sign up or log in when you press Send. Your message stays saved.'),
+  phoneHint: (host) => `${host} asks for a verified phone before the first message. Your number stays private.`,
+  sent: (host) => `Message sent to ${host}`,
 };
 
 // BR-MSG-003: text only, 1 to 1000 characters after trimming. Returns the error code or null.
@@ -63,7 +82,7 @@ export function dailyLimitReached({ accountAgeDays: age, conversationsStartedTod
 }
 
 // The first inquiry on a listing (UC-004 steps 5 to 8). `ctx`:
-// { profile, listingStatus, isOwner, blockedByHost, messageRule, accountAgeDays,
+// { profile, listingStatus, isOwner, blockedByHost, messageRule, datesOk, accountAgeDays,
 //   conversationsStartedToday, hasConversation }
 // Returns { ok: true, append } or { ok: false, reason, missing? }. `append` means the message goes
 // into the existing conversation (BR-MSG-001), which the daily limit never stops.
@@ -75,6 +94,7 @@ export function canStartConversation(ctx) {
   if (ctx.isOwner) return { ok: false, reason: 'owner' };
   if (ctx.blockedByHost) return { ok: false, reason: 'blocked' };
   if (ctx.messageRule === 'phone' && !ctx.profile.phoneVerified) return { ok: false, reason: 'phone' };
+  if (ctx.datesOk === false) return { ok: false, reason: 'dates' };
   if (ctx.hasConversation) return { ok: true, append: true };
   if (dailyLimitReached(ctx)) return { ok: false, reason: 'dailyLimit' };
   return { ok: true, append: false };
@@ -110,5 +130,58 @@ export function inquirySummary({ checkIn, checkOut, roster }) {
     stayTo: checkOut,
     nights: totalNights,
     roster: roster ? `${rosterLabel(roster)} roster` : null,
+  };
+}
+
+// What stops the box from sending, in the order the person reads it: the message (BR-MSG-003), then
+// the dates (BR-MSG-002, same limits as the search, validateStay in core/fit.js). `today` is the
+// date in the listing's time zone (BR-AVL-005). Returns a list of codes, each a key of TEXTS.
+export function draftIssues({ text, checkIn, checkOut }, today) {
+  const issues = [];
+  const message = checkMessage(text);
+  if (message) issues.push(message);
+  if (!checkIn || !checkOut) issues.push('dates');
+  else issues.push(...validateStay(checkIn, checkOut, today));
+  return issues;
+}
+
+// AC-004-4 and BR-MSG-002: the warning above Send when some nights are taken. It never blocks.
+export function conflictText(count) {
+  const base = unavailableText(count);
+  return base ? `${base}. You can still send it, or change your dates.` : null;
+}
+
+// "Your dates: 7 – 21 Dec · 14 nights"
+export function datesLine({ checkIn, checkOut }) {
+  const nights = daysBetween(checkIn, checkOut);
+  return `${formatRange(checkIn, checkOut)} · ${nights} ${nights === 1 ? 'night' : 'nights'}`;
+}
+
+// The text for what start_conversation answered when it did not send. A missing profile item names
+// the first one; an unknown code falls back to the generic failure, which keeps the message.
+export function refusalText(result) {
+  if (!result || result.ok) return null;
+  if (result.reason === 'profile') return TEXTS[result.missing?.[0]] ?? TEXTS.failed;
+  return TEXTS[result.reason] ?? TEXTS.failed;
+}
+
+// BR-ACC-004: after the first message, suggest photo, bio and mobile if any is missing. Never blocks.
+export function showProfileNudge({ photoPath, bio, phoneVerified }) {
+  return !photoPath || !String(bio ?? '').trim() || !phoneVerified;
+}
+
+// BR-ACC-005: the draft saved in the browser session while the person signs up. Only what the box
+// needs; anything else in storage is ignored. Returns null when there is nothing usable.
+export function parseDraft(raw, listingId) {
+  let value;
+  try { value = JSON.parse(raw); } catch { return null; }
+  if (!value || typeof value !== 'object' || value.listingId !== listingId) return null;
+  const date = (d) => (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '');
+  return {
+    listingId,
+    text: typeof value.text === 'string' ? value.text.slice(0, MESSAGE_MAX * 2) : '',
+    checkIn: date(value.checkIn),
+    checkOut: date(value.checkOut),
+    pending: value.pending === true,
   };
 }

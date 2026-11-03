@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRoster } from '../../core/roster.js';
 import {
-  accountAgeDays, canReply, canStartConversation, checkMessage, dailyLimitReached, inquirySummary, MESSAGE_MAX,
-  missingProfile, TEXTS, unavailableNights, unavailableText,
+  accountAgeDays, BOX_TEXTS, canReply, canStartConversation, checkMessage, conflictText, dailyLimitReached, datesLine,
+  draftIssues, inquirySummary, MESSAGE_MAX, missingProfile, parseDraft, refusalText, showProfileNudge, TEXTS,
+  unavailableNights, unavailableText,
 } from '../../core/messaging.js';
 
 const READY = {
@@ -101,4 +102,68 @@ test('BR-MSG-002 the inquiry keeps the dates as sent and a roster summary', () =
     stayFrom: '2026-12-01', stayTo: '2026-12-08', nights: 7, roster: '14:7 roster',
   });
   assert.equal(inquirySummary({ checkIn: '2026-12-01', checkOut: '2026-12-08' }).roster, null);
+});
+
+test('BR-MSG-002 the box needs a message and valid dates before sending', () => {
+  const today = '2026-11-03';
+  assert.deepEqual(draftIssues({ text: 'Hi', checkIn: '2026-11-10', checkOut: '2026-11-24' }, today), []);
+  assert.deepEqual(draftIssues({ text: ' ', checkIn: '2026-11-10', checkOut: '2026-11-24' }, today), ['empty']);
+  assert.deepEqual(draftIssues({ text: 'Hi', checkIn: '', checkOut: '' }, today), ['dates']);
+  assert.deepEqual(draftIssues({ text: 'Hi', checkIn: '2026-11-01', checkOut: '2026-11-24' }, today), ['checkIn']);
+  assert.deepEqual(draftIssues({ text: 'Hi', checkIn: '2026-11-10', checkOut: '2026-11-10' }, today), ['checkOut']);
+  assert.deepEqual(draftIssues({ text: 'x'.repeat(MESSAGE_MAX + 1), checkIn: '', checkOut: '' }, today), ['tooLong', 'dates']);
+  for (const code of ['empty', 'tooLong', 'dates', 'checkIn', 'checkOut']) assert.ok(TEXTS[code], code);
+});
+
+test('AC-004-4 taken nights warn but never block', () => {
+  assert.equal(conflictText(0), null);
+  assert.equal(conflictText(1), '1 of these nights isn’t available. You can still send it, or change your dates.');
+  assert.equal(conflictText(3), '3 of these nights aren’t available. You can still send it, or change your dates.');
+  // The warning is not one of the issues that stop the box.
+  assert.deepEqual(draftIssues({ text: 'Hi', checkIn: '2026-11-10', checkOut: '2026-11-24' }, '2026-11-03'), []);
+});
+
+test('UC-004 the sent state shows the dates and their nights', () => {
+  assert.equal(datesLine({ checkIn: '2026-12-07', checkOut: '2026-12-21' }), '7 – 21 Dec · 14 nights');
+  assert.equal(datesLine({ checkIn: '2026-11-30', checkOut: '2026-12-01' }), '30 Nov – 1 Dec · 1 night');
+  assert.equal(BOX_TEXTS.sent('Hana'), 'Message sent to Hana');
+  assert.match(BOX_TEXTS.sendHint(false, 'Hana'), /sign up or log in when you press Send/);
+  assert.match(BOX_TEXTS.sendHint(true, 'Hana'), /^Sends straight to Hana/);
+});
+
+test('UC-004 E1 to E3 every refusal of start_conversation has its words', () => {
+  assert.equal(refusalText({ ok: true }), null);
+  assert.equal(refusalText({ ok: false, reason: 'profile', missing: ['terms', 'baseSuburb'] }), TEXTS.terms);
+  assert.equal(refusalText({ ok: false, reason: 'inactive' }), TEXTS.inactive);
+  // E3: the same words as any host you can't message, never "blocked".
+  assert.equal(refusalText({ ok: false, reason: 'blocked' }), 'You can’t message this host');
+  assert.doesNotMatch(refusalText({ ok: false, reason: 'blocked' }), /block/i);
+  assert.equal(refusalText({ ok: false, reason: 'dailyLimit' }), TEXTS.dailyLimit);
+  assert.equal(refusalText({ ok: false, reason: 'something new' }), TEXTS.failed);
+  for (const reason of ['empty', 'tooLong', 'suspended', 'owner', 'phone', 'dates']) {
+    assert.ok(refusalText({ ok: false, reason }), reason);
+  }
+});
+
+test('UC-004 the order of checks matches start_conversation, dates after the host rule', () => {
+  assert.deepEqual(canStartConversation(ctx({ datesOk: false })), { ok: false, reason: 'dates' });
+  assert.equal(canStartConversation(ctx({ datesOk: false, blockedByHost: true })).reason, 'blocked');
+  assert.equal(canStartConversation(ctx({ datesOk: false, accountAgeDays: 1, conversationsStartedToday: 10 })).reason, 'dates');
+});
+
+test('BR-ACC-004 after sending, suggest photo, bio and mobile only when one is missing', () => {
+  assert.equal(showProfileNudge({ photoPath: 'a/b.jpg', bio: 'Quiet and tidy', phoneVerified: true }), false);
+  assert.equal(showProfileNudge({ photoPath: null, bio: 'Quiet and tidy', phoneVerified: true }), true);
+  assert.equal(showProfileNudge({ photoPath: 'a/b.jpg', bio: ' ', phoneVerified: true }), true);
+  assert.equal(showProfileNudge({ photoPath: 'a/b.jpg', bio: 'Quiet', phoneVerified: false }), true);
+});
+
+test('AC-004-2 the saved draft comes back only for its own listing', () => {
+  const raw = JSON.stringify({ listingId: 'L1', text: 'Hi Hana', checkIn: '2026-12-07', checkOut: '2026-12-21', pending: true });
+  assert.deepEqual(parseDraft(raw, 'L1'), { listingId: 'L1', text: 'Hi Hana', checkIn: '2026-12-07', checkOut: '2026-12-21', pending: true });
+  assert.equal(parseDraft(raw, 'L2'), null);
+  assert.equal(parseDraft('not json', 'L1'), null);
+  assert.equal(parseDraft(null, 'L1'), null);
+  assert.deepEqual(parseDraft(JSON.stringify({ listingId: 'L1', text: 5, checkIn: 'soon', email: 'a@b.c' }), 'L1'),
+    { listingId: 'L1', text: '', checkIn: '', checkOut: '', pending: false });
 });

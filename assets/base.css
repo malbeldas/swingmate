@@ -270,3 +270,11 @@ label.btn { cursor: pointer; }
 @media (min-width: 1024px) {
   .detail-layout { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
 }
+
+/* Message box on the detail (UC-004) */
+.message-box .date-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.message-box .notice.warn { background: var(--peach-soft); color: var(--peach-ink); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-weight: 600; }
+.message-box textarea[readonly] { background: var(--cream); }
+.message-box .sent-mark { flex: none; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--good-soft); color: var(--teal-ink); font-weight: 800; }
+.message-box .sent-text { margin: 0; padding: var(--s-3); border-radius: var(--r-sm); background: var(--cream); white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-box #profile-nudge { align-items: flex-start; }
