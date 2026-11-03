@@ -1,10 +1,14 @@
 // Sign up and log in sheet (UC-030, frontend-migration.md: steps and texts from the prototype).
 // Steps: signup, login, verify (6-digit email code), profile (minimum profile, BR-ACC-003),
-// forgot and newPassword (UC-031, NTF-002).
+// forgot and newPassword (UC-031, NTF-002), roster (offer to save the visitor roster, AC-002-4).
 // The sheet opens over the current page and closes there, so the person stays where they were
 // (AC-030-3). Google returns to the same URL (redirectTo = current page).
 import { getClient } from '../db.js';
-import { TERMS_VERSION, getOwnProfile, profileComplete } from '../session.js';
+import { TERMS_VERSION, getOwnProfile, getOwnRoster, profileComplete, saveOwnRoster } from '../session.js';
+import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
+import { rosterWithArticle } from '../../core/roster.js';
+import { formatDay } from '../../core/dates.js';
+import { attachSuburbList, resolveSuburb } from '../suburbs.js';
 import {
   INTENTS, PASSWORD_MIN, TEXTS, authErrorText, cleanCode, intentFlags, isEmail, passwordHint, resetSentText, signupIssues,
 } from '../../core/account.js';
@@ -12,7 +16,7 @@ import { TEXTS as PROFILE_TEXTS, profileIssues, DISPLAY_NAME_MAX } from '../../c
 
 const STEP_LABELS = {
   signup: 'Create account', login: 'Log in', verify: 'Verify email', profile: 'Your profile',
-  forgot: 'Reset password', newPassword: 'Reset password',
+  forgot: 'Reset password', newPassword: 'Reset password', roster: 'Your roster',
 };
 
 let dialog;
@@ -185,7 +189,7 @@ function profileStep() {
   const name = el('input', { name: 'displayName', autocomplete: 'given-name', required: true, maxlength: String(DISPLAY_NAME_MAX), placeholder: 'e.g. Alex', value: state.name });
   const suburb = el('input', { name: 'suburb', list: 'suburb-options', autocomplete: 'off', required: true, placeholder: 'e.g. Rockingham, WA', value: state.suburbLabel });
   const options = el('datalist', { id: 'suburb-options' });
-  suburb.addEventListener('input', () => searchSuburbs(suburb.value, options));
+  state.suburbs = attachSuburbList(suburb, options);
   const intents = el('div', { class: 'segmented', role: 'group', 'aria-label': "I'm here to" },
     INTENTS.map((intent) => el('button', {
       type: 'button',
@@ -211,9 +215,22 @@ function profileStep() {
   return [el('h2', { id: 'auth-title' }, 'A few details hosts need'), form];
 }
 
+// AC-002-4 and BR-ROS-006: the roster tried before signing up, ready to save in one tap.
+function rosterStep() {
+  const roster = state.visitorRoster;
+  return [
+    el('h2', { id: 'auth-title' }, 'Save your roster?'),
+    el('p', {}, `You tried ${rosterWithArticle(roster)} starting ${formatDay(roster.anchor)}.`),
+    el('p', { class: 'muted' }, 'Every search and listing uses this roster to show how well a home fits your weeks off.'),
+    errorBox(),
+    el('button', { type: 'button', class: 'btn btn-primary btn-block', onclick: saveVisitorRoster }, 'Save roster'),
+    linkButton('Not now', () => { clearVisitorRoster(); finish(state.user); }),
+  ];
+}
+
 const STEPS = {
   signup: signupStep, login: loginStep, verify: verifyStep, profile: profileStep,
-  forgot: forgotStep, newPassword: newPasswordStep,
+  forgot: forgotStep, newPassword: newPasswordStep, roster: rosterStep,
 };
 
 function render() {
@@ -302,39 +319,14 @@ async function saveNewPassword(password) {
 // BR-ACC-003: with a session, ask for whatever the minimum profile still lacks.
 async function afterSignIn(user) {
   const { data: profile } = await getOwnProfile(user.id);
-  if (profileComplete(profile)) return finish(user);
+  if (profileComplete(profile)) return complete(user);
   go('profile', { userId: user.id, name: profile?.display_name ?? user.user_metadata?.full_name ?? user.user_metadata?.name ?? '' });
-}
-
-let suburbTimer;
-async function searchSuburbs(query, datalist) {
-  clearTimeout(suburbTimer);
-  const q = query.split(',')[0].trim();
-  if (q.length < 2) return;
-  suburbTimer = setTimeout(async () => {
-    const db = await getClient();
-    const { data } = await db.from('suburbs').select('id, name, state, postcode').ilike('name', `${q.replace(/[%_]/g, '')}%`).order('name').limit(8);
-    state.suburbs = new Map((data ?? []).map((s) => [`${s.name}, ${s.state}`, s.id]));
-    datalist.replaceChildren(...[...state.suburbs.keys()].map((label) => el('option', { value: label })));
-  }, 150);
-}
-
-async function resolveSuburb(label) {
-  const clean = label.trim();
-  if (state.suburbs?.has(clean)) return state.suburbs.get(clean);
-  const [name, st] = clean.split(',').map((s) => s.trim());
-  if (!name) return null;
-  const db = await getClient();
-  let query = db.from('suburbs').select('id').ilike('name', name.replace(/[%_]/g, ''));
-  if (st) query = query.eq('state', st.toUpperCase());
-  const { data } = await query.limit(2);
-  return data?.length === 1 ? data[0].id : null;
 }
 
 async function saveProfile(name, suburbLabel, termsAccepted) {
   state.name = name;
   state.suburbLabel = suburbLabel;
-  const baseSuburbId = await resolveSuburb(suburbLabel);
+  const baseSuburbId = await resolveSuburb(suburbLabel, state.suburbs);
   const issues = profileIssues({ displayName: name, baseSuburbId });
   if (issues.length) return go('profile', { error: PROFILE_TEXTS[issues[0]] });
   if (!termsAccepted) return go('profile', { error: TEXTS.termsRequired });
@@ -356,7 +348,26 @@ async function saveProfile(name, suburbLabel, termsAccepted) {
     : await db.from('profiles').insert({ id: state.userId, ...values });
   if (error) return go('profile', { error: TEXTS.generic });
   const { data } = await db.auth.getUser();
-  finish(data.user);
+  await complete(data.user);
+}
+
+// With the minimum profile done, offer the visitor roster once if there is no saved roster yet.
+async function complete(user) {
+  const visitorRoster = readVisitorRoster();
+  if (visitorRoster) {
+    const { data: saved } = await getOwnRoster(user.id);
+    if (!saved) return go('roster', { user, visitorRoster });
+    clearVisitorRoster();
+  }
+  finish(user);
+}
+
+async function saveVisitorRoster() {
+  setBusy(true);
+  const { error } = await saveOwnRoster(state.user.id, state.visitorRoster);
+  if (error) return go('roster', { error: TEXTS.generic });
+  clearVisitorRoster();
+  finish(state.user);
 }
 
 function finish(user) {

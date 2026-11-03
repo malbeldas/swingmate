@@ -23,8 +23,10 @@ async function render(container, user, { askProfile = true } = {}) {
     return;
   }
   const { data: profile } = await getOwnProfile(user.id);
-  const name = document.createElement('span');
+  // UC-032: the name opens My account.
+  const name = document.createElement('a');
   name.className = 'account-name';
+  name.href = new URL('../../account.html', import.meta.url).pathname;
   name.textContent = profile?.display_name ? `Hi, ${profile.display_name}` : 'Your account';
   container.replaceChildren(name, button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
   // Back from Google (or a half-finished sign-up): finish the minimum profile here (BR-ACC-003).

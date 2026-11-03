@@ -86,3 +86,41 @@ export function neededBlocks(roster, from, count) {
   if (start !== null) blocks.push([start, prev]);
   return blocks;
 }
+
+// schema.md rosters: the database row and back. "No fixed roster" is no row.
+export function rosterToRow(roster) {
+  return {
+    days_on: roster.daysOn,
+    days_off: roster.daysOff,
+    anchor_date: roster.anchor,
+    fly_home_last_day: roster.fliesHomeLastDay,
+    fly_out_first_day: roster.fliesOutFirstDay,
+  };
+}
+
+export function rosterFromRow(row) {
+  if (!row) return null;
+  return makeRoster({
+    daysOn: row.days_on,
+    daysOff: row.days_off,
+    anchor: row.anchor_date,
+    fliesHomeLastDay: row.fly_home_last_day,
+    fliesOutFirstDay: row.fly_out_first_day,
+  });
+}
+
+// BR-ROS-006: a visitor's roster lives only in the browser session (sessionStorage) as JSON.
+// Anything that isn't a valid roster reads as none.
+export function parseStoredRoster(text) {
+  let value;
+  try { value = JSON.parse(text); } catch { return null; }
+  if (!value || typeof value !== 'object') return null;
+  const roster = makeRoster(value);
+  return validateRoster(roster).length ? null : roster;
+}
+
+// "a 14:7 roster" but "an 8:6 roster" and "an 11:3 roster": the article follows how the number sounds.
+export function rosterWithArticle(roster) {
+  const label = rosterLabel(roster);
+  return `${/^(8|11|18)(?!\d)/.test(label) ? 'an' : 'a'} ${label} roster`;
+}

@@ -5,6 +5,14 @@ import { rosterLabel } from './roster.js';
 export const DISPLAY_NAME_MAX = 40; // profiles.display_name
 export const BIO_MAX = 300; // BR-ACC-004
 export const WORK_TYPES = ['fifo', 'dido', 'bibo', 'other'];
+// Texts from the prototype's profile screen (frontend-migration.md).
+export const WORK_TYPE_LABELS = {
+  fifo: 'FIFO (fly in, fly out)',
+  dido: 'DIDO (drive in, drive out)',
+  bibo: 'BIBO (bus in, bus out)',
+  other: 'Other shift work',
+};
+const WORK_TYPE_SHORT = { fifo: 'FIFO', dido: 'DIDO', bibo: 'BIBO', other: 'Shift work' };
 export const NEW_MEMBER_DAYS = 7; // same window as BR-MSG-007
 export const RESPONSE_TIME_MIN_CONVERSATIONS = 5; // BR-TRU-002
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -96,4 +104,19 @@ export function hostFacts({ displayName, phoneVerified, createdAt, livesOnsite, 
   const response = responseTimeText(responseMinutes);
   if (response) lines.push(response);
   return { name: displayName, lines };
+}
+
+// UC-032 "How hosts see you": the line under the name, as in the prototype, e.g.
+// "FIFO · Based in Rockingham, WA · 14:7 roster · Email verified". Only public facts (BR-TRU-003).
+export function publicCardLine({ workType, baseSuburb, roster, phoneVerified }) {
+  const parts = [];
+  if (WORK_TYPE_SHORT[workType]) parts.push(WORK_TYPE_SHORT[workType]);
+  if (baseSuburb) parts.push(`Based in ${baseSuburb}`);
+  if (roster) parts.push(`${rosterLabel(roster)} roster`);
+  parts.push(phoneVerified ? 'Email and phone verified' : 'Email verified');
+  return parts.join(' · ');
+}
+
+export function publicBioText(bio) {
+  return String(bio ?? '').trim() || 'No bio yet. A line about you helps hosts say yes.';
 }
