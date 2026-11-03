@@ -207,6 +207,13 @@ function photo(item) {
   return box;
 }
 
+// The detail opens with the same search, so its fit matches the card and "Back to search"
+// returns to this list (UC-003).
+function listingHref(item) {
+  const search = searchParamsFor({ placeId: state.place.id, radiusKm: state.radiusKm, checkIn: state.checkIn, checkOut: state.checkOut });
+  return `listing.html?id=${encodeURIComponent(item.id)}&${search}`;
+}
+
 function card(item) {
   const t = cardTexts(item, state.need);
   const weeks = cardWeeks(item, state.need, state.start);
@@ -229,7 +236,7 @@ function card(item) {
           }))))),
       el('div', { class: 'result-bottom' },
         el('span', { class: 'small' }, t.line),
-        el('a', { class: 'btn btn-secondary btn-sm', href: `listing.html?id=${encodeURIComponent(item.id)}` }, 'View home'))));
+        el('a', { class: 'btn btn-secondary btn-sm', href: listingHref(item) }, 'View home'))));
 }
 
 function emptyState(view) {

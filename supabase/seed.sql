@@ -38,7 +38,8 @@ begin
       ('00000000-0000-0000-0000-00000000f004'::uuid, 90002, 'Seed: room free most of the stay', 'private_room', 'ensuite', 280, 0.006, 'ranges', 'active'),
       ('00000000-0000-0000-0000-00000000f005'::uuid, 90004, 'Seed: room in Mandurah', 'private_room', 'shared', 230, 0.002, 'from_date', 'active'),
       ('00000000-0000-0000-0000-00000000f006'::uuid, 90005, 'Seed: room in Karratha', 'private_room', 'shared', 350, 0.002, 'from_date', 'active'),
-      ('00000000-0000-0000-0000-00000000f007'::uuid, 90002, 'Seed: draft never shown', 'private_room', 'own', 100, 0.001, 'from_date', 'draft')
+      ('00000000-0000-0000-0000-00000000f007'::uuid, 90002, 'Seed: draft never shown', 'private_room', 'own', 100, 0.001, 'from_date', 'draft'),
+      ('00000000-0000-0000-0000-00000000f008'::uuid, 90002, 'Seed: paused by the host', 'private_room', 'own', 240, -0.002, 'from_date', 'paused')
     ) as t(id, suburb, title, place_type, bathroom, price, offset_deg, rule, status)
   loop
     insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
@@ -48,7 +49,7 @@ begin
       from public.suburbs s where s.id = l.suburb
     on conflict (id) do nothing;
     insert into public.listing_private (listing_id, address_line, lat, lng)
-      select l.id, 'Seed address', s.lat, s.lng from public.suburbs s where s.id = l.suburb
+      select l.id, 'Seed address 1 Private St', s.lat - 0.0031, s.lng + 0.0027 from public.suburbs s where s.id = l.suburb
     on conflict (listing_id) do nothing;
     insert into public.listing_photos (listing_id, storage_path, position, width, height)
       select l.id, l.id || '/seed-' || i || '.jpg', i, 1600, 1200 from generate_series(0, 2) i
@@ -66,5 +67,8 @@ begin
     ('00000000-0000-0000-0000-00000000f004', today + 7, today + 17);
 
   update public.listings set status = 'active', published_at = now()
-    where owner_id = host and id <> '00000000-0000-0000-0000-00000000f007' and status = 'draft';
+    where owner_id = host and id not in ('00000000-0000-0000-0000-00000000f007', '00000000-0000-0000-0000-00000000f008') and status = 'draft';
+  -- f008 is paused: not in the search, but its link opens with a label (AC-003-4).
+  update public.listings set status = 'paused', published_at = now()
+    where id = '00000000-0000-0000-0000-00000000f008' and status = 'draft';
 end $$;

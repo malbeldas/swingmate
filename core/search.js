@@ -1,4 +1,4 @@
-import { addDays, formatDay, isIsoDate } from './dates.js';
+import { addDays, daysBetween, formatDay, isIsoDate } from './dates.js';
 import { RADIUS_OPTIONS_KM, defaultRadiusKm } from './geo.js';
 import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel, sortResults, validateStay, visibleResults } from './fit.js';
 
@@ -147,22 +147,31 @@ export function resultsHeading(count, place) {
 // The card's 4 weeks (AC-001-8): 28 nights from `start`, each Available or Unavailable, and
 // marked when it is a night the person needs.
 export function cardWeeks(row, need, start) {
+  return nightWeeks(row.nights, need, start, CARD_WEEKS);
+}
+
+// `count` weeks of 7 nights read from a listing_nights string that starts on `start`. The card
+// starts on `start`; the detail passes `from` (the Monday on or before it) so the weeks line up
+// under Mon to Sun, and nights before `start` are marked `before` (Unavailable, dimmed).
+export function nightWeeks(nightsText, need, start, count, { from = start } = {}) {
   const needed = new Set(need.nights);
-  const nights = row.nights ?? '';
+  const nights = nightsText ?? '';
   const weeks = [];
-  for (let w = 0; w < CARD_WEEKS; w++) {
-    const first = addDays(start, w * 7);
+  for (let w = 0; w < count; w++) {
+    const first = addDays(from, w * 7);
     const cells = [];
     for (let d = 0; d < 7; d++) {
       const night = addDays(first, d);
-      const i = w * 7 + d;
-      const free = nights[i] === '1';
-      const need = needed.has(night);
+      const i = daysBetween(start, night);
+      const before = i < 0;
+      const free = !before && nights[i] === '1';
+      const isNeeded = needed.has(night);
       cells.push({
         night,
         free,
-        need,
-        title: `${formatDay(night)}: ${free ? 'Available' : 'Unavailable'}${need ? ', a night you need' : ''}`,
+        need: isNeeded,
+        ...(before ? { before: true } : {}),
+        title: `${formatDay(night)}: ${free ? 'Available' : 'Unavailable'}${isNeeded ? ', a night you need' : ''}`,
       });
     }
     weeks.push({ label: formatDay(first), cells });
