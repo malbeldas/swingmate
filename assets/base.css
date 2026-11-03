@@ -85,6 +85,8 @@ a { color: var(--navy); }
 
 .site-footer { border-top: 1px solid var(--line); background: var(--white); padding: var(--s-6) 0; font-size: var(--t-small); color: var(--muted); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between; }
+.site-footer .analytics-note { display: block; margin-top: var(--s-4); }
+.site-footer .analytics-note[hidden] { display: none; }
 
 /* Coming soon page: buttons, pitch band, example card, FAQ (design-system.md tokens only). */
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s-5); border-radius: var(--r-sm); font-weight: 600; text-decoration: none; text-align: center; }

@@ -154,7 +154,7 @@ Reglas:
 3. **Datos privados no salen de la base hacia otra persona:** dirección exacta, email, teléfono, empleador (`BR-TRU-003`). Hay tests que lo prueban mirando las respuestas de red.
 4. **Lógica pura en `core/`** con test unitario, compartida entre web y Edge Functions.
 5. **Sin inventario falso en producción** (`BR-TRU-006`).
-6. **Mobile first a 375 px** y sin scripts externos salvo Turnstile (`SEC-22`).
+6. **Mobile first a 375 px** y sin scripts externos salvo Turnstile y GA4 en la página pública (`SEC-22`, `DEC-019`).
 7. **Cada AC tiene su test** y nada se mergea con CI en rojo.
 8. **El logo es el existente** (Instagram: círculo navy, "Swing" crema, "Mate" ámbar). No se proponen ni dibujan logos nuevos.
 

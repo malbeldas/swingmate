@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
   <!-- Coming soon page: indexed, collects no personal data, so it doesn't wait for Terms (decision-log.md Q-01). -->
   <title>SwingMate · Coming soon · Find a home that fits your roster</title>
   <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they're actually in town. Pilot opening in Perth.">
@@ -24,6 +24,8 @@
   <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/tokens.css">
   <link rel="stylesheet" href="assets/base.css">
+  <!-- DEC-019: GA4 measurement ID (public). Empty means no analytics. -->
+  <meta name="ga-measurement-id" content="">
   <script type="module" src="app/pages/home.js"></script>
 </head>
 <body>
@@ -52,7 +54,7 @@
         <p class="lead">SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
         <div class="cta-row">
           <a class="btn btn-primary" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
-          <a class="btn btn-secondary" href="#your-nights">Try it with your roster</a>
+          <a class="btn btn-secondary" id="cta-try" href="#your-nights">Try it with your roster</a>
         </div>
         <ul class="ticks">
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
@@ -212,8 +214,9 @@
   <footer class="site-footer">
     <div class="wrap">
       <span class="wordmark">Swing<span class="mate">Mate</span></span>
-      <a href="https://www.instagram.com/swingmate.au/" rel="noopener">Instagram @swingmate.au</a>
+      <a id="footer-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Instagram @swingmate.au</a>
     </div>
+    <p class="wrap analytics-note" id="analytics-note" hidden>This page uses Google Analytics to count visits and which buttons get used. It sets cookies, and never receives your name, email or anything you type. <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">Opt out of Google Analytics</a>.</p>
   </footer>
 </body>
 </html>
