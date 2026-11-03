@@ -261,15 +261,19 @@ async function saveProfile(name, suburbLabel, termsAccepted) {
   setBusy(true);
   const db = await getClient();
   const { isSeeking, isHosting } = intentFlags(state.intent);
-  const { error } = await db.from('profiles').upsert({
-    id: state.userId,
+  const values = {
     display_name: name.trim(),
     base_suburb_id: baseSuburbId,
     is_seeking: isSeeking,
     is_hosting: isHosting,
     terms_version: TERMS_VERSION,
     terms_accepted_at: new Date().toISOString(),
-  });
+  };
+  // Insert or update, never upsert: an upsert also rewrites `id`, which P-04 doesn't let users update.
+  const { data: existing } = await getOwnProfile(state.userId);
+  const { error } = existing
+    ? await db.from('profiles').update(values).eq('id', state.userId)
+    : await db.from('profiles').insert({ id: state.userId, ...values });
   if (error) return go('profile', { error: TEXTS.generic });
   const { data } = await db.auth.getUser();
   finish(data.user);
