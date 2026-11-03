@@ -101,3 +101,16 @@ export function reportIssue(report) {
 export function reportErrorText(error) {
   return /\btooMany\b/.test(String(error?.message ?? '')) ? REPORT_TEXTS.tooMany : REPORT_TEXTS.failed;
 }
+
+// NTF-009: what the admin email says about a report. Only the reason, the kind of object and its
+// public label (a listing title or a display name); never the reporter's detail, emails or phones
+// (notifications-admin-report.md AC-2). The link opens the report in the admin panel.
+export function adminReportData({ report, targetLabel, openReports, appUrl }) {
+  return {
+    reason: REPORT_REASONS[report.reason] ?? REPORT_REASONS.other,
+    targetType: report.target_type,
+    targetLabel: targetLabel || 'Deleted',
+    openReports: Number(openReports) || 1,
+    adminUrl: `${String(appUrl).replace(/\/+$/, '')}/admin.html#report=${encodeURIComponent(report.id)}`,
+  };
+}
