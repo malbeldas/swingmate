@@ -1,6 +1,6 @@
-// My account: profile (UC-032) and saved roster (BR-ROS-006, AC-002-4). Texts from the prototype's
-// account screen (frontend-migration.md). Other sections (saved homes, alerts, messages, privacy)
-// arrive with their own issues.
+// My account: profile (UC-032), saved roster (BR-ROS-006, AC-002-4) and notifications (BR-MAIL-001).
+// Texts from the prototype's account screen (frontend-migration.md). Other sections (saved homes,
+// alerts, privacy) arrive with their own issues.
 import { getClient } from '../db.js';
 import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
 import { openRosterPicker, rosterLegend, weekGrid } from '../ui/roster-picker.js';
@@ -8,7 +8,7 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
-import { INTENTS, TEXTS } from '../../core/account.js';
+import { INTENTS, NOTIFY_TEXTS, TEXTS } from '../../core/account.js';
 import { formatDay, todayIn } from '../../core/dates.js';
 import { AVATAR_MAX_PX, JPEG_QUALITY, PHOTO_INPUT_TYPES, PHOTO_TEXTS, avatarPath, photoIssue, scaleToFit } from '../../core/photo.js';
 import { rosterDetailText, rosterSummaryText, rosterWeeks, rosterWithArticle } from '../../core/roster.js';
@@ -254,6 +254,33 @@ function rosterSection(ctx) {
   return section;
 }
 
+// Notifications (BR-MAIL-001, UC-050 A1). The emails link here (account.html#notifications).
+// No row means everything on (notification_preferences defaults).
+function notificationsSection(ctx) {
+  const box = el('input', { type: 'checkbox', id: 'notify-new-messages', checked: ctx.prefs?.new_messages ?? true });
+  const status = el('p', { class: 'small text-2', role: 'status', id: 'notify-status' });
+  box.addEventListener('change', async () => {
+    const db = await getClient();
+    const value = box.checked;
+    const { error } = ctx.prefs
+      ? await db.from('notification_preferences').update({ new_messages: value }).eq('user_id', ctx.user.id)
+      : await db.from('notification_preferences').insert({ user_id: ctx.user.id, new_messages: value });
+    if (error) {
+      box.checked = !value;
+      status.textContent = NOTIFY_TEXTS.failed;
+      return;
+    }
+    ctx.prefs = { ...(ctx.prefs ?? {}), new_messages: value };
+    status.textContent = NOTIFY_TEXTS.saved;
+  });
+  return el('section', { class: 'card stack', id: 'notifications', 'aria-labelledby': 'notifications-title' },
+    el('h2', { id: 'notifications-title' }, NOTIFY_TEXTS.title),
+    el('label', { class: 'check' }, box, el('span', { class: 'stack-tight' },
+      el('span', {}, NOTIFY_TEXTS.newMessages),
+      el('span', { class: 'small text-2', id: 'notify-hint' }, NOTIFY_TEXTS.newMessagesHint))),
+    status);
+}
+
 // ---------------------------------------------------------------------------------------------
 
 let shownUserId = null;
@@ -268,8 +295,11 @@ async function start() {
     main.replaceChildren(el('p', { class: 'lead' }, 'Finish your profile to continue.'));
     return;
   }
-  const ctx = { user, profile, roster, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
-  main.replaceChildren(profileSection(ctx), rosterSection(ctx));
+  const db = await getClient();
+  const { data: prefs } = await db.from('notification_preferences').select('new_messages').eq('user_id', user.id).maybeSingle();
+  const ctx = { user, profile, roster, prefs, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
+  main.replaceChildren(profileSection(ctx), rosterSection(ctx), notificationsSection(ctx));
+  if (location.hash === '#notifications') document.getElementById('notifications').scrollIntoView();
 }
 
 async function init() {

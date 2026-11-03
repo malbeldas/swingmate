@@ -93,3 +93,13 @@ export function readRecoveryLink(href) {
   url.searchParams.delete('type');
   return { tokenHash, cleanUrl: url.pathname + url.search + url.hash };
 }
+
+// "Notifications" in My account (BR-MAIL-001, BR-MAIL-005, UC-050 A1). The other switches
+// (alerts, reminders) join when their emails exist.
+export const NOTIFY_TEXTS = {
+  title: 'Notifications',
+  newMessages: 'Email me when I get a new message',
+  newMessagesHint: 'We always email you about a new enquiry, even with this off.',
+  saved: 'Saved.',
+  failed: 'We couldn’t save that. Try again.',
+};
