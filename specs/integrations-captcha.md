@@ -24,7 +24,7 @@ Hay que confirmar al implementar qué métodos de Supabase aceptan `captchaToken
 ## Configuración
 
 - Sitio en Turnstile a nombre de SwingMate, dominios `swingmate.au` y `malbeldas.github.io`.
-- CSP: `script-src` y `frame-src` incluyen `https://challenges.cloudflare.com` (`security.md` SEC-22). Es el único script externo permitido.
+- CSP: `script-src` y `frame-src` incluyen `https://challenges.cloudflare.com` (`security.md` SEC-22). Es el único script externo permitido en pantallas con cuentas; GA4 solo va en la página pública (`DEC-019`).
 
 ## Errores
 

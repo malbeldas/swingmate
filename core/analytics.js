@@ -94,3 +94,45 @@ export function scrubErrorMessage(message) {
     .replace(/(https?:\/\/[^\s?#]+)[?#]\S*/g, '$1')
     .slice(0, CLIENT_ERROR_MAX);
 }
+
+// ---------------------------------------------------------------------------------------------
+// DEC-019: GA4 on the public page (observability.md §6). A separate closed list from the product
+// funnel above, which stays in our own table (DEC-105).
+// ---------------------------------------------------------------------------------------------
+
+export const GA_HOSTS = ['swingmate.au', 'www.swingmate.au'];
+export const GA_EVENTS = {
+  cta_clicked: { cta: ['instagram_hero', 'try_roster', 'instagram_hosts', 'instagram_footer'] },
+  roster_example_used: { pattern: ['14:7', '8:6', '7:7', '14:14', '21:7'] },
+};
+const GA_ID = /^G-[A-Z0-9]{4,20}$/;
+const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+
+// SEC-22 and DEC-019: GA4 loads only on the published site, with an ID set, and never on a page
+// that has the database configured (accounts, private data, one-time links).
+export function shouldLoadGa({ hostname, measurementId, hasDatabase }) {
+  return GA_HOSTS.includes(hostname) && GA_ID.test(String(measurementId ?? '')) && !hasDatabase;
+}
+
+// The address GA4 receives: origin and path plus utm_* tags, nothing else (no tokens, no hash).
+export function gaPageLocation(href) {
+  const url = new URL(href);
+  const out = new URL(url.origin + url.pathname);
+  for (const key of UTM) {
+    const value = url.searchParams.get(key);
+    if (value) out.searchParams.set(key, value.slice(0, 100));
+  }
+  return out.toString();
+}
+
+export function checkGaEvent(name, props = {}) {
+  const allowed = GA_EVENTS[name];
+  if (!allowed) return [`unknown event ${name}`];
+  const errors = [];
+  for (const [key, value] of Object.entries(props)) {
+    if (!allowed[key]) errors.push(`property ${key} not allowed`);
+    else if (!allowed[key].includes(value)) errors.push(`${key} must be one of ${allowed[key].join(', ')}`);
+  }
+  for (const key of Object.keys(allowed)) if (!(key in props)) errors.push(`${key} missing`);
+  return errors;
+}
