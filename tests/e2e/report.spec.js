@@ -71,7 +71,7 @@ test('AC-034-2 a member reports a listing with a reason and gets the 24-hour pro
   await reportSheet(page).getByRole('button', { name: 'Send report' }).click();
   expect((await sent).status()).toBe(201);
   await expect(reportSheet(page).getByRole('heading', { name: 'Thanks, we’ll review this within 24 hours' })).toBeVisible();
-  await reportSheet(page).getByRole('button', { name: 'Close' }).click();
+  await reportSheet(page).locator('.sheet-body').getByRole('button', { name: 'Close' }).click();
   await expect(reportSheet(page)).toBeHidden();
 });
 
@@ -114,7 +114,7 @@ test('AC-034-2 a seeker reports the conversation and blocks the host in the same
   await reportSheet(page).getByLabel('Also block Seed Host').check();
   await reportSheet(page).getByRole('button', { name: 'Send report' }).click();
   await expect(reportSheet(page).getByRole('heading', { name: 'Thanks, we’ll review this within 24 hours' })).toBeVisible();
-  await reportSheet(page).getByRole('button', { name: 'Close' }).click();
+  await reportSheet(page).locator('.sheet-body').getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('#blocked-note')).toHaveText('You blocked Seed Host. They can’t message you.');
   await expect(page.getByRole('button', { name: 'Unblock' })).toBeVisible();
 });
