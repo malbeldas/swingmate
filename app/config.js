@@ -21,8 +21,8 @@ async function readConfig() {
   try {
     const res = await fetch(new URL('./config.local.json', import.meta.url), { cache: 'no-store' });
     if (!res.ok) return null;
-    const { url, anonKey } = await res.json();
-    return url && anonKey ? { url, anonKey } : null;
+    const local = await res.json();
+    return local?.url && local?.anonKey ? { url: local.url, anonKey: local.anonKey } : null;
   } catch {
     // No local Supabase running: the page still works, just without accounts.
     return null;

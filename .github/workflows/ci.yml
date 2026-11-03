@@ -44,6 +44,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.1
+      # Auth, REST and Mailpit are enough for the E2E; the rest stays off to start faster.
+      - run: supabase start -x studio,imgproxy,vector,logflare,edge-runtime,supavisor,realtime,storage-api,postgres-meta
+      - run: npm run local:config
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

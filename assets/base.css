@@ -119,3 +119,35 @@ a { color: var(--navy); }
 .faq details { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s-3) var(--s-4); }
 .faq summary { cursor: pointer; font-weight: 600; min-height: 24px; }
 .faq details p { margin-top: var(--s-2); color: var(--text-2); }
+
+/* Account area and sign-up sheet (UC-030). */
+.account { display: flex; align-items: center; gap: var(--s-2); }
+.account-name { font-size: var(--t-small); font-weight: 600; white-space: nowrap; }
+.btn-sm { min-height: 40px; padding: 0 var(--s-4); font-size: var(--t-small); border: 0; cursor: pointer; }
+.btn-block { width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+.btn-secondary.btn-block { border: 1.5px solid var(--navy); gap: var(--s-2); }
+.btn-text { background: none; border: 0; padding: var(--s-2) var(--s-3); min-height: 40px; font: inherit; font-size: var(--t-small); font-weight: 600; color: var(--navy); cursor: pointer; }
+.link-btn { align-self: flex-start; background: none; border: 0; padding: var(--s-1) 0; font: inherit; color: var(--navy); text-decoration: underline; cursor: pointer; }
+.link-row { display: flex; flex-wrap: wrap; gap: var(--s-4); }
+@media (max-width: 479px) { .site-header:has(.account:not([hidden])) .site-nav { display: none; } }
+
+.sheet { border: 0; padding: 0; margin: 0 0 0 auto; width: 440px; max-width: 100%; height: 100%; max-height: 100%; background: var(--white); color: var(--navy); box-shadow: -12px 0 40px rgb(21 34 56 / 18%); }
+.sheet::backdrop { background: rgb(21 34 56 / 45%); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: var(--s-3) var(--s-5); border-bottom: 1px solid var(--line); }
+.sheet-body { padding: var(--s-5); }
+.icon-btn { width: 44px; height: 44px; border: 0; background: none; font-size: 28px; line-height: 1; color: var(--navy); cursor: pointer; }
+.field input[type='email'], .field input[type='password'], .field input:not([type]), .field input[type='text'] {
+  height: 48px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3); font: inherit; font-weight: 400; color: var(--navy); background: var(--white);
+}
+.field input:focus-visible, .btn-block:focus-visible, .link-btn:focus-visible, .btn-text:focus-visible, .icon-btn:focus-visible, .segmented button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.hint { font-size: var(--t-micro); line-height: var(--t-micro-lh); font-weight: 400; color: var(--muted); }
+.form-error { color: var(--danger); font-size: var(--t-small); font-weight: 600; }
+.notice { color: var(--teal-ink); font-size: var(--t-small); }
+.divider { display: flex; align-items: center; gap: var(--s-3); color: var(--muted); font-size: var(--t-small); }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.g-mark { font-weight: 800; font-family: var(--font-display); }
+.plain { border: 0; margin: 0; padding: 0; }
+.plain legend { padding: 0; margin-bottom: var(--s-1); }
+.segmented { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.segmented button { min-height: 44px; padding: 0 var(--s-4); border-radius: var(--r-pill); border: 1.5px solid var(--line); background: var(--white); font: inherit; font-weight: 600; color: var(--navy); cursor: pointer; }
+.segmented button[aria-pressed='true'] { background: var(--navy); border-color: var(--navy); color: var(--cream); }
