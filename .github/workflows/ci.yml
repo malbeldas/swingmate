@@ -20,6 +20,18 @@ jobs:
           node-version: 22
       - run: npm test
 
+  db:
+    name: Tests de base (pgTAP)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          # engineering-constitution.md §2: CLI version pinned in CI.
+          version: 2.122.1
+      - run: supabase db start
+      - run: supabase test db
+
   e2e:
     name: Tests de pantalla (Playwright)
     # Fijo en 24.04: Playwright 1.56 no instala Chromium en ubuntu-latest (26.04).
