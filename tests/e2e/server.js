@@ -20,6 +20,9 @@ createServer(async (req, res) => {
     const body = await readFile(file);
     res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' }).end(body);
   } catch {
+    // Without a local Supabase there is no app/config.local.json: answer "no database" instead of
+    // a 404, so pages run without accounts and without console errors (infrastructure.md §1).
+    if (path === '/app/config.local.json') return res.writeHead(200, { 'content-type': types['.json'] }).end('null');
     res.writeHead(404).end('Not found');
   }
 }).listen(port);

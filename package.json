@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test \"tests/unit/**/*.test.js\"",
     "test:e2e": "playwright test",
-    "serve": "node tests/e2e/server.js 4173"
+    "serve": "node tests/e2e/server.js 4173",
+    "local:config": "node scripts/local-config.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1"

@@ -1,6 +1,7 @@
 import { addDays, dayNumber, mod } from '../../core/dates.js';
 import { ROSTER_PATTERNS, cycleLength, makeRoster, nightKind, neededBlocks, neededNights } from '../../core/roster.js';
 import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel } from '../../core/fit.js';
+import { initAccountMenu } from '../ui/account-menu.js';
 
 const WEEKS = 4;
 const KIND_LABEL = { away: 'away on site', travel: 'flying home, sleeping in town', home: 'in town' };
@@ -121,3 +122,4 @@ function init() {
 }
 
 init();
+initAccountMenu(document.getElementById('account'));

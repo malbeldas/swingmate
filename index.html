@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
   <!-- Coming soon page: indexed, collects no personal data, so it doesn't wait for Terms (decision-log.md Q-01). -->
   <title>SwingMate · Coming soon · Find a home that fits your roster</title>
   <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they're actually in town. Pilot opening in Perth.">
@@ -38,6 +38,7 @@
         <a class="nav-wide" href="#safety">Safety</a>
         <a href="#faq">FAQ</a>
       </nav>
+      <div class="account" id="account" hidden></div>
     </div>
   </header>
 
