@@ -189,7 +189,7 @@ select is(
         order by a.ordinal_position),
   array['id', 'title', 'suburb_name', 'state', 'place_type', 'bathroom', 'weekly_price', 'bills_included',
         'furnished', 'public_lat', 'public_lng', 'distance_km', 'cover_path', 'host_name', 'host_photo_path',
-        'host_phone_verified', 'nights'],
+        'host_phone_verified', 'published_at', 'nights'],
   'BR-TRU-003 search returns no address, email, phone or roster'
 );
 
