@@ -28,7 +28,12 @@ async function render(container, user, { askProfile = true } = {}) {
   name.className = 'account-name';
   name.href = new URL('../../account.html', import.meta.url).pathname;
   name.textContent = profile?.display_name ? `Hi, ${profile.display_name}` : 'Your account';
-  container.replaceChildren(name, button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
+  // UC-033: the inbox, from every page.
+  const inbox = document.createElement('a');
+  inbox.className = 'btn-text account-messages';
+  inbox.href = new URL('../../messages.html', import.meta.url).pathname;
+  inbox.textContent = 'Messages';
+  container.replaceChildren(name, inbox, button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
   // Back from Google (or a half-finished sign-up): finish the minimum profile here (BR-ACC-003).
   if (askProfile && !profileComplete(profile)) openAuthSheet({ step: 'profile', user, onDone: (u) => render(container, u) });
 }
