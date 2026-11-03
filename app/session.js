@@ -53,6 +53,12 @@ export async function saveOwnRoster(userId, roster) {
   return db.from('rosters').upsert({ user_id: userId, ...rosterToRow(roster) });
 }
 
+// BR-ROS-005: "No fixed roster" is no row.
+export async function deleteOwnRoster(userId) {
+  const db = await getClient();
+  return db.from('rosters').delete().eq('user_id', userId);
+}
+
 // schema.md §11: avatars are public by URL.
 export async function photoUrl(path) {
   if (!path) return '';

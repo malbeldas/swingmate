@@ -66,3 +66,20 @@ export function formatRange(fromIso, toIso) {
   const from = sameMonth ? String(Number(fromIso.slice(8, 10))) : formatDay(fromIso);
   return `${from} – ${formatDay(toIso)}`;
 }
+
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+// 0 = Monday … 6 = Sunday. Day 0 (1970-01-01) was a Thursday.
+export function weekdayIndex(iso) {
+  return mod(dayNumber(iso) + 3, 7);
+}
+
+// 'Mon 9 Nov'
+export function formatDayLong(iso) {
+  return `${WEEKDAYS[weekdayIndex(iso)]} ${formatDay(iso)}`;
+}
+
+// The Monday on or before the date.
+export function mondayOf(iso) {
+  return addDays(iso, -weekdayIndex(iso));
+}

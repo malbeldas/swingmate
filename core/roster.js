@@ -1,4 +1,4 @@
-import { addDays, daysBetween, isIsoDate, mod } from './dates.js';
+import { addDays, daysBetween, formatDay, formatDayLong, isIsoDate, mod, mondayOf } from './dates.js';
 
 // BR-ROS-002
 export const ROSTER_PATTERNS = [
@@ -123,4 +123,40 @@ export function parseStoredRoster(text) {
 export function rosterWithArticle(roster) {
   const label = rosterLabel(roster);
   return `${/^(8|11|18)(?!\d)/.test(label) ? 'an' : 'a'} ${label} roster`;
+}
+
+// The first day of the swing that starts on or after `today`.
+export function nextSwingStart(roster, today) {
+  const cycle = cycleLength(roster);
+  return addDays(today, mod(cycle - phaseOf(roster, today), cycle));
+}
+
+// UC-002 "My roster" and the picker preview: whole weeks from the Monday of `from`.
+const KIND_TITLE = { away: 'on site', travel: 'last day on site, you fly home', home: 'home' };
+export function rosterWeeks(roster, from, weeks) {
+  const start = mondayOf(from);
+  return Array.from({ length: weeks }, (_, w) => {
+    const monday = addDays(start, w * 7);
+    const cells = Array.from({ length: 7 }, (_, d) => {
+      const date = addDays(monday, d);
+      const kind = nightKind(roster, date);
+      return { date, kind, past: date < from, day: Number(date.slice(8, 10)), title: `${formatDayLong(date)}: ${KIND_TITLE[kind]}` };
+    });
+    return { label: formatDay(monday), cells };
+  });
+}
+
+// Texts from the prototype's "My roster" (frontend-migration.md).
+export function rosterSummaryText(roster, today) {
+  if (!roster) return 'No fixed roster';
+  return `${rosterLabel(roster)} · next swing ${formatDayLong(nextSwingStart(roster, today))}`;
+}
+
+export function rosterDetailText(roster, today) {
+  if (!roster) return 'No fixed roster. Search with your dates instead.';
+  const home = roster.fliesHomeLastDay
+    ? 'You fly home on the last day, so you need a bed that night too.'
+    : 'You fly home the day after your swing ends.';
+  const out = roster.fliesOutFirstDay ? ' You fly out on the first day of each swing.' : ' You fly out the day before each swing.';
+  return `Next swing starts ${formatDayLong(nextSwingStart(roster, today))}. ${home}${out}`;
 }

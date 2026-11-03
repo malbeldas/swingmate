@@ -127,6 +127,6 @@ test('AC-002-4 the roster a visitor tried is offered, filled in, when they sign 
   await expect(sheet(page)).toBeHidden();
 
   await page.goto('/account.html');
-  await expect(main(page).locator('#roster-summary')).toContainText('8:6 roster starting');
+  await expect(main(page).locator('#roster-summary')).toContainText('8:6 · next swing');
   await expect(main(page).locator('#public-card')).toContainText('8:6 roster');
 });
