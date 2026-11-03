@@ -76,6 +76,16 @@ test('NTF-001 AC-1 the sign-up email carries the code in subject and body, and n
   assert.match(config, /\[auth\.email\.template\.confirmation\]\nsubject = "Your SwingMate code: \{\{ \.Token \}\}"\ncontent_path = "\.\/supabase\/templates\/email-code\.html"/);
 });
 
+test('NTF-002 the reset email links to the site with a one-time token, and keeps the spec text', () => {
+  const html = read('supabase/templates/password-reset.html');
+  assert.match(html, /href="\{\{ \.SiteURL \}\}\/\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
+  assert.match(html, />Choose a new password</);
+  assert.match(html, /Someone asked to reset the password for your SwingMate account\./);
+  assert.match(html, /This link works once and expires in 1 hour\. If it wasn't you, ignore this email: your password stays the same\./);
+  const config = read('supabase/config.toml');
+  assert.match(config, /\[auth\.email\.template\.recovery\]\nsubject = "Reset your SwingMate password"\ncontent_path = "\.\/supabase\/templates\/password-reset\.html"/);
+});
+
 test('BR-ACC-002 and SEC-08 auth settings: email code on, 8-character passwords, 1 email a minute', () => {
   const config = read('supabase/config.toml');
   const emailSection = config.slice(config.indexOf('[auth.email]'));
