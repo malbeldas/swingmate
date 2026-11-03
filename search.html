@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org http://127.0.0.1:54321 http://localhost:54321; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <!-- Results (UC-001, frontend-migration.md: search.html). Not indexed until the pilot opens (Q-01). -->
+  <meta name="robots" content="noindex">
+  <title>Search homes · SwingMate</title>
+  <meta name="theme-color" content="#152238">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/base.css">
+  <script type="module" src="app/pages/search.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./" aria-label="SwingMate home">
+        <img class="brand-mark" src="assets/favicon.svg" alt="" width="40" height="40">
+        <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      </a>
+      <div class="account" id="account" hidden></div>
+    </div>
+  </header>
+
+  <main class="section search-page">
+    <div class="wrap stack">
+      <!-- DEC-016, AC-002-5: three steps to the first message, shown until closed or a roster is saved. -->
+      <aside class="first-visit card" id="first-visit" aria-labelledby="first-visit-title" hidden>
+        <div class="first-visit-head">
+          <h2 id="first-visit-title" class="micro">How it works</h2>
+          <button type="button" class="icon-btn" id="first-visit-close" aria-label="Close how it works">×</button>
+        </div>
+        <ol class="steps">
+          <li>Search by suburb and add your dates or your roster.</li>
+          <li>See which homes are free for the nights you need.</li>
+          <li>Message the host. You only need an account when you send.</li>
+        </ol>
+      </aside>
+
+      <form class="search-bar card" id="search-form" novalidate>
+        <label class="field search-place">Location
+          <input type="text" name="place" list="place-list" autocomplete="off" placeholder="Suburb or city" required>
+          <datalist id="place-list"></datalist>
+          <span class="form-error" id="place-error" role="alert" hidden></span>
+        </label>
+        <label class="field">Radius
+          <select name="radius" id="radius"></select>
+        </label>
+        <label class="field">From
+          <input type="date" name="checkIn">
+        </label>
+        <label class="field">To
+          <input type="date" name="checkOut">
+        </label>
+        <div class="field">My roster
+          <button type="button" class="btn btn-secondary btn-sm roster-btn" id="roster-btn"><span id="roster-summary">Add my roster</span></button>
+        </div>
+        <div class="search-actions">
+          <button type="submit" class="btn btn-primary btn-sm">Search homes</button>
+          <button type="button" class="btn-text" id="clear-dates" hidden>Clear dates</button>
+        </div>
+        <span class="form-error search-dates-error" id="dates-error" role="alert" hidden></span>
+        <span class="hint search-hint" id="dates-hint" hidden></span>
+      </form>
+
+      <div class="results-layout">
+        <details class="filters card" id="filters" hidden>
+          <summary>Filters</summary>
+          <div class="filters-body">
+          <fieldset class="plain stack-tight">
+            <legend>Fit</legend>
+            <div id="fit-filters" class="stack-tight">
+              <label class="check"><input type="checkbox" name="great" checked>Great fit</label>
+              <label class="check"><input type="checkbox" name="good" checked>Good fit</label>
+              <label class="check"><input type="checkbox" name="near">Near matches (partial fit)</label>
+              <span class="hint">Homes that don't fit are never shown.</span>
+            </div>
+            <span class="hint" id="fit-filters-off" hidden>Add dates or your roster to filter by fit.</span>
+          </fieldset>
+          <fieldset class="plain stack-tight">
+            <legend>Room type</legend>
+            <label class="check"><input type="checkbox" name="private_room">Private room</label>
+            <label class="check"><input type="checkbox" name="entire_place">Entire place</label>
+          </fieldset>
+          <label class="field">Max price per week
+            <select name="maxPrice">
+              <option value="">Any</option>
+              <option value="300">$300</option>
+              <option value="400">$400</option>
+            </select>
+          </label>
+          </div>
+        </details>
+
+        <section class="results stack" id="results" aria-live="polite"></section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

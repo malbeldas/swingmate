@@ -52,3 +52,12 @@ export function attachSuburbList(input, datalist) {
   });
   return known;
 }
+
+// The place a search runs around (BR-SRC-003, BR-AVL-005): centre, time zone and whether it is a city.
+export async function getPlace(id) {
+  if (!id) return null;
+  const db = await getClient();
+  if (!db) return null;
+  const { data } = await db.from('suburbs').select('id, name, state, lat, lng, timezone, is_city').eq('id', id).maybeSingle();
+  return data ? { id: data.id, label: suburbText(data), lat: data.lat, lng: data.lng, timezone: data.timezone, isCity: data.is_city } : null;
+}
