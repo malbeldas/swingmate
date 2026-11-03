@@ -499,6 +499,7 @@ returns table (
   host_name text,
   host_photo_path text,
   host_phone_verified boolean,
+  published_at timestamptz,
   nights text
 )
 language plpgsql
@@ -544,6 +545,7 @@ begin
          (select f.storage_path from public.listing_photos f where f.listing_id = m.id order by f.position limit 1),
          h.display_name, h.photo_path,
          exists (select 1 from auth.users u where u.id = m.owner_id and u.phone_confirmed_at is not null),
+         m.published_at,
          public.listing_nights_at(m.id, greatest(coalesce(p_start, t.today), t.today), 84, t.today)
   from measured m
   join public.profiles h on h.id = m.owner_id
