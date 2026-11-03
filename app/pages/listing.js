@@ -7,6 +7,8 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openRosterPicker } from '../ui/roster-picker.js';
 import { drawAreaMap } from '../ui/map.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
+import { openReportSheet } from '../ui/report-sheet.js';
+import { REPORT_TEXTS } from '../../core/moderation.js';
 import {
   deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, profileComplete, saveOwnRoster,
 } from '../session.js';
@@ -269,6 +271,13 @@ async function hostBlock(view, l) {
       view.host.lines.map((line) => el('span', { class: line === 'Phone verified host' ? 'badge verified' : 'small text-2' }, line === 'Phone verified host' ? `✓ ${line}` : line))));
 }
 
+// UC-034: a visitor is asked to sign up first, then the sheet opens on the same page.
+function reportListing() {
+  const open = () => openReportSheet({ targetType: 'listing', targetId: state.listing.id });
+  if (state.user) return open();
+  return openAuthSheet({ step: 'signup', onDone: (user) => { state.user = user; open(); } });
+}
+
 async function render() {
   const l = state.listing;
   const db = await getClient();
@@ -282,6 +291,7 @@ async function render() {
     view.editButton && el('a', { class: 'btn btn-primary btn-block', id: 'edit-listing', href: `list.html?id=${encodeURIComponent(l.id)}` }, TEXTS.editListing),
     view.messageBox && messageBox(l), // BR-LST-008: never on the host's own listing
     await hostBlock(view, l),
+    !view.editButton && el('button', { type: 'button', class: 'btn-text report-link', id: 'report-listing', onclick: reportListing }, REPORT_TEXTS.reportListing),
   ];
   main.replaceChildren(...[
     backLink(l),

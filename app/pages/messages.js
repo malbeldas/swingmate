@@ -11,6 +11,8 @@ import {
   TEXTS, addMessage, conversationHead, inquirerView, listItem, messageGroups, replyErrorText, replyIssue,
 } from '../../core/inbox.js';
 import { TEXTS as MSG_TEXTS } from '../../core/messaging.js';
+import { REPORT_TEXTS } from '../../core/moderation.js';
+import { openBlockSheet, openReportSheet, setConversationBlock } from '../ui/report-sheet.js';
 
 const main = document.getElementById('messages-main');
 const MESSAGE_COLUMNS = 'id, sender_id, kind, body, stay_from, stay_to, created_at, risk_flag';
@@ -107,6 +109,30 @@ function composer(head) {
       state.sending ? 'Sending…' : (state.error ? TEXTS.tryAgain : TEXTS.send)));
 }
 
+// UC-034: report the conversation, block or unblock the other person. Nothing changes for them on
+// screen (BR-MSG-006); the person who blocked sees a note and can undo it here (A2).
+function tools(db, row) {
+  const name = row.other_name;
+  const refresh = () => refreshList(db);
+  const report = el('button', {
+    type: 'button', class: 'btn-text report-link', id: 'report-conversation',
+    onclick: () => openReportSheet({ targetType: 'conversation', targetId: row.id, blockName: name && !row.blocked_by_me ? name : null, onDone: refresh }),
+  }, REPORT_TEXTS.report);
+  const block = name && (row.blocked_by_me
+    ? el('button', {
+      type: 'button', class: 'btn-text', id: 'unblock',
+      onclick: async () => { await setConversationBlock(row.id, false); await refresh(); },
+    }, REPORT_TEXTS.unblock)
+    : el('button', {
+      type: 'button', class: 'btn-text', id: 'block',
+      onclick: () => openBlockSheet({ conversationId: row.id, name, onDone: refresh }),
+    }, REPORT_TEXTS.block));
+  return [
+    el('div', { class: 'conversation-tools' }, block, report),
+    row.blocked_by_me && name && el('p', { class: 'blocked-note small', id: 'blocked-note', role: 'status' }, REPORT_TEXTS.blockedNote(name)),
+  ];
+}
+
 function conversationSection(db) {
   const row = state.rows.find((r) => r.id === state.openId);
   const back = el('a', { class: 'btn-text back-link', href: 'messages.html', onclick: (e) => { e.preventDefault(); closeConversation(); } }, `‹ ${TEXTS.back}`);
@@ -123,6 +149,7 @@ function conversationSection(db) {
       el('div', { class: 'stack-tight' },
         el('h2', { id: 'conversation-title' }, el('a', { href: `listing.html?id=${encodeURIComponent(row.listing_id)}` }, head.heading)),
         el('span', { class: 'small text-2', id: 'requested-dates' }, head.requested))),
+    ...tools(db, row),
     head.banner && el('p', { class: 'status-label', id: 'listing-status', role: 'status' }, head.banner),
     row.role === 'host' && cardBlock(inquirerView(state.card)),
     thread(),
