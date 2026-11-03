@@ -1,6 +1,7 @@
 import { addDays, daysBetween, formatDay, formatRange, groupConsecutive, todayIn, weekdayIndex } from './dates.js';
 import { conversationView } from './listing.js';
 import { checkMessage, datesLine } from './messaging.js';
+import { RISK_WARNING } from './text-checks.js';
 import {
   memberSince, publicBioText, publicCardLine, seekerActivity, trustBadges,
 } from './trust.js';
@@ -140,6 +141,8 @@ export function messageGroups(messages, myId, now = new Date(), timeZone = 'Aust
       body: m.body,
       time: timeLabel(m.created_at, timeZone),
       dates: m.kind === 'inquiry' && m.stay_from ? datesLine({ checkIn: m.stay_from, checkOut: m.stay_to }) : null,
+      // BR-MSG-008: only the person who receives a flagged message sees the warning above it.
+      warning: m.risk_flag && m.sender_id !== myId ? RISK_WARNING : null,
     });
   }
   return groups;

@@ -13,7 +13,7 @@ import {
 import { TEXTS as MSG_TEXTS } from '../../core/messaging.js';
 
 const main = document.getElementById('messages-main');
-const MESSAGE_COLUMNS = 'id, sender_id, kind, body, stay_from, stay_to, created_at';
+const MESSAGE_COLUMNS = 'id, sender_id, kind, body, stay_from, stay_to, created_at, risk_flag';
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Australia/Perth';
 
 const state = {
@@ -85,10 +85,13 @@ function thread() {
   return el('div', { class: 'thread', id: 'thread', role: 'log', 'aria-live': 'polite', 'aria-label': 'Messages' },
     groups.flatMap((g) => [
       el('p', { class: 'day-label micro' }, g.label),
-      ...g.messages.map((m) => el('div', { class: `bubble ${m.mine ? 'mine' : 'theirs'}`, 'data-message': m.id },
-        m.dates && el('span', { class: 'bubble-dates small' }, `Dates: ${m.dates}`),
-        el('p', { class: 'bubble-text' }, m.body),
-        el('span', { class: 'bubble-time' }, m.time))),
+      ...g.messages.flatMap((m) => [
+        m.warning && el('p', { class: 'risk-warning small', role: 'note' }, m.warning),
+        el('div', { class: `bubble ${m.mine ? 'mine' : 'theirs'}`, 'data-message': m.id },
+          m.dates && el('span', { class: 'bubble-dates small' }, `Dates: ${m.dates}`),
+          el('p', { class: 'bubble-text' }, m.body),
+          el('span', { class: 'bubble-time' }, m.time)),
+      ]),
     ]));
 }
 

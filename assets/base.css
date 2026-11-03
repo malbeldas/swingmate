@@ -309,6 +309,8 @@ label.btn { cursor: pointer; }
 .bubble-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .bubble-time { font-size: var(--t-micro); opacity: 0.75; justify-self: end; }
 .bubble-dates { font-weight: 600; }
+/* BR-MSG-008: the warning sits right above the flagged message, on its side. */
+.risk-warning { justify-self: start; max-width: 85%; margin: var(--s-1) 0 -2px; padding: var(--s-1) var(--s-3); border-radius: var(--r-sm); background: var(--peach-soft); color: var(--peach-ink); font-weight: 600; }
 .composer textarea { min-height: 72px; }
 .closed-note { background: var(--peach-soft); color: var(--peach-ink); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); }
 @media (min-width: 1024px) {

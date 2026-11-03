@@ -125,3 +125,23 @@ test('UC-004 after sending from the detail, Open conversation shows the inquiry 
   await expect(page.locator('#thread .bubble.mine')).toContainText('Is it free over Christmas?');
   await expect(page.locator('#thread .bubble.mine')).toContainText('14 nights');
 });
+
+test('AC-033-3 a message asking to pay before a visit shows the risk warning only to who receives it', async ({ page, request }, testInfo) => {
+  const body = 'Can I send the deposit by PayID today to secure the room?';
+  const seeker = await seekerWithConversation(request, testInfo, ALWAYS_FREE, body);
+  await page.goto('/messages.html');
+  await logIn(page, SEED_HOST.email, SEED_HOST.password);
+  await page.goto(`/messages.html?c=${seeker.id}`);
+  const warning = page.locator('#thread .risk-warning');
+  await expect(warning).toHaveText('Never pay before seeing the place. Never send ID documents by chat.');
+  // AC-033-2: the message is right below it, unchanged.
+  await expect(warning.locator('xpath=following-sibling::*[1]')).toContainText(body);
+
+  // The sender sees their own message without the warning.
+  const seekerPage = await (await page.context().browser().newContext()).newPage();
+  await seekerPage.goto('/messages.html');
+  await logIn(seekerPage, seeker.email);
+  await seekerPage.goto(`/messages.html?c=${seeker.id}`);
+  await expect(seekerPage.locator('#thread .bubble.mine')).toContainText(body);
+  await expect(seekerPage.locator('#thread .risk-warning')).toHaveCount(0);
+});
