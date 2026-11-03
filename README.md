@@ -2,7 +2,7 @@
 
 Web responsive para que trabajadores FIFO, DIDO y BIBO de Australia compartan alojamiento según su roster. Piloto en Perth, objetivo 6 Dic 2026.
 
-- **Web:** https://malbeldas.github.io/swingmate/ (GitHub Pages desde `main`). Por ahora es la portada previa al piloto, con "See the nights you need" funcionando sobre la lógica real de noches (`core/roster.js`, `BR-ROS-003`). No se indexa hasta que estén Terms y Privacy (`Q-01`).
+- **Web:** https://swingmate.au/ (GitHub Pages desde `main`, con dominio propio por el archivo `CNAME`; `malbeldas.github.io/swingmate` redirige ahí). Por ahora es la portada previa al piloto, con "See the nights you need" funcionando sobre la lógica real de noches (`core/roster.js`, `BR-ROS-003`). No se indexa hasta que estén Terms y Privacy (`Q-01`).
 - **Prototipo navegable v0.1:** https://claude.ai/artifact/9FtEvpdcmrZgqTbKH6ZRQw (referencia visual y de textos; no gana sobre los specs).
 - **Tareas:** GitHub Issues de este repo, agrupadas por épica (label `epic:*`) y release (milestone).
 
