@@ -63,3 +63,17 @@ export async function createMember(request, email, name = 'Ana') {
 function expect200(res, what) {
   if (!res.ok()) throw new Error(`${what} failed with ${res.status()}`);
 }
+
+// The example host in supabase/seed.sql, who can sign in only in the local and CI auth (UC-023).
+export const SEED_HOST = { email: 'seed-host@example.test', password: 'seed-host-local-only' };
+
+// UC-004 through the API, as the person with this session would send it from the detail.
+export async function startConversation(request, session, listingId, body, stayFrom, stayTo) {
+  const res = await request.post(`${local.url}/rest/v1/rpc/start_conversation`, {
+    headers: { apikey: local.anonKey, authorization: `Bearer ${session.access_token}`, 'content-type': 'application/json' },
+    data: { p_listing_id: listingId, p_body: body, p_stay_from: stayFrom, p_stay_to: stayTo },
+  });
+  const result = await res.json();
+  if (!result?.ok) throw new Error(`start_conversation failed: ${JSON.stringify(result)}`);
+  return result.conversation_id;
+}

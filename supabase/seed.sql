@@ -14,11 +14,20 @@ on conflict (id) do nothing;
 
 -- Example listings for the search E2E tests (tests/e2e/search.spec.js). Local and CI only: never
 -- loaded into production (BR-TRU-006). Dates are relative to the day the seed runs, in Perth.
--- Nobody can sign in as this host: it has no password.
-insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, phone, phone_confirmed_at, raw_app_meta_data, raw_user_meta_data)
+-- The host signs in only in the local and CI auth, with the password in tests/e2e/auth-helpers.js
+-- (SEED_HOST), so the inbox E2E can play the host (UC-023). The empty token columns are what
+-- Supabase Auth expects of a user it did not create itself.
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, phone, phone_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
 values ('00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-        'seed-host@example.test', now(), '61400000999', now(), '{"provider":"email","providers":["email"]}', '{}')
+        'seed-host@example.test', extensions.crypt('seed-host-local-only', extensions.gen_salt('bf')), now(), '61400000999', now(),
+        '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+values ('00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-00000000e001',
+        '{"sub":"00000000-0000-0000-0000-00000000e001","email":"seed-host@example.test","email_verified":true}', 'email', now(), now(), now())
+on conflict do nothing;
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, listing_limit)
 values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 90002, 'seed', now(), 10)
 on conflict (id) do nothing;

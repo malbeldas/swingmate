@@ -278,3 +278,49 @@ label.btn { cursor: pointer; }
 .message-box .sent-mark { flex: none; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--good-soft); color: var(--teal-ink); font-weight: 800; }
 .message-box .sent-text { margin: 0; padding: var(--s-3); border-radius: var(--r-sm); background: var(--cream); white-space: pre-wrap; overflow-wrap: anywhere; }
 .message-box #profile-nudge { align-items: flex-start; }
+
+/* Messages (UC-023, UC-033) */
+.plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-1); }
+.messages-layout { display: grid; gap: var(--s-4); }
+.messages-layout > * { min-width: 0; }
+.pane-hidden-mobile { display: none; }
+.conversation-link { display: flex; gap: var(--s-3); align-items: center; padding: var(--s-3); border-radius: var(--r-sm); color: inherit; text-decoration: none; min-height: 44px; }
+.conversation-link:hover, .conversation-link[aria-current='page'] { background: var(--cream); }
+.conversation-link:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.conversation-link.unread strong { font-weight: 800; }
+.conversation-text { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.conversation-top { display: flex; justify-content: space-between; gap: var(--s-2); }
+.conversation-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-cover { flex: none; width: 48px; height: 48px; border-radius: var(--r-sm); object-fit: cover; }
+.avatar.small { width: 48px; height: 48px; font-size: 18px; }
+.unread-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
+.conversation-head { display: flex; gap: var(--s-3); align-items: center; }
+.conversation-head h2 { font-size: var(--t-h3, 1.125rem); }
+.conversation-head h2 a { color: inherit; }
+.inquirer-card { background: var(--cream); border-radius: var(--r-sm); padding: var(--s-3); }
+.requested-fit { font-weight: 600; font-size: var(--t-small); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); }
+.requested-fit.good { background: var(--good-soft); color: var(--teal-ink); }
+.requested-fit.warn { background: var(--peach-soft); color: var(--peach-ink); }
+.thread { display: grid; gap: var(--s-2); max-height: 60vh; overflow-y: auto; padding: var(--s-1); }
+.day-label { text-align: center; margin: var(--s-2) 0 0; }
+.bubble { max-width: 85%; padding: var(--s-2) var(--s-3); border-radius: var(--r-md, 12px); display: grid; gap: 2px; }
+.bubble.mine { justify-self: end; background: var(--navy); color: var(--cream); }
+.bubble.theirs { justify-self: start; background: var(--cream); color: var(--navy); }
+.bubble-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble-time { font-size: var(--t-micro); opacity: 0.75; justify-self: end; }
+.bubble-dates { font-weight: 600; }
+.composer textarea { min-height: 72px; }
+.closed-note { background: var(--peach-soft); color: var(--peach-ink); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); }
+@media (min-width: 1024px) {
+  .messages-layout { grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
+  .pane-hidden-mobile { display: block; }
+  .conversation .back-link { display: none; }
+}
+.composer .field { width: 100%; }
+.composer textarea { width: 100%; box-sizing: border-box; }
+.badge.missing { background: var(--cream); color: var(--muted); }
+/* Signed in on a phone: the account links take their own row under the logo, so nothing scrolls sideways. */
+.site-header .wrap { flex-wrap: wrap; row-gap: var(--s-2); }
+@media (max-width: 479px) {
+  .site-header .account:not([hidden]) { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+}

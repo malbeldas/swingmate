@@ -146,6 +146,7 @@ function sentBox(host) {
     el('p', {}, el('span', { class: 'text-2' }, 'Your dates: '), el('strong', {}, datesLine(draft))),
     el('blockquote', { class: 'sent-text' }, draft.text.trim()),
     el('span', { class: 'small text-2' }, MSG_TEXTS.enquiry),
+    el('a', { class: 'btn btn-secondary btn-sm', id: 'open-conversation', href: `messages.html?c=${encodeURIComponent(box.sent.conversationId)}` }, 'Open conversation'),
     nudge && el('div', { class: 'notice stack-tight', id: 'profile-nudge' },
       el('span', {}, MSG_TEXTS.nudge),
       el('a', { class: 'btn btn-secondary btn-sm', href: 'account.html' }, MSG_TEXTS.completeProfile)));
@@ -249,6 +250,7 @@ async function send() {
   }
   clearDraft();
   box.sent = {
+    conversationId: data.conversation_id,
     draft: { ...box.draft },
     nudge: showProfileNudge({ photoPath: profile?.photo_path, bio: profile?.bio, phoneVerified: Boolean(state.user.phone_confirmed_at) }),
   };
