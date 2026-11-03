@@ -122,6 +122,7 @@ Lo que tiene que estar listo para pasar de prueba a usuarios reales. Cada punto 
 | 9 | Backup diario funcionando y una restauración probada | §7, `Q-06` |
 | 10 | Cuentas de servicio a nombre de SwingMate, con acceso de los dos socios | `Q-05` |
 | 11 | Los dos socios con rol admin y la cobertura de reportes acordada | `BR-ADM-003`, `Q-12` |
+| 12 | La Privacy Policy menciona GA4 en la página pública, y se decide si la página con login sigue midiendo con GA4 (hoy GA4 se apaga sola cuando la página tiene la base configurada) | `DEC-019`, `SEC-22`, `Q-01` |
 
 ## 9. Fuera de scope
 
