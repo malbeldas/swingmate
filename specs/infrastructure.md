@@ -17,7 +17,8 @@
 5. Costos
 6. Deploy
 7. Backups y recuperación
-8. Fuera de scope
+8. Salida a producción
+9. Fuera de scope
 
 ---
 
@@ -27,16 +28,21 @@
 |---|---|---|---|---|
 | Local | `npx serve` o `python3 -m http.server` en `localhost` | `supabase start` (Docker) | `seed.sql` con datos "Sample" | Quien desarrolla y CI |
 | CI | El mismo que local, dentro de GitHub Actions | `supabase start` | `seed.sql` | Tests |
-| Producción | GitHub Pages: `malbeldas.github.io/swingmate`, después `swingmate.au` | Proyecto `swingmate-prod`, región Sídney | Solo reales (`BR-TRU-006`) | Usuarios del piloto |
+| Producción | GitHub Pages: `swingmate.au` | Proyecto `swingmate-prod`, región Sídney | Solo reales (`BR-TRU-006`), desde la salida a producción (§8) | Usuarios del piloto |
 
 No hay staging en el piloto: el plan gratuito permite dos proyectos y GitHub Pages publica un solo sitio por repo. Se agrega si aparece la necesidad de probar con datos reales sin usuarios.
+
+**Hasta la salida a producción** (`decision-log.md` DEC-017), el sitio publicado y `swingmate-prod` funcionan como ambiente de prueba (UAT):
+- Se pueden cargar datos de prueba rotulados "Sample", con un script aparte de las migraciones. Nunca desde una migración, así el chequeo `no-sample-data` de `engineering-constitution.md` §8 sigue igual.
+- No se invita a usuarios reales ni se publica el sitio.
+- Antes de abrir se borran todos esos datos y se cumple la lista de §8.
 
 `app/config.js` elige la base por el host: `localhost` usa la local y cualquier otro host usa producción.
 
 ## 2. Hosting de la web
 
 - GitHub Pages desde `main`, carpeta raíz, con `.nojekyll`.
-- Dominio: `swingmate.au` con un archivo `CNAME` en el repo cuando Tomás cargue el DNS (`decision-log.md` Q-04). HTTPS forzado.
+- Dominio: `swingmate.au` con el archivo `CNAME` del repo; `malbeldas.github.io/swingmate` redirige ahí. HTTPS forzado.
 - Sin headers propios: la seguridad de la web va por meta CSP (`security.md` SEC-22).
 
 ## 3. Supabase
@@ -99,7 +105,25 @@ Antes de cada deploy de base: CI verde en `main` y, en Pro, un backup de menos d
 - **Desde el piloto:** se recomienda Pro con backups diarios por 7 días (`decision-log.md` Q-06). Restaurar es desde el panel de Supabase.
 - **Fotos:** Storage no entra en los backups de la base. En el piloto se acepta el riesgo; los hosts tienen sus fotos originales.
 
-## 8. Fuera de scope
+## 8. Salida a producción
+
+Lo que tiene que estar listo para pasar de prueba a usuarios reales. Cada punto cita la regla o la pendiente que lo pide.
+
+| # | Qué | Por qué |
+|---|---|---|
+| 1 | Términos, Privacy Policy y "Before you agree" escritos o revisados por el abogado y publicados | `SEC-20`, `Q-01` |
+| 2 | Borrar todos los datos de prueba de `swingmate-prod`: cuentas, avisos, fotos de Storage, conversaciones y eventos | `BR-TRU-006`, DEC-017 |
+| 3 | Twilio con tarjeta de SwingMate, límite de gasto, permisos geográficos solo para Australia y remitente registrado ante ACMA (o aceptar "Unverified") | `Q-03`, `INT-003`, `T-07`, `SEC-09` |
+| 4 | Sin números de prueba de SMS en la configuración de Auth de producción | `integrations-sms.md` |
+| 5 | Dominio verificado en Resend, con SPF, DKIM y DMARC | `INT-002` |
+| 6 | Google sign-in publicado (fuera del modo de prueba) con `swingmate.au` en las redirecciones | `INT-001`, `SEC-05` |
+| 7 | Claves de Turnstile del dominio `swingmate.au` | `INT-004` |
+| 8 | HTTPS forzado en GitHub Pages | §2 |
+| 9 | Backup diario funcionando y una restauración probada | §7, `Q-06` |
+| 10 | Cuentas de servicio a nombre de SwingMate, con acceso de los dos socios | `Q-05` |
+| 11 | Los dos socios con rol admin y la cobertura de reportes acordada | `BR-ADM-003`, `Q-12` |
+
+## 9. Fuera de scope
 
 - Staging con datos reales.
 - Multi-región, SLA o alta disponibilidad propia.

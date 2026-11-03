@@ -33,3 +33,30 @@ test('no horizontal scroll and the CSP of SEC-22 is present', async ({ page }) =
   const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   expect(csp).toContain("script-src 'self' https://challenges.cloudflare.com");
 });
+
+test('coming soon: the example home shows the fit for the roster the visitor picks', async ({ page }) => {
+  await page.goto('/');
+  const example = page.locator('.example');
+  await expect(example.locator('.tag')).toHaveText('Example');
+  await expect(page.locator('#example-fit')).toHaveText('Great roster fit');
+  await expect(page.locator('#example-line')).toHaveText(/^Free for all \d+ nights you need in the next 12 weeks$/);
+  await expect(page.locator('#example-strip [role="listitem"]')).toHaveCount(28);
+  // The free nights are exactly the nights the visitor sleeps in town in the strip above.
+  const inTown = await page.locator('#strip .night.home, #strip .night.travel').count();
+  await expect(page.locator('#example-strip .night.free')).toHaveCount(inTown);
+  await page.getByLabel('Do you fly home on the last day of your swing?').uncheck();
+  await expect(page.locator('#example-strip .night.free')).toHaveCount(await page.locator('#strip .night.home').count());
+});
+
+test('coming soon: indexable, with share tags and a way to follow the launch', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://swingmate.au/');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://swingmate.au/assets/og-image.png');
+  await expect(page.locator('#cta-instagram')).toHaveAttribute('href', 'https://www.instagram.com/swingmate.au/');
+  await expect(page.locator('#faq details')).toHaveCount(5);
+  const og = await page.request.get('/assets/og-image.png');
+  expect(og.ok()).toBe(true);
+  const robots = await page.request.get('/robots.txt');
+  expect(await robots.text()).toContain('Sitemap: https://swingmate.au/sitemap.xml');
+});

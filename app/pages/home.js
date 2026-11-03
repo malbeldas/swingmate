@@ -1,8 +1,14 @@
 import { addDays, dayNumber, mod } from '../../core/dates.js';
 import { ROSTER_PATTERNS, cycleLength, makeRoster, nightKind, neededBlocks, neededNights } from '../../core/roster.js';
+import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel } from '../../core/fit.js';
 
 const WEEKS = 4;
 const KIND_LABEL = { away: 'away on site', travel: 'flying home, sleeping in town', home: 'in town' };
+
+// The example home on the coming soon page is a swing share: its host is on site whenever the
+// visitor is in town, so it is free for every night they need. It is labelled "Example" and is
+// not a listing (BR-TRU-006).
+const EXAMPLE_AVAILABILITY = '1'.repeat(HORIZON_NIGHTS);
 
 // BR-AVL-005: the pilot runs in WA, so "today" is Perth's date.
 function todayInPerth() {
@@ -68,6 +74,37 @@ function render(form, today) {
     cells.push(cell);
   }
   strip.replaceChildren(...cells);
+  renderExample(roster, today);
+}
+
+function nightCell(night, kind, label) {
+  const cell = document.createElement('div');
+  cell.className = `night ${kind}`;
+  cell.setAttribute('role', 'listitem');
+  cell.title = `${dateFmt.format(asDate(night))}: ${label}`;
+  cell.setAttribute('aria-label', cell.title);
+  const dow = document.createElement('span');
+  dow.className = 'dow';
+  dow.textContent = dowFmt.format(asDate(night));
+  const day = document.createElement('span');
+  day.textContent = String(asDate(night).getUTCDate());
+  cell.append(dow, day);
+  return cell;
+}
+
+// BR-FIT-001, BR-FIT-002 and BR-FIT-005 with the same core/fit.js the search will use.
+function renderExample(roster, today) {
+  const needed = neededNights(roster, today, HORIZON_NIGHTS);
+  const fit = computeFit(needed, EXAMPLE_AVAILABILITY, today);
+  document.getElementById('example-fit').textContent = fitLabel(fit.fitClass, false) ?? '';
+  document.getElementById('example-line').textContent = cardLine(fit, { byDates: false });
+  const neededSet = new Set(needed);
+  const cells = [];
+  for (let i = 0; i < WEEKS * 7; i++) {
+    const night = addDays(today, i);
+    cells.push(neededSet.has(night) ? nightCell(night, 'free', "free, you're in town") : nightCell(night, 'off', "you're on site"));
+  }
+  document.getElementById('example-strip').replaceChildren(...cells);
 }
 
 function init() {
