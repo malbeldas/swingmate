@@ -66,3 +66,32 @@ test('hard rule 2: every table created in a migration enables RLS', () => {
   const missing = tables.filter((t) => !new RegExp(`alter table public\\.${t} enable row level security`, 'i').test(all));
   assert.deepEqual(missing, []);
 });
+
+test('NTF-001 AC-1 the sign-up email carries the code in subject and body, and no link', () => {
+  const html = read('supabase/templates/email-code.html');
+  assert.match(html, /\{\{ \.Token \}\}/);
+  assert.doesNotMatch(html, /ConfirmationURL|href=/);
+  assert.match(html, /It expires in 1 hour\./);
+  const config = read('supabase/config.toml');
+  assert.match(config, /\[auth\.email\.template\.confirmation\]\nsubject = "Your SwingMate code: \{\{ \.Token \}\}"\ncontent_path = "\.\/supabase\/templates\/email-code\.html"/);
+});
+
+test('NTF-002 the reset email links to the site with a one-time token, and keeps the spec text', () => {
+  const html = read('supabase/templates/password-reset.html');
+  assert.match(html, /href="\{\{ \.SiteURL \}\}\/\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
+  assert.match(html, />Choose a new password</);
+  assert.match(html, /Someone asked to reset the password for your SwingMate account\./);
+  assert.match(html, /This link works once and expires in 1 hour\. If it wasn't you, ignore this email: your password stays the same\./);
+  const config = read('supabase/config.toml');
+  assert.match(config, /\[auth\.email\.template\.recovery\]\nsubject = "Reset your SwingMate password"\ncontent_path = "\.\/supabase\/templates\/password-reset\.html"/);
+});
+
+test('BR-ACC-002 and SEC-08 auth settings: email code on, 8-character passwords, 1 email a minute', () => {
+  const config = read('supabase/config.toml');
+  const emailSection = config.slice(config.indexOf('[auth.email]'));
+  assert.match(emailSection, /enable_confirmations = true/);
+  assert.match(emailSection, /max_frequency = "60s"/);
+  assert.match(emailSection, /otp_length = 6/);
+  assert.match(config, /minimum_password_length = 8/);
+  assert.match(config, /\[auth\.hook\.before_user_created\]\nenabled = true\nuri = "pg-functions:\/\/postgres\/public\/hook_before_user_created"/);
+});

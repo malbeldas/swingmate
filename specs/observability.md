@@ -17,7 +17,8 @@
 3. Métricas del piloto
 4. Errores y alertas
 5. Logs
-6. Fuera de scope
+6. Visitas de la página pública (GA4)
+7. Fuera de scope
 
 ---
 
@@ -108,7 +109,18 @@ Objetivos del piloto: los define Tomás junto con Maxi antes del 6 Dic (`decisio
 - Supabase guarda los logs de API, base y Edge Functions 1 día en el plan gratuito y 7 días en Pro (supabase.com/pricing, consultado el 29 Oct).
 - Las Edge Functions loguean en JSON con `fn`, `event`, `ref_id` y `ms`; nunca emails, teléfonos ni texto de mensajes.
 
-## 6. Fuera de scope
+## 6. Visitas de la página pública (GA4)
+
+`DEC-019`: la página Coming Soon mide visitas con Google Analytics 4. GA4 recibe la vista de página (con la dirección sin parámetros salvo `utm_*`) y solo estos eventos, con estos valores. El script vive en `app/analytics.js` y la lista en `core/analytics.js` (`GA_EVENTS`).
+
+| Evento | Cuándo | Propiedades |
+|---|---|---|
+| `cta_clicked` | Se toca un botón de la página | `cta` (`instagram_hero`, `try_roster`, `instagram_hosts`, `instagram_footer`) |
+| `roster_example_used` | Primer cambio en la calculadora de noches | `pattern` (`14:7`, `8:6`, `7:7`, `14:14`, `21:7`) |
+
+Los clics a Instagram también los cuenta GA4 solo, como clics salientes. Para links en redes se usan etiquetas `utm_source` y `utm_campaign` (por ejemplo `?utm_source=instagram&utm_campaign=bio`).
+
+## 7. Fuera de scope
 
 - Herramientas de terceros (GA4, PostHog, Sentry): ver `decision-log.md` DEC-105.
 - Mapas de calor, grabación de sesiones o A/B testing.

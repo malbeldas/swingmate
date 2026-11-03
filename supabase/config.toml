@@ -207,9 +207,11 @@ anonymous_users = 30
 # Number of sessions that can be refreshed in a 5 minute interval per IP address.
 token_refresh = 150
 # Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
-sign_in_sign_ups = 30
+# Local and CI only: the E2E suite signs up and logs in more than 30 times in 5 minutes from one IP.
+# Production keeps Supabase's limits, set in the dashboard (security.md SEC-08, infrastructure.md §8).
+sign_in_sign_ups = 150
 # Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
-token_verifications = 30
+token_verifications = 150
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
 web3 = 30
 
@@ -249,6 +251,16 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 # Uncomment to customize email template
+# NTF-001: the sign-up code, with no confirmation link.
+[auth.email.template.confirmation]
+subject = "Your SwingMate code: {{ .Token }}"
+content_path = "./supabase/templates/email-code.html"
+
+# NTF-002: the reset link opens the site with a one-time token_hash (UC-031).
+[auth.email.template.recovery]
+subject = "Reset your SwingMate password"
+content_path = "./supabase/templates/password-reset.html"
+
 # [auth.email.template.invite]
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"

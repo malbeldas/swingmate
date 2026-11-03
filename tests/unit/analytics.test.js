@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { checkEvent, CLIENT_ERROR_MAX, EVENTS, scrubErrorMessage } from '../../core/analytics.js';
+import {
+  checkEvent, CLIENT_ERROR_MAX, EVENTS, scrubErrorMessage, shouldLoadGa, gaPageLocation, checkGaEvent, GA_EVENTS,
+} from '../../core/analytics.js';
+import { ROSTER_PATTERNS } from '../../core/roster.js';
 
 // observability.md §2 is the source of truth: every row there must be in EVENTS, with the same
 // properties, and nothing else.
@@ -55,4 +58,38 @@ test('BR-ANL-002 client errors are scrubbed and cut to 200 characters', () => {
   assert.equal(scrubErrorMessage('x'.repeat(500)).length, CLIENT_ERROR_MAX);
   const scrubbed = scrubErrorMessage('Fetch failed for sam@example.com');
   assert.deepEqual(checkEvent('client_error', { page: 'search', kind: 'network', message: scrubbed }), []);
+});
+
+test('DEC-019 GA4 loads only on swingmate.au, with an ID, and never where the database is set up', () => {
+  assert.equal(shouldLoadGa({ hostname: 'swingmate.au', measurementId: 'G-ABC123XYZ9', hasDatabase: false }), true);
+  assert.equal(shouldLoadGa({ hostname: 'www.swingmate.au', measurementId: 'G-ABC123XYZ9', hasDatabase: false }), true);
+  assert.equal(shouldLoadGa({ hostname: 'swingmate.au', measurementId: '', hasDatabase: false }), false);
+  assert.equal(shouldLoadGa({ hostname: 'swingmate.au', measurementId: 'UA-123-1', hasDatabase: false }), false);
+  assert.equal(shouldLoadGa({ hostname: 'swingmate.au', measurementId: 'G-ABC123XYZ9', hasDatabase: true }), false);
+  assert.equal(shouldLoadGa({ hostname: 'localhost', measurementId: 'G-ABC123XYZ9', hasDatabase: false }), false);
+  assert.equal(shouldLoadGa({ hostname: 'malbeldas.github.io', measurementId: 'G-ABC123XYZ9', hasDatabase: false }), false);
+});
+
+test('DEC-019 and BR-ANL-002 GA4 gets the address without tokens, other parameters or the hash', () => {
+  assert.equal(gaPageLocation('https://swingmate.au/?token_hash=abc&type=recovery#faq'), 'https://swingmate.au/');
+  assert.equal(
+    gaPageLocation('https://swingmate.au/?utm_source=instagram&utm_campaign=launch&email=ana@example.com'),
+    'https://swingmate.au/?utm_source=instagram&utm_campaign=launch',
+  );
+});
+
+test('DEC-019 the GA4 events are a closed list with fixed values (observability.md §6)', () => {
+  assert.deepEqual(checkGaEvent('cta_clicked', { cta: 'try_roster' }), []);
+  assert.deepEqual(checkGaEvent('roster_example_used', { pattern: '8:6' }), []);
+  assert.deepEqual(ROSTER_PATTERNS.map((p) => p.label), GA_EVENTS.roster_example_used.pattern);
+  assert.deepEqual(checkGaEvent('cta_clicked', { cta: 'ana@example.com' }), ['cta must be one of instagram_hero, try_roster, instagram_hosts, instagram_footer']);
+  assert.deepEqual(checkGaEvent('cta_clicked', {}), ['cta missing']);
+  assert.deepEqual(checkGaEvent('signup_completed', { method: 'email' }), ['unknown event signup_completed']);
+});
+
+test('DEC-019 the GA4 event list matches observability.md §6', () => {
+  const md = readFileSync(new URL('../../specs/observability.md', import.meta.url), 'utf8');
+  const section = md.split('## 6. Visitas de la página pública (GA4)')[1].split('\n## ')[0];
+  const rows = section.split('\n').filter((l) => /^\| `[a-z_]+` \|/.test(l)).map((l) => l.split('|')[1].trim().replaceAll('`', ''));
+  assert.deepEqual(rows.sort(), Object.keys(GA_EVENTS).sort());
 });

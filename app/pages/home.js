@@ -1,6 +1,9 @@
 import { addDays, dayNumber, mod } from '../../core/dates.js';
 import { ROSTER_PATTERNS, cycleLength, makeRoster, nightKind, neededBlocks, neededNights } from '../../core/roster.js';
 import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel } from '../../core/fit.js';
+import { writeVisitorRoster } from '../visitor-roster.js';
+import { initAnalytics, track } from '../analytics.js';
+import { initAccountMenu } from '../ui/account-menu.js';
 
 const WEEKS = 4;
 const KIND_LABEL = { away: 'away on site', travel: 'flying home, sleeping in town', home: 'in town' };
@@ -116,8 +119,29 @@ function init() {
   form.anchor.value = nextMonday(today);
   form.anchor.min = addDays(today, -365);
   form.addEventListener('input', () => render(form, today));
+  // BR-ROS-006: once the visitor changes the calculator, their roster is kept for this session,
+  // so signing up can offer to save it (AC-002-4).
+  form.addEventListener('input', () => writeVisitorRoster(readRoster(form)));
   form.addEventListener('submit', (e) => e.preventDefault());
   render(form, today);
 }
 
+// DEC-019: which buttons get used and whether visitors try the roster example (observability.md §6).
+function initTracking() {
+  const ctas = { 'cta-instagram': 'instagram_hero', 'cta-try': 'try_roster', 'cta-host': 'instagram_hosts', 'footer-instagram': 'instagram_footer' };
+  for (const [id, cta] of Object.entries(ctas)) {
+    document.getElementById(id)?.addEventListener('click', () => track('cta_clicked', { cta }));
+  }
+  const form = document.getElementById('roster-form');
+  let used = false;
+  form.addEventListener('input', () => {
+    if (used) return;
+    used = true;
+    track('roster_example_used', { pattern: ROSTER_PATTERNS[Number(form.pattern.value)].label });
+  });
+}
+
 init();
+initTracking();
+initAnalytics();
+initAccountMenu(document.getElementById('account'));

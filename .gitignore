@@ -5,3 +5,4 @@ test-results/
 .env
 .env.*
 supabase/.temp/
+app/config.local.json

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRoster } from '../../core/roster.js';
 import {
-  hostFacts, isNewMember, memberSince, profileIssues, responseTimeText, seekerActivity, toPublicProfile, trustBadges,
+  hostFacts, isNewMember, memberSince, profileIssues, responseTimeText, seekerActivity, toPublicProfile, trustBadges, publicCardLine, publicBioText, WORK_TYPE_LABELS,
 } from '../../core/trust.js';
 
 const ROSTER = makeRoster({ daysOn: 8, daysOff: 6, anchor: '2026-11-02' });
@@ -71,4 +71,16 @@ test('BR-TRU-002 the host block: phone verified, member since, lives here or ros
   });
   assert.deepEqual(hostFacts({ ...base, livesOnsite: false, roster: ROSTER, responseMinutes: [5, 5, 5, 5, 5] }).lines,
     ['Phone verified host', 'Member since Oct 2026', '8:6 roster', 'Usually replies within an hour']);
+});
+
+test('BR-ACC-004 and BR-TRU-003 the line hosts see carries only public facts', () => {
+  assert.equal(
+    publicCardLine({ workType: 'fifo', baseSuburb: 'Rockingham, WA', roster: { daysOn: 14, daysOff: 7 }, phoneVerified: false }),
+    'FIFO · Based in Rockingham, WA · 14:7 roster · Email verified',
+  );
+  assert.equal(publicCardLine({ workType: null, baseSuburb: '', roster: null, phoneVerified: true }), 'Email and phone verified');
+  assert.equal(publicCardLine({ workType: 'other', baseSuburb: 'Baldivis, WA' }), 'Shift work · Based in Baldivis, WA · Email verified');
+  assert.equal(publicBioText('  '), 'No bio yet. A line about you helps hosts say yes.');
+  assert.equal(publicBioText(' Quiet and tidy '), 'Quiet and tidy');
+  assert.deepEqual(Object.keys(WORK_TYPE_LABELS), ['fifo', 'dido', 'bibo', 'other']);
 });

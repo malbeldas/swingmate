@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org http://127.0.0.1:54321 http://localhost:54321; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <!-- My account (UC-032, frontend-migration.md: account.html). Private: not indexed. -->
+  <meta name="robots" content="noindex">
+  <title>My account · SwingMate</title>
+  <meta name="theme-color" content="#152238">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/base.css">
+  <script type="module" src="app/pages/account.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./" aria-label="SwingMate home">
+        <img class="brand-mark" src="assets/favicon.svg" alt="" width="40" height="40">
+        <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      </a>
+      <div class="account" id="account" hidden></div>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="wrap stack account-page">
+      <h1>My account</h1>
+      <div id="account-main" class="stack" aria-live="polite"></div>
+    </div>
+  </main>
+</body>
+</html>
