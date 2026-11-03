@@ -223,6 +223,7 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 | DEC-015 | 27 Oct 2026 | Tomás lidera lo visual y la estética; Maxi lidera los flujos. Las propuestas de uno se discuten con razones. | — | — |
 | DEC-016 | 29 Oct 2026 | El host publica solo y la web guía: el asistente muestra "Step N of 5", un consejo por paso y la vista previa antes de "Publish"; quien busca ve en su primera visita una tira de 3 pasos hasta el primer mensaje. Va en #13 y #15. | Alta asistida por videollamada (suma fricción; idea para después del piloto) y una historia de onboarding aparte | UC-020, UC-002 |
 | DEC-017 | 3 Nov 2026 | Hasta la salida a producción, el sitio publicado y `swingmate-prod` funcionan como ambiente de prueba (UAT): se pueden cargar datos de prueba y no se invita a usuarios reales. Para abrir se cumple la lista de `infrastructure.md` §8. | Esperar a los textos del abogado para publicar algo | BR-TRU-006, SEC-20 |
+| DEC-018 | 3 Nov 2026 | Mientras se arma el piloto, `swingmate.au` muestra una página Coming Soon indexable que explica SwingMate, con la calculadora de noches, un ejemplo de aviso rotulado "Example" y contacto por Instagram. No junta datos personales, así que no espera a los Términos (`Q-01`). La medición de visitas se decide aparte. | Mantener la landing sin indexar hasta el piloto | BR-TRU-006 |
 
 ## 3. Decisiones técnicas
 

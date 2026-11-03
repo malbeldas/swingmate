@@ -4,10 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
-  <!-- Not indexed until the pilot opens with Terms and Privacy in place (decision-log.md Q-01). -->
-  <meta name="robots" content="noindex">
-  <title>SwingMate · Find a home that fits your roster</title>
-  <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they are actually in town.">
+  <!-- Coming soon page: indexed, collects no personal data, so it doesn't wait for Terms (decision-log.md Q-01). -->
+  <title>SwingMate · Coming soon · Find a home that fits your roster</title>
+  <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they're actually in town. Pilot opening in Perth.">
+  <link rel="canonical" href="https://swingmate.au/">
+  <meta name="theme-color" content="#152238">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SwingMate">
+  <meta property="og:url" content="https://swingmate.au/">
+  <meta property="og:title" content="SwingMate · Find a home that fits your roster">
+  <meta property="og:description" content="For FIFO, DIDO and BIBO workers. Different swings. Same home. Pilot opening in Perth.">
+  <meta property="og:image" content="https://swingmate.au/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SwingMate logo with the line: Find a home that fits your roster">
+  <meta property="og:locale" content="en_AU">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/tokens.css">
@@ -23,7 +35,8 @@
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="#how-it-works">How it works</a>
-        <a href="#safety">Safety</a>
+        <a class="nav-wide" href="#safety">Safety</a>
+        <a href="#faq">FAQ</a>
       </nav>
     </div>
   </header>
@@ -31,16 +44,41 @@
   <main>
     <section class="hero">
       <div class="wrap stack">
-        <span class="pill">Pilot opening soon in Perth</span>
+        <span class="pill">Coming soon · Pilot opening in Perth</span>
         <p class="micro">For FIFO, DIDO &amp; BIBO workers</p>
         <h1>Find a home that fits <span class="accent">your roster</span></h1>
         <p class="tagline">Different swings. Same home.</p>
         <p class="lead">SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
+          <a class="btn btn-secondary" href="#your-nights">Try it with your roster</a>
+        </div>
         <ul class="ticks">
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Hosts verify their email and mobile before listing</li>
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Message hosts directly in SwingMate</li>
         </ul>
+      </div>
+    </section>
+
+    <section class="section band" id="why" aria-labelledby="why-title">
+      <div class="wrap stack">
+        <h2 id="why-title">Why pay for nights you spend on site?</h2>
+        <p class="lead">On a 2-and-1 swing you sleep in town about 8 nights out of 21. A full-time lease charges you for all of them, and most rooms online don't care about your roster.</p>
+        <div class="grid-3">
+          <div class="card stack">
+            <h3>Rooms that fit your swing</h3>
+            <p class="muted">Tell us your roster once. Every home shows how many of your nights in town it's free for.</p>
+          </div>
+          <div class="card stack">
+            <h3>Share with an opposite swing</h3>
+            <p class="muted">Hosts can offer the nights they're on site. Two workers on opposite rosters can share one home.</p>
+          </div>
+          <div class="card stack">
+            <h3>Talk before you agree</h3>
+            <p class="muted">Message the host in SwingMate, check the place and agree the details between you.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -66,6 +104,32 @@
             <span><i class="swatch away"></i>Away on site</span>
             <span><i class="swatch travel"></i>Flying home</span>
             <span><i class="swatch home"></i>In town</span>
+          </div>
+        </div>
+
+        <div class="card stack example" aria-labelledby="example-title">
+          <div class="example-head">
+            <h2 id="example-title">How a home looks for your roster</h2>
+            <span class="tag">Example</span>
+          </div>
+          <p class="muted small">This isn't a real listing. It shows how each home will tell you if it fits the roster you picked above.</p>
+          <div class="example-card">
+            <div class="example-photo" aria-hidden="true">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+            </div>
+            <div class="stack example-body">
+              <div class="example-title-row">
+                <h3>Room in a shared house</h3>
+                <span class="fit-badge" id="example-fit"></span>
+              </div>
+              <p class="small muted">Baldivis, WA · $180 a week · bills included</p>
+              <p class="small" id="example-line"></p>
+              <div class="strip" id="example-strip" role="list" aria-label="This home over your next four weeks"></div>
+              <div class="legend" aria-hidden="true">
+                <span><i class="swatch free"></i>Free when you're in town</span>
+                <span><i class="swatch off"></i>You're on site</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +167,43 @@
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Your email, mobile and employer stay private.</li>
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Report or block anyone, any time.</li>
         </ul>
+      </div>
+    </section>
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap stack">
+        <h2 id="faq-title">Questions</h2>
+        <div class="faq">
+          <details>
+            <summary>When does SwingMate open?</summary>
+            <p>We're starting with a pilot in Perth. Follow us on Instagram to hear the day it opens.</p>
+          </details>
+          <details>
+            <summary>How much does it cost?</summary>
+            <p>Nothing during the pilot, for hosts and for people looking for a place.</p>
+          </details>
+          <details>
+            <summary>Do I pay the rent through SwingMate?</summary>
+            <p>No. SwingMate helps you find each other and talk. You agree the rent and how to pay it directly with the host.</p>
+          </details>
+          <details>
+            <summary>I don't have a fixed roster. Can I still use it?</summary>
+            <p>Yes. Search with your dates instead, and every home shows if it's free for them.</p>
+          </details>
+          <details>
+            <summary>Who can list a room?</summary>
+            <p>Anyone with a room or a home to share in Perth. Hosts verify their email and mobile before their listing goes live.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section band" id="hosts" aria-labelledby="hosts-title">
+      <div class="wrap stack">
+        <h2 id="hosts-title">Have a room in Perth?</h2>
+        <p class="lead">Be one of the first hosts in the pilot. Send us a message on Instagram and we'll help you set up your listing when we open.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" id="cta-host" href="https://www.instagram.com/swingmate.au/" rel="noopener">Message us on Instagram</a>
+        </div>
       </div>
     </section>
   </main>
