@@ -36,4 +36,4 @@ npm run test:e2e    # Playwright a 375×740 y 1280×800
 npm run serve       # http://localhost:4173
 ```
 
-El CI corre lo mismo en cada PR. Supabase se suma cuando se confirme el stack (`Q-02`).
+El CI corre lo mismo en cada PR. Supabase se suma con la primera migración (stack confirmado el 3 Nov 2026, `DEC-101`).

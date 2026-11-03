@@ -35,23 +35,23 @@ Las que bloquean el piloto del 6 Dic están marcadas con (\*).
 
 **Por qué:** sin Términos y Privacidad no se puede abrir el registro a usuarios reales (`SEC-20`), y ninguna de las consultas a profesionales tiene reunión registrada (Revisión integral, 18 Oct).
 **Dueño propuesto:** Tomás, porque el ABN está a su nombre.
+**Mientras tanto (3 Nov):** Tomás y Maxi lo llevan al abogado. Hasta que estén los textos, el sitio publicado funciona como ambiente de prueba (`DEC-017`).
 
-### Q-02 (\*) — Stack técnico
-**Pregunta:** ¿confirmamos el stack de `DEC-101`?
-**Lo que haríamos nosotros:** confirmarlo. Sería HTML y JavaScript sin framework en GitHub Pages, con Supabase (Postgres, login, fotos, chat en tiempo real) en Sídney.
-**Por qué:**
-- Quedan 5 semanas y media hasta el 6 Dic.
-- Es el mismo patrón con el que Maxi ya armó Catálogo web y Pueyrredón.
-- Cuesta cero en el piloto.
-- El Web MVP §14 ya proponía Supabase.
-
-**Lo que perdemos:** el SEO de las páginas de avisos es más débil sin render en servidor. Para un piloto con usuarios conocidos no importa. Si después hace falta, la base, las reglas y `core/` se reutilizan con Next.js.
+### Q-02 — Stack técnico (resuelta)
+Confirmado el 3 Nov 2026: pasa a `DEC-101`. Ya se puede crear código que dependa del stack.
 
 ### Q-03 (\*) — Pagar los SMS de verificación
 **Pregunta:** ¿aprobamos el único costo variable del piloto?
 **Lo que haríamos nosotros:** sí, con una tarjeta de SwingMate en Twilio y límite de gasto de US$10.
 **Por qué:** cada SMS a Australia cuesta US$0,0515 (Twilio, consultado el 29 Oct). Verificar 20 hosts cuesta menos de US$5. El celular obligatorio para publicar es la decisión D10 y nuestra principal defensa contra avisos falsos.
 **Estado (29 Oct):** Maxi propone pagar los SMS y dejar Supabase gratis (`Q-06`). Falta el OK de Tomás. Twilio probablemente pida una carga inicial mínima de unos US$20 para salir de la cuenta de prueba (sin confirmar). La videollamada con cada host se descartó: suma fricción y hoy no aporta (Maxi, 29 Oct); queda como idea para después del piloto.
+**Estado (3 Nov):** Tomás está de acuerdo en pagarlo: con poco volumen no es caro, pero quiere el gasto controlado. Propuso tres controles: límite de gasto en Twilio, tope de envíos por número para que nadie reintente sin fin, y como máximo unos 3 intentos. Los dos primeros ya están en `T-07`, `SEC-09` e `INT-003`. Faltan dos cosas:
+- Que Tomás hable con el contador sobre una sociedad o una cuenta bancaria de SwingMate para la tarjeta.
+- Que revise el registro del remitente "SwingMate" ante ACMA, obligatorio desde el 1 Jul 2026. Sin registro, el SMS llega como "Unverified".
+
+Hasta entonces no se carga Twilio y el desarrollo usa los códigos de prueba de Supabase.
+
+**Lo que haríamos nosotros con el tope:** bajar `SEC-09` de 5 a 3 códigos por número por día, que es lo que propone Tomás. Un host que no recibe el código lo vuelve a pedir una o dos veces, no cinco. Se cambia en `security.md` cuando lo confirmen los dos.
 
 ### Q-04 (\*) — DNS de swingmate.au
 **Pregunta:** ¿Tomás puede cargar los registros DNS del dominio?
@@ -222,12 +222,13 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 | DEC-014 | 27 Oct 2026 | Mapa de zona aproximada, nunca la dirección. | Pin exacto | BR-LST-004 |
 | DEC-015 | 27 Oct 2026 | Tomás lidera lo visual y la estética; Maxi lidera los flujos. Las propuestas de uno se discuten con razones. | — | — |
 | DEC-016 | 29 Oct 2026 | El host publica solo y la web guía: el asistente muestra "Step N of 5", un consejo por paso y la vista previa antes de "Publish"; quien busca ve en su primera visita una tira de 3 pasos hasta el primer mensaje. Va en #13 y #15. | Alta asistida por videollamada (suma fricción; idea para después del piloto) y una historia de onboarding aparte | UC-020, UC-002 |
+| DEC-017 | 3 Nov 2026 | Hasta la salida a producción, el sitio publicado y `swingmate-prod` funcionan como ambiente de prueba (UAT): se pueden cargar datos de prueba y no se invita a usuarios reales. Para abrir se cumple la lista de `infrastructure.md` §8. | Esperar a los textos del abogado para publicar algo | BR-TRU-006, SEC-20 |
 
 ## 3. Decisiones técnicas
 
 | ID | Fecha | Decisión | Alternativas descartadas | Por qué |
 |---|---|---|---|---|
-| DEC-101 | 29 Oct 2026 | Stack: HTML/JS sin build en GitHub Pages + Supabase en Sídney. **Pendiente de confirmar (Q-02).** | Next.js + Supabase en Vercel (el plan gratuito de Vercel no permite uso comercial); Firebase (base NoSQL: las consultas por fechas y los permisos por fila son más simples en Postgres) | Tiempo, costo cero, patrón conocido |
+| DEC-101 | 29 Oct 2026 | Stack: HTML/JS sin build en GitHub Pages + Supabase en Sídney. Confirmado el 3 Nov 2026 (`Q-02`). | Next.js + Supabase en Vercel (el plan gratuito de Vercel no permite uso comercial); Firebase (base NoSQL: las consultas por fechas y los permisos por fila son más simples en Postgres) | Tiempo, costo cero, patrón conocido |
 | DEC-102 | 29 Oct 2026 | Specs en nivel `full`, en `specs/`. | `light` en un solo `SPEC.md` | 150+ horas, varias superficies (público, host, admin, emails), datos personales y legales |
 | DEC-103 | 29 Oct 2026 | Repo público `malbeldas/swingmate`. | Privado con GitHub Pro (US$4/mes) u otro hosting | GitHub Pages gratis y mismo flujo que Catálogo web. Lo sensible queda en Drive. |
 | DEC-104 | 29 Oct 2026 | El fit se calcula en el navegador con `core/fit.js`; la base devuelve la disponibilidad por noche. | Materializar el fit en una tabla (Reglas §23) | Con decenas o cientos de avisos alcanza y deja la lógica en un solo lugar testeable |
