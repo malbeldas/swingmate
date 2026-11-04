@@ -6,8 +6,9 @@ import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { getSessionUser, onAuthChange } from '../session.js';
+import { createFinder } from './admin-find.js';
 import {
-  ACTION_LABELS, ADMIN_TEXTS, REPORT_REASONS, actResultText, actionIssue, adminActions, adminQueue, ageText, isAdmin,
+  SEARCH_TEXTS, ACTION_LABELS, ADMIN_TEXTS, REPORT_REASONS, actResultText, actionIssue, adminActions, adminQueue, ageText, isAdmin,
 } from '../../core/moderation.js';
 
 const main = document.getElementById('admin-main');
@@ -16,6 +17,7 @@ const timeFormat = new Intl.DateTimeFormat('en-AU', { timeZone, day: 'numeric', 
 
 const state = {
   user: null,
+  view: 'reports', // 'reports' | 'find' | 'record' (UC-041)
   queue: [],
   openId: null,
   conversation: null, // messages once read
@@ -26,10 +28,6 @@ const state = {
   notice: '',
   busy: false,
 };
-
-function reportFromHash() {
-  return new URLSearchParams(location.hash.slice(1)).get('report');
-}
 
 function openGroup() {
   return state.queue.find((g) => g.reportIds.includes(state.openId)) ?? null;
@@ -124,13 +122,29 @@ function detailSection() {
     actionForm(g));
 }
 
+// Reports (UC-040) and Find (UC-041), as two tabs of the same page.
+function tabs() {
+  const onReports = state.view === 'reports';
+  return el('nav', { class: 'admin-tabs', 'aria-label': 'Admin' },
+    el('a', { href: '#', id: 'tab-reports', 'aria-current': onReports ? 'page' : null }, ADMIN_TEXTS.title),
+    el('a', { href: '#find', id: 'tab-find', 'aria-current': onReports ? null : 'page' }, SEARCH_TEXTS.tab));
+}
+
 function render(focus) {
-  const open = Boolean(state.openId);
-  main.replaceChildren(el('div', { class: `admin-layout${open ? ' has-open' : ''}` },
-    el('div', { class: `list-pane${open ? ' pane-hidden-mobile' : ''}` }, queueSection()),
-    open && el('div', { class: 'detail-pane' }, detailSection())));
+  let content;
+  if (state.view === 'find') content = finder.searchView();
+  else if (state.view === 'record') content = finder.recordView();
+  else {
+    const open = Boolean(state.openId);
+    content = el('div', { class: `admin-layout${open ? ' has-open' : ''}` },
+      el('div', { class: `list-pane${open ? ' pane-hidden-mobile' : ''}` }, queueSection()),
+      open && el('div', { class: 'detail-pane' }, detailSection()));
+  }
+  main.replaceChildren(tabs(), content);
   if (focus) document.querySelector(focus)?.focus();
 }
+
+const finder = createFinder(render);
 
 // ---------------------------------------------------------------------------------------------
 // Data
@@ -228,16 +242,35 @@ async function init() {
       el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: init }, 'Try again')));
     return;
   }
-  state.openId = reportFromHash();
-  render();
+  await route();
 }
 
-// NTF-009 links straight to a report with #report=<id>; the list links use the same address.
+// The address says which view is open: #report=<id> (also the NTF-009 link), #find, #person=<id>
+// or #listing=<id>. Search words never go in it (engineering-constitution.md §10).
+async function route() {
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const from = state.view;
+  if (hash.get('person') || hash.get('listing')) {
+    state.view = 'record';
+    return finder.openRecord(hash.get('person') ? 'user' : 'listing', hash.get('person') || hash.get('listing'));
+  }
+  if (hash.has('find')) {
+    state.view = 'find';
+    return render(from === 'reports' ? '#find-query' : null);
+  }
+  state.view = 'reports';
+  if (from !== 'reports') {
+    try { await loadQueue(await getClient()); } catch { /* keep the last queue */ }
+  }
+  const id = hash.get('report');
+  if (id) return openReport(id);
+  if (state.openId) resetDetail();
+  state.openId = null;
+  render(from !== 'reports' ? '#admin-title' : null);
+}
+
 window.addEventListener('hashchange', () => {
-  if (!state.user) return;
-  const id = reportFromHash();
-  if (id) openReport(id);
-  else if (state.openId) { state.openId = null; resetDetail(); render('#admin-title'); }
+  if (state.user) route();
 });
 
 initAccountMenu(document.getElementById('account'));

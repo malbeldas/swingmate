@@ -121,9 +121,14 @@ export function adminReportData({ report, targetLabel, openReports, appUrl }) {
 
 export const ACTION_LABELS = {
   hide_listing: 'Hide listing',
+  unhide_listing: 'Unhide listing',
   warn_user: 'Warn',
   suspend_user: 'Suspend account',
+  unsuspend_user: 'Lift suspension',
   dismiss: 'Dismiss',
+  read_conversation: 'Read conversation',
+  grant_admin: 'Make admin',
+  revoke_admin: 'Remove admin',
 };
 
 export const TARGET_LABELS = { listing: 'Listing', user: 'Person', conversation: 'Conversation' };
@@ -216,4 +221,104 @@ export function actResultText(result, error) {
   if (error || !result) return ADMIN_TEXTS.result.failed;
   if (result.ok) return ADMIN_TEXTS.done(Number(result.closed) || 1);
   return ADMIN_TEXTS.result[result.reason] ?? ADMIN_TEXTS.result.failed;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Finding people and listings (UC-041). Message content never reaches the panel (AC-041-1).
+// ---------------------------------------------------------------------------------------------
+
+export const SEARCH_MIN = 2;
+
+export const SEARCH_TEXTS = {
+  tab: 'Find',
+  title: 'Find people and listings',
+  label: 'Name, email, listing title or suburb',
+  submit: 'Search',
+  tooShort: `Type at least ${SEARCH_MIN} characters.`,
+  people: 'People',
+  listings: 'Listings',
+  none: 'Nothing found.',
+  failed: 'We couldn’t search. Try again.',
+  back: 'Back',
+  notFound: 'We couldn’t find this record.',
+  reports: 'Reports about this',
+  noReports: 'No reports.',
+  log: 'Moderation log',
+  noLog: 'No actions yet.',
+  ownListings: 'Listings',
+  noListings: 'No listings.',
+  admin: 'Admin',
+  you: 'You',
+  done: 'Done. It’s in the log.',
+  result: {
+    note: ADMIN_TEXTS.result.note,
+    action: 'That action doesn’t apply here.',
+    missing: 'This record no longer exists.',
+    state: 'That’s already done. Reload to see the latest.',
+    self: 'You can’t do that to your own account.',
+    failed: ADMIN_TEXTS.result.failed,
+  },
+};
+
+const STATUS_LABELS = {
+  active: 'Active', suspended: 'Suspended', draft: 'Draft', paused: 'Paused', filled: 'Filled', hidden: 'Hidden', removed: 'Removed',
+};
+
+export function statusLabel(status) {
+  return STATUS_LABELS[status] ?? String(status ?? '');
+}
+
+// The first problem with the search box, or null.
+export function searchIssue(query) {
+  return String(query ?? '').trim().length < SEARCH_MIN ? SEARCH_TEXTS.tooShort : null;
+}
+
+// UC-041 step 3: what an admin can do from a record, given its state. Undoing comes in place of
+// doing, and nobody takes away their own role or suspends themselves.
+export function recordActions(targetType, record = {}) {
+  if (targetType === 'listing') {
+    if (record.status === 'removed') return ['warn_user'];
+    return [record.status === 'hidden' ? 'unhide_listing' : 'hide_listing', 'warn_user'];
+  }
+  if (targetType !== 'user') return [];
+  const actions = ['warn_user'];
+  if (record.status === 'suspended') actions.push('unsuspend_user');
+  else if (!record.is_me) actions.push('suspend_user');
+  if (!record.is_admin) actions.push('grant_admin');
+  else if (!record.is_me) actions.push('revoke_admin');
+  return actions;
+}
+
+export function recordActionIssue({ action, note }, allowed) {
+  if (!action || !allowed.includes(action)) return ADMIN_TEXTS.chooseAction;
+  if (String(note ?? '').trim().length < NOTE_MIN) return ADMIN_TEXTS.noteNeeded;
+  return null;
+}
+
+export function moderateResultText(result, error) {
+  if (error || !result) return SEARCH_TEXTS.result.failed;
+  if (result.ok) return SEARCH_TEXTS.done;
+  return SEARCH_TEXTS.result[result.reason] ?? SEARCH_TEXTS.result.failed;
+}
+
+// Issue #28: each action with its date, author and note, newest first.
+export function logEntries(log, format) {
+  return [...(log ?? [])]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .map((a) => ({
+      id: a.id,
+      action: ACTION_LABELS[a.action] ?? a.action,
+      by: a.admin_name || 'Deleted admin',
+      when: format(new Date(a.created_at)),
+      note: a.note,
+    }));
+}
+
+// What a search result line says under the name or title.
+export function personLine(p) {
+  return [p.email, p.suburb].filter(Boolean).join(' · ');
+}
+
+export function listingLine(l) {
+  return [l.suburb, l.owner_name ? `Host: ${l.owner_name}` : 'Host: deleted'].filter(Boolean).join(' · ');
 }

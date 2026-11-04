@@ -356,3 +356,12 @@ label.btn { cursor: pointer; }
   .admin-layout .pane-hidden-mobile { display: block; }
   .action-form #apply-action { align-self: flex-start; min-width: 200px; }
 }
+.admin-tabs { display: flex; gap: var(--s-2); }
+.admin-tabs a { padding: var(--s-2) var(--s-4); border-radius: var(--r-pill); font-weight: 600; color: var(--navy); text-decoration: none; min-height: 40px; display: inline-flex; align-items: center; }
+.admin-tabs a[aria-current='page'] { background: var(--navy); color: var(--cream); }
+.admin-tabs a:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.find-form { display: grid; gap: var(--s-3); }
+.find-form input[type='search'] { height: 48px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3); font: inherit; font-weight: 400; color: var(--navy); background: var(--white); width: 100%; box-sizing: border-box; }
+.find-form input[type='search']:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+@media (min-width: 768px) { .find-form { grid-template-columns: 1fr auto; align-items: end; } }
+#record, #find { max-width: 760px; }
