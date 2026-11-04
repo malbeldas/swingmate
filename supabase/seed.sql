@@ -77,6 +77,10 @@ begin
     insert into public.listing_private (listing_id, address_line, lat, lng)
       select l.id, 'Seed address 1 Private St', s.lat - 0.0031, s.lng + 0.0027 from public.suburbs s where s.id = l.suburb
     on conflict (listing_id) do nothing;
+    -- Saving the address draws a random circle (BR-LST-004); the seed puts back a fixed one so the
+    -- distances in tests/e2e/search.spec.js stay the same on every run.
+    update public.listings set public_lat = s.lat + l.offset_deg, public_lng = s.lng + l.offset_deg
+      from public.suburbs s where s.id = l.suburb and listings.id = l.id;
     insert into public.listing_photos (listing_id, storage_path, position, width, height)
       select l.id, l.id || '/seed-' || i || '.jpg', i, 1600, 1200 from generate_series(0, 2) i
     on conflict do nothing;
