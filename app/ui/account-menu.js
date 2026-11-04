@@ -4,6 +4,7 @@ import { getClient } from '../db.js';
 import { getOwnProfile, getSessionUser, onAuthChange, profileComplete, signOut } from '../session.js';
 import { openAuthSheet } from './auth-sheet.js';
 import { TEXTS, readRecoveryLink } from '../../core/account.js';
+import { isAdmin } from '../../core/moderation.js';
 
 function button(text, cls, onclick) {
   const b = document.createElement('button');
@@ -33,7 +34,14 @@ async function render(container, user, { askProfile = true } = {}) {
   inbox.className = 'btn-text account-messages';
   inbox.href = new URL('../../messages.html', import.meta.url).pathname;
   inbox.textContent = 'Messages';
-  container.replaceChildren(name, inbox, button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
+  // UC-040: admins reach the report queue from the header too, not only from the NTF-009 email.
+  const admin = isAdmin(user) ? document.createElement('a') : null;
+  if (admin) {
+    admin.className = 'btn-text account-admin';
+    admin.href = new URL('../../admin.html', import.meta.url).pathname;
+    admin.textContent = 'Reports';
+  }
+  container.replaceChildren(...[name, inbox, admin].filter(Boolean), button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
   // Back from Google (or a half-finished sign-up): finish the minimum profile here (BR-ACC-003).
   if (askProfile && !profileComplete(profile)) openAuthSheet({ step: 'profile', user, onDone: (u) => render(container, u) });
 }

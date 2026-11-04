@@ -336,3 +336,23 @@ label.btn { cursor: pointer; }
 .conversation-tools .btn-text { padding-left: 0; }
 .conversation-tools .report-link { padding-left: var(--s-3); }
 .blocked-note { background: var(--cream); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-weight: 600; }
+
+/* Admin panel (UC-040) */
+.admin-layout { display: grid; gap: var(--s-4); }
+.admin-layout > * { min-width: 0; }
+.queue-link { display: grid; gap: 2px; padding: var(--s-3); border-radius: var(--r-sm); color: inherit; text-decoration: none; min-height: 44px; }
+.queue-link:hover, .queue-link[aria-current='page'] { background: var(--cream); }
+.queue-link:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.queue-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.badge.report-type { background: var(--cream); color: var(--navy); }
+.badge.overdue { background: var(--peach-soft); color: var(--peach-ink); }
+.report-entries { gap: var(--s-3); }
+.report-entry { display: grid; gap: 2px; padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
+.report-details { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.action-form textarea { width: 100%; box-sizing: border-box; }
+.bubble-sender { font-weight: 600; opacity: 0.85; }
+@media (min-width: 1024px) {
+  .admin-layout.has-open { grid-template-columns: minmax(280px, 380px) 1fr; align-items: start; }
+  .admin-layout .pane-hidden-mobile { display: block; }
+  .action-form #apply-action { align-self: flex-start; min-width: 200px; }
+}

@@ -114,3 +114,106 @@ export function adminReportData({ report, targetLabel, openReports, appUrl }) {
     adminUrl: `${String(appUrl).replace(/\/+$/, '')}/admin.html#report=${encodeURIComponent(report.id)}`,
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// Admin panel (UC-040). Texts in en-AU; the panel is only for admins (BR-ADM-004).
+// ---------------------------------------------------------------------------------------------
+
+export const ACTION_LABELS = {
+  hide_listing: 'Hide listing',
+  warn_user: 'Warn',
+  suspend_user: 'Suspend account',
+  dismiss: 'Dismiss',
+};
+
+export const TARGET_LABELS = { listing: 'Listing', user: 'Person', conversation: 'Conversation' };
+
+export const ADMIN_TEXTS = {
+  title: 'Reports',
+  logIn: 'Log in with an admin account to see reports.',
+  notAdmin: 'This page is for SwingMate admins.',
+  empty: 'No open reports. Nice.',
+  loadFailed: 'We couldn’t load the reports. Try again.',
+  back: 'All reports',
+  notFound: 'This report is closed or doesn’t exist.',
+  reportsHeading: 'What people said',
+  readConversation: 'Read conversation',
+  readNote: 'Reading this conversation is logged.',
+  readFailed: 'We couldn’t open the conversation. Try again.',
+  openListing: 'Open listing',
+  actionLegend: 'Action',
+  noteLabel: 'Note (required, kept in the log)',
+  apply: 'Apply',
+  applying: 'Applying…',
+  chooseAction: 'Choose an action.',
+  noteNeeded: `Write a note of at least ${NOTE_MIN} characters.`,
+  overdue: `Over ${RESOLVE_HOURS} h`,
+  result: {
+    closed: 'Someone already closed this report.',
+    note: `Write a note of at least ${NOTE_MIN} characters.`,
+    action: 'That action doesn’t apply to this report.',
+    deleted: 'That account no longer exists. Dismiss the report instead.',
+    failed: 'We couldn’t apply the action. Try again.',
+  },
+  done: (n) => (n === 1 ? 'Done. 1 report closed.' : `Done. ${n} reports closed.`),
+};
+
+// BR-ADM-004: the role lives in app_metadata, which people can't edit. The database checks it
+// again on every call (is_admin()); this only decides what the page draws.
+export function isAdmin(user) {
+  return user?.app_metadata?.role === 'admin';
+}
+
+// What the action form offers for a type of object. Reading a conversation is a button of its
+// own, not an action that closes the report.
+export function adminActions(targetType) {
+  return (ACTIONS_BY_TARGET[targetType] ?? []).filter((a) => a !== 'read_conversation');
+}
+
+// admin_reports() rows to the queue: groups by object (A1), oldest first, with what the list shows.
+export function adminQueue(rows, now) {
+  const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+  const reports = (rows ?? []).map((r) => ({
+    id: r.id, targetType: r.target_type, targetId: r.target_id, reason: r.reason, status: 'open', createdAt: r.created_at,
+  }));
+  return reportQueue(reports, now).map((g) => {
+    const first = byId.get(g.reportIds[0]);
+    return {
+      ...g,
+      key: g.reportIds[0],
+      label: first?.target_label || 'Deleted',
+      person: first?.person_name || '',
+      status: first?.target_status || '',
+      type: TARGET_LABELS[g.targetType],
+      reasonText: g.reasons.map((r) => REPORT_REASONS[r] ?? REPORT_REASONS.other).join(' · '),
+      countText: g.count === 1 ? '1 report' : `${g.count} reports`,
+      age: ageText(g.oldestAt, now),
+      reports: g.reportIds.map((id) => byId.get(id)),
+    };
+  });
+}
+
+// "5 min ago", "3 h ago", "2 days ago": how long a report has waited.
+export function ageText(at, now) {
+  const minutes = Math.max(0, Math.floor((new Date(now) - new Date(at)) / 60000));
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours} h ago`;
+  return `${Math.floor(hours / 24)} days ago`;
+}
+
+// The first problem with the action form before calling admin_act (AC-040-1), or null.
+export function actionIssue({ action, targetType, note }) {
+  if (!action) return ADMIN_TEXTS.chooseAction;
+  const errors = checkAction({ action, targetType, note });
+  if (errors.includes('action')) return ADMIN_TEXTS.result.action;
+  if (errors.includes('note')) return ADMIN_TEXTS.noteNeeded;
+  return null;
+}
+
+// What admin_act answered, as the text the panel shows.
+export function actResultText(result, error) {
+  if (error || !result) return ADMIN_TEXTS.result.failed;
+  if (result.ok) return ADMIN_TEXTS.done(Number(result.closed) || 1);
+  return ADMIN_TEXTS.result[result.reason] ?? ADMIN_TEXTS.result.failed;
+}

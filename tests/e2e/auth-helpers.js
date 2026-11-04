@@ -67,6 +67,9 @@ function expect200(res, what) {
 // The example host in supabase/seed.sql, who can sign in only in the local and CI auth (UC-023).
 export const SEED_HOST = { email: 'seed-host@example.test', password: 'seed-host-local-only' };
 
+// The example admin in supabase/seed.sql, local and CI only (UC-040).
+export const SEED_ADMIN = { email: 'seed-admin@example.test', password: 'seed-admin-local-only' };
+
 // UC-004 through the API, as the person with this session would send it from the detail.
 export async function startConversation(request, session, listingId, body, stayFrom, stayTo) {
   const res = await request.post(`${local.url}/rest/v1/rpc/start_conversation`, {

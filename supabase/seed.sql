@@ -32,6 +32,23 @@ insert into public.profiles (id, display_name, base_suburb_id, terms_version, te
 values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 90002, 'seed', now(), 10)
 on conflict (id) do nothing;
 
+-- An admin for the moderation E2E (UC-040), local and CI only, with the password in
+-- tests/e2e/auth-helpers.js (SEED_ADMIN). In production the first admin is set by hand (BR-ADM-004).
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+values ('00000000-0000-0000-0000-00000000ad01', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+        'seed-admin@example.test', extensions.crypt('seed-admin-local-only', extensions.gen_salt('bf')), now(),
+        '{"provider":"email","providers":["email"],"role":"admin"}', '{}', now(), now(), '', '', '', '', '', '', '', '')
+on conflict (id) do nothing;
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+values ('00000000-0000-0000-0000-00000000ad01', '00000000-0000-0000-0000-00000000ad01', '00000000-0000-0000-0000-00000000ad01',
+        '{"sub":"00000000-0000-0000-0000-00000000ad01","email":"seed-admin@example.test","email_verified":true}', 'email', now(), now(), now())
+on conflict do nothing;
+insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
+values ('00000000-0000-0000-0000-00000000ad01', 'Seed Admin', 90001, 'seed', now())
+on conflict (id) do nothing;
+
 do $$
 declare
   today date := (now() at time zone 'Australia/Perth')::date;
