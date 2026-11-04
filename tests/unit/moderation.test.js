@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   ACTIONS_BY_TARGET, canReadConversation, checkAction, checkReport, REPORT_REASONS, REPORT_THANKS, reportQueue,
   REPORT_TEXTS, reportErrorText, reportIssue, ADMIN_TEXTS, actResultText, actionIssue, adminActions, adminQueue, ageText, isAdmin,
+  SEARCH_TEXTS, listingLine, logEntries, moderateResultText, personLine, recordActionIssue, recordActions, searchIssue, statusLabel,
 } from '../../core/moderation.js';
 
 test('BR-TRU-005 a report has a reason from the list and up to 500 characters of detail', () => {
@@ -122,4 +123,47 @@ test('UC-040 the panel says what admin_act did', () => {
   assert.equal(actResultText({ ok: false, reason: 'note' }), ADMIN_TEXTS.result.note);
   assert.equal(actResultText({ ok: false, reason: 'closed' }), ADMIN_TEXTS.result.closed);
   assert.equal(actResultText(null, { message: 'Failed to fetch' }), ADMIN_TEXTS.result.failed);
+});
+
+test('UC-041 the search needs at least 2 characters', () => {
+  assert.equal(searchIssue(' a '), SEARCH_TEXTS.tooShort);
+  assert.equal(searchIssue('Pe'), null);
+});
+
+test('UC-041 a record offers each action or its undo, never on oneself', () => {
+  assert.deepEqual(recordActions('listing', { status: 'active' }), ['hide_listing', 'warn_user']);
+  assert.deepEqual(recordActions('listing', { status: 'hidden' }), ['unhide_listing', 'warn_user']);
+  assert.deepEqual(recordActions('user', { status: 'active', is_admin: false }), ['warn_user', 'suspend_user', 'grant_admin']);
+  assert.deepEqual(recordActions('user', { status: 'suspended', is_admin: true }), ['warn_user', 'unsuspend_user', 'revoke_admin']);
+  assert.deepEqual(recordActions('user', { status: 'active', is_admin: true, is_me: true }), ['warn_user']);
+  assert.deepEqual(recordActions('conversation', {}), []);
+});
+
+test('BR-ADM-001 a record action needs one of its actions and a note', () => {
+  const allowed = ['warn_user', 'suspend_user'];
+  assert.equal(recordActionIssue({ action: '', note: 'Fine note' }, allowed), ADMIN_TEXTS.chooseAction);
+  assert.equal(recordActionIssue({ action: 'grant_admin', note: 'Fine note' }, allowed), ADMIN_TEXTS.chooseAction);
+  assert.equal(recordActionIssue({ action: 'warn_user', note: 'no' }, allowed), ADMIN_TEXTS.noteNeeded);
+  assert.equal(recordActionIssue({ action: 'warn_user', note: 'Rude to a host' }, allowed), null);
+});
+
+test('Issue #28 the log shows each action with its date, author and note, newest first', () => {
+  const log = [
+    { id: 'a', action: 'suspend_user', note: 'Threats', created_at: '2026-11-01T02:00:00Z', admin_name: 'Una' },
+    { id: 'b', action: 'unsuspend_user', note: 'Resolved', created_at: '2026-11-03T02:00:00Z', admin_name: null },
+  ];
+  assert.deepEqual(logEntries(log, (d) => d.toISOString().slice(0, 10)), [
+    { id: 'b', action: 'Lift suspension', by: 'Deleted admin', when: '2026-11-03', note: 'Resolved' },
+    { id: 'a', action: 'Suspend account', by: 'Una', when: '2026-11-01', note: 'Threats' },
+  ]);
+});
+
+test('UC-041 result lines and texts', () => {
+  assert.equal(personLine({ email: 'ana@example.com', suburb: 'Perth' }), 'ana@example.com · Perth');
+  assert.equal(listingLine({ suburb: 'Baldivis', owner_name: 'Sam' }), 'Baldivis · Host: Sam');
+  assert.equal(listingLine({ suburb: 'Baldivis', owner_name: null }), 'Baldivis · Host: deleted');
+  assert.equal(statusLabel('hidden'), 'Hidden');
+  assert.equal(moderateResultText({ ok: true }), SEARCH_TEXTS.done);
+  assert.equal(moderateResultText({ ok: false, reason: 'self' }), 'You can’t do that to your own account.');
+  assert.equal(moderateResultText(null, { message: 'x' }), SEARCH_TEXTS.result.failed);
 });
