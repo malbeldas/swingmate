@@ -453,3 +453,8 @@ label.btn { cursor: pointer; }
 .save-btn[aria-pressed="true"] .heart { fill: currentColor; }
 .result-actions { align-items: center; }
 .detail-price .save-wrap { margin-top: var(--s-2); }
+
+/* UC-035: Privacy and data in My account. */
+.open-delete { justify-self: start; align-self: flex-start; padding-left: 0; }
+.delete-confirm .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.reauth { padding: var(--s-3); border-radius: var(--r-sm); background: var(--cream); }
