@@ -147,7 +147,7 @@ test('UC-050 A1 new message emails can be switched off, and it stays off', async
   await expect(main(page).locator('#notify-status')).toHaveText('Saved.');
 });
 
-test('UC-024 a host chooses who can message them and it stays; a seeker never sees the choice', async ({ page, request }, testInfo) => {
+test('UC-024 a host chooses who can message them and it stays; a seeker never sees the choice', async ({ page, browser, request }, testInfo) => {
   const seekerEmail = uniqueEmail(testInfo, 'rule-seek');
   await createMember(request, seekerEmail);
   await logInOnAccountPage(page, seekerEmail);
@@ -160,13 +160,16 @@ test('UC-024 a host chooses who can message them and it stays; a seeker never se
     data: { is_hosting: true },
   });
   expect(res.ok()).toBe(true);
-  await page.locator('#account').getByRole('button', { name: 'Log out' }).click();
-  await logInOnAccountPage(page, email);
-  const section = main(page).locator('#who-can-message');
+  // The host signs in on a browser of their own, at the same screen size.
+  const context = await browser.newContext({ baseURL: new URL(page.url()).origin, viewport: page.viewportSize() });
+  const host = await context.newPage();
+  await logInOnAccountPage(host, email);
+  const section = main(host).locator('#who-can-message');
   await expect(section.getByRole('heading', { name: 'Who can message you' })).toBeVisible();
   await expect(section.getByLabel('Anyone with a verified email')).toBeChecked();
   await section.getByLabel('Only people with a verified phone').check();
-  await expect(main(page).locator('#message-rule-status')).toHaveText('Saved. It applies to all your listings.');
-  await page.reload();
-  await expect(main(page).locator('#who-can-message').getByLabel('Only people with a verified phone')).toBeChecked();
+  await expect(main(host).locator('#message-rule-status')).toHaveText('Saved. It applies to all your listings.');
+  await host.reload();
+  await expect(main(host).locator('#who-can-message').getByLabel('Only people with a verified phone')).toBeChecked();
+  await context.close();
 });
