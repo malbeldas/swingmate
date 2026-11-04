@@ -164,7 +164,7 @@ test('AC-002-5 the first-visit strip goes away for good once closed, without per
   await page.goto(`/search.html?place=${BALDIVIS}`);
   const strip = page.locator('#first-visit');
   await expect(strip).toBeVisible();
-  await expect(strip.locator('li')).toHaveCount(3);
+  await expect(strip.locator('li')).toHaveText(['Add your roster', 'See who fits', 'Message the host. You only need an account when you send.']);
   await strip.getByRole('button', { name: 'Close how it works' }).click();
   await expect(strip).toBeHidden();
   await page.reload();
@@ -172,6 +172,18 @@ test('AC-002-5 the first-visit strip goes away for good once closed, without per
   await expect(strip).toBeHidden();
   const stored = await page.evaluate(() => ({ ...localStorage }));
   expect(stored).toEqual({ 'swingmate.firstVisitDone': '1' });
+});
+
+test('AC-002-5 UC-002 A0 "Add your roster" in the strip opens the roster picker, and saving one hides the strip', async ({ page }) => {
+  await page.goto(`/search.html?place=${BALDIVIS}`);
+  const strip = page.locator('#first-visit');
+  await strip.getByRole('button', { name: 'Add your roster' }).click();
+  await expect(page.locator('#roster-picker')).toBeVisible();
+  await page.locator('#roster-picker').getByRole('button', { name: 'Save roster' }).click();
+  await expect(strip).toBeHidden();
+  await page.reload();
+  await expect(cards(page).first()).toBeVisible();
+  await expect(strip).toBeHidden();
 });
 
 test('AC-003-1 searching never brings the exact address, the host email or phone to the browser', async ({ page }) => {

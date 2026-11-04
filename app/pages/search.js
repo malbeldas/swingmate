@@ -332,7 +332,9 @@ async function init() {
   form.addEventListener('submit', submit);
   form.radius.addEventListener('change', () => { if (state.place) submit(); });
   document.getElementById('clear-dates').addEventListener('click', () => { form.checkIn.value = ''; form.checkOut.value = ''; submit(); });
-  document.getElementById('roster-btn').addEventListener('click', () => openRosterPicker({ roster: state.roster, today: today(), onSave: storeRoster }));
+  const pickRoster = () => openRosterPicker({ roster: state.roster, today: today(), onSave: storeRoster });
+  document.getElementById('roster-btn').addEventListener('click', pickRoster);
+  document.getElementById('first-visit-roster').addEventListener('click', pickRoster); // UC-002 A0
   filtersBox.addEventListener('change', readFilters);
   // Filters start open beside the list on wide screens and folded above it on phones.
   filtersBox.open = matchMedia('(min-width: 1024px)').matches;

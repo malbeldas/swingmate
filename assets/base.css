@@ -195,6 +195,7 @@ label.btn { cursor: pointer; }
 /* Results (UC-001, design-system.md §6 "Card de aviso" and §7) */
 .first-visit { padding: var(--s-4); gap: var(--s-2); }
 .first-visit-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.first-visit .steps .btn-text { padding: var(--s-2) 0; margin-block: calc(-1 * var(--s-2)); min-height: 0; font-size: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .search-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); align-items: end; }
 .search-bar .search-place, .search-bar .search-actions, .search-bar .search-hint, .search-bar .search-dates-error { grid-column: 1 / -1; }
 .search-place > .field { align-self: stretch; }
