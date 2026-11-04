@@ -430,7 +430,7 @@ export async function openAuthSheet({ step = 'signup', user = null, error = '', 
   if (!dialog) build();
   onDoneCallback = onDone;
   state = {
-    step, email: '', error, resent: false, sent: false, intent: 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null, source,
+    step, email: '', error, resent: false, sent: false, intent: source === 'list_place' ? 'hosting' : 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null, source,
   };
   if (step === 'signup' && source) trackEvent('auth_gate_opened', { source });
   if (step === 'profile' && user) {

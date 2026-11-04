@@ -4,9 +4,10 @@ import { listingNights } from '../../core/availability.js';
 import { makeRoster } from '../../core/roster.js';
 import { REPHRASE_RULES } from '../../core/text-checks.js';
 import {
-  calendarCheckDue, calendarUpdatedText, canPublish, checkPhotoFile, conversationView, firstIncompleteStep,
-  LISTING_LIMIT, listingLimitReached, listingView, PHOTOS_MAX, publishIssues, resizeDimensions, stepIssues,
-  stepLabel, TEXTS, TOTAL_STEPS,
+  calendarCheckDue, calendarUpdatedText, canPublish, checkPhotoFile, conversationView, exceptionsToRows, extrasLabels,
+  FEATURES, firstIncompleteStep, LISTING_LIMIT, listingFromRow, listingLimitReached, listingPhotoPath, listingToRow,
+  listingView, nextBlockedText, nextPhotoPosition, PERKS, PHOTOS_MAX, publishIssues, publishResultText, rangesToRows,
+  resizeDimensions, saveIssues, STEP_TIPS, STEP_TITLES, stepIssues, stepLabel, TEXTS, toggleNight, TOTAL_STEPS, WIZARD_TEXTS,
 } from '../../core/listing.js';
 
 const ROSTER = makeRoster({ daysOn: 14, daysOff: 7, anchor: '2026-11-02' });
@@ -205,4 +206,108 @@ test('AC-003-5 the detail shows "Calendar updated N days ago"', () => {
 test('BR-AVL-006 the calendar check is due after 30 days without changes', () => {
   assert.equal(calendarCheckDue('2026-10-04', '2026-11-02'), false);
   assert.equal(calendarCheckDue('2026-10-03', '2026-11-02'), true);
+});
+
+// ----- The wizard page (#13) -------------------------------------------------------------------
+
+test('AC-020-7 each of the 5 steps has a title and a tip', () => {
+  assert.equal(STEP_TITLES.length, TOTAL_STEPS);
+  assert.equal(STEP_TIPS.length, TOTAL_STEPS);
+  for (const tip of STEP_TIPS) assert.ok(tip.length > 20 && tip.length < 160, tip);
+  assert.equal(STEP_TITLES[0], 'Where is it and what are you offering?');
+});
+
+// What my_listing returns for a draft saved half way (supabase/migrations/20261117090000_publish_listing.sql).
+const SAVED = {
+  listing: {
+    id: '0b6e7a7c-6f5e-4d1e-9a40-2c8f3f6f2a11', status: 'draft', title: 'Room in the hills', suburb_id: 90002,
+    place_type: 'private_room', bathroom: 'own', weekly_price: 260, bills_included: true, bond: 520, furnished: true,
+    features: ['pool'], perks: ['airport_lift'], custom_items: ['Gym'], availability_type: 'ranges', accuracy_declared_at: null,
+  },
+  address: { line: '3 Hidden Rd', lat: -32.33, lng: 115.83 },
+  photos: [{ id: 'p1', path: 'x/1.jpg', position: 0, width: 1600, height: 1200 }],
+  ranges: [{ start_night: '2026-12-01', end_exclusive: '2026-12-15' }],
+  exceptions: [{ night: '2026-12-05', available: false }],
+};
+
+test('UC-020 A1 "Save and finish later" comes back with what was saved', () => {
+  const l = listingFromRow(SAVED);
+  assert.equal(l.title, 'Room in the hills');
+  assert.deepEqual(l.address, SAVED.address);
+  assert.deepEqual(l.ranges, [{ startNight: '2026-12-01', endExclusive: '2026-12-15' }]);
+  assert.deepEqual(l.exceptions, [{ night: '2026-12-05', available: false }]);
+  assert.equal(l.accuracyDeclared, false);
+  assert.equal(firstIncompleteStep(l, VERIFIED), 3, 'a draft with one photo goes back to step 3');
+  // And the same columns go back to the base.
+  const row = listingToRow(l);
+  assert.equal(row.title, 'Room in the hills');
+  assert.equal(row.available_from, null);
+  assert.deepEqual(row.features, ['pool']);
+  assert.ok(!('status' in row) && !('accuracy_declared_at' in row) && !('public_lat' in row), 'P-09 BR-LST-004 never the status, the statement nor the circle');
+  assert.deepEqual(rangesToRows('L', l), [{ listing_id: 'L', start_night: '2026-12-01', end_exclusive: '2026-12-15' }]);
+  assert.deepEqual(exceptionsToRows('L', l), [{ listing_id: 'L', night: '2026-12-05', available: false }]);
+});
+
+test('listingToRow drops empty text, unknown chips and ranges of another rule', () => {
+  const row = listingToRow({ title: '  ', otherRules: '', features: ['pool', 'helipad'], perks: ['spa'], customItems: [' Gym ', ''], availabilityType: 'from_date', availableFrom: '2026-12-01' });
+  assert.equal(row.title, null);
+  assert.equal(row.other_rules, null);
+  assert.deepEqual(row.features, ['pool']);
+  assert.deepEqual(row.perks, []);
+  assert.deepEqual(row.custom_items, ['Gym']);
+  assert.equal(row.available_from, '2026-12-01');
+  assert.deepEqual(rangesToRows('L', { availabilityType: 'from_date', ranges: [{ startNight: '2026-12-01', endExclusive: '2026-12-02' }] }), []);
+});
+
+test('UC-020 A1 a draft saves with empty fields but not with a wrong value', () => {
+  assert.deepEqual(saveIssues({}, 1), []);
+  assert.deepEqual(saveIssues({}, 3), []);
+  assert.deepEqual(codes(saveIssues({ title: 'Hi' }, 3)), ['titleLength']);
+  assert.deepEqual(codes(saveIssues({ otherRules: 'x'.repeat(201) }, 3)), ['otherRulesTooLong']);
+  assert.deepEqual(codes(saveIssues({ weeklyPrice: 9000 }, 2)), ['weeklyPriceRange']);
+});
+
+test('UC-020 E1 Next says what is missing', () => {
+  assert.equal(nextBlockedText({}, 1), TEXTS.suburbId);
+  assert.equal(nextBlockedText(complete(), 1), null);
+  assert.equal(nextBlockedText(complete({ photos: [{}] }), 3), 'Add at least 3 photos (2 more)');
+});
+
+test('BR-AVL-002 tapping a night blocks it, tapping again opens it with no exception left', () => {
+  const l = complete({ availabilityType: 'from_date', availableFrom: '2026-12-01', roster: null, exceptions: [] });
+  const today = '2026-11-20';
+  const blocked = toggleNight(l, '2026-12-05', today);
+  assert.deepEqual(blocked, [{ night: '2026-12-05', available: false }]);
+  assert.equal(listingNights({ ...l, exceptions: blocked }, '2026-12-04', 3, today), '101');
+  assert.deepEqual(toggleNight({ ...l, exceptions: blocked }, '2026-12-05', today), []);
+  // A night the rule leaves closed opens with an exception.
+  assert.deepEqual(toggleNight(l, '2026-11-25', today), [{ night: '2026-11-25', available: true }]);
+});
+
+test('AC-020-3 from a 14:7 roster with the defaults the listing is free 13 nights per cycle', () => {
+  const l = complete({ availabilityType: 'roster', roster: ROSTER });
+  const nights = listingNights(l, '2026-11-02', 21, '2026-11-02');
+  assert.equal([...nights].filter((n) => n === '1').length, 13);
+});
+
+test('UC-020 E4 what publish_listing answers is shown in words', () => {
+  assert.equal(publishResultText({ ok: true }), null);
+  assert.equal(publishResultText({ ok: false, reason: 'limit' }), TEXTS.limit);
+  assert.equal(publishResultText({ ok: false, reason: 'missing', missing: ['verified_contact'] }), TEXTS.phoneVerified);
+  assert.equal(publishResultText({ ok: false, reason: 'missing', missing: ['accuracy_declared_at'] }), TEXTS.accuracyDeclared);
+  assert.equal(publishResultText({ ok: false, reason: 'missing', missing: ['photos', 'title'] }), 'Add at least 3 photos');
+  assert.equal(publishResultText({ ok: false, reason: 'suspended' }), WIZARD_TEXTS.suspended);
+  assert.equal(publishResultText(null), WIZARD_TEXTS.saveFailed);
+});
+
+test('BR-LST-006 the detail shows features, FIFO perks and the host\'s own items as chips', () => {
+  assert.deepEqual(extrasLabels({ features: ['pool', 'nope'], perks: ['rr_only_rate'], custom_items: ['Gym'] }), ['Pool', 'R&R-only rate', 'Gym']);
+  assert.ok(Object.keys(FEATURES).length === 4 && Object.keys(PERKS).length === 3);
+});
+
+test('SEC-18 photo paths use the listing id and a uuid, positions 0 to 11', () => {
+  assert.equal(listingPhotoPath('L', 'U'), 'L/U.jpg');
+  assert.equal(nextPhotoPosition([]), 0);
+  assert.equal(nextPhotoPosition([{ position: 0 }, { position: 2 }]), 1);
+  assert.equal(nextPhotoPosition(Array.from({ length: PHOTOS_MAX }, (_, i) => ({ position: i }))), -1);
 });
