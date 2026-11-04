@@ -8,7 +8,7 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
-import { INTENTS, NOTIFY_TEXTS, TEXTS } from '../../core/account.js';
+import { INTENTS, MESSAGE_RULE_TEXTS, NOTIFY_TEXTS, TEXTS } from '../../core/account.js';
 import { formatDay, todayIn } from '../../core/dates.js';
 import { AVATAR_MAX_PX, JPEG_QUALITY, PHOTO_INPUT_TYPES, PHOTO_TEXTS, avatarPath, photoIssue, scaleToFit } from '../../core/photo.js';
 import { rosterDetailText, rosterSummaryText, rosterWeeks, rosterWithArticle } from '../../core/roster.js';
@@ -281,6 +281,34 @@ function notificationsSection(ctx) {
     status);
 }
 
+// UC-024: hosts choose who can start a conversation with them (BR-TRU-004). Saved at once.
+function messageRuleSection(ctx) {
+  const status = el('p', { class: 'small text-2', role: 'status', id: 'message-rule-status' });
+  const current = ctx.profile.message_rule ?? 'email';
+  const options = Object.entries(MESSAGE_RULE_TEXTS.options).map(([value, text]) => {
+    const radio = el('input', { type: 'radio', name: 'message-rule', value, checked: value === current });
+    radio.addEventListener('change', async () => {
+      const db = await getClient();
+      const { error } = await db.from('profiles').update({ message_rule: value }).eq('id', ctx.user.id);
+      if (error) {
+        document.querySelector(`input[name="message-rule"][value="${ctx.profile.message_rule ?? 'email'}"]`).checked = true;
+        status.textContent = MESSAGE_RULE_TEXTS.failed;
+        return;
+      }
+      ctx.profile.message_rule = value;
+      status.textContent = MESSAGE_RULE_TEXTS.saved;
+    });
+    return el('label', { class: 'check' }, radio, el('span', { class: 'stack-tight' },
+      el('span', {}, text.label),
+      el('span', { class: 'small text-2' }, text.hint)));
+  });
+  return el('section', { class: 'card stack', id: 'who-can-message', 'aria-labelledby': 'who-can-message-title' },
+    el('h2', { id: 'who-can-message-title' }, MESSAGE_RULE_TEXTS.title),
+    el('fieldset', { class: 'stack-tight plain-fieldset' },
+      el('legend', { class: 'visually-hidden' }, MESSAGE_RULE_TEXTS.title), options),
+    status);
+}
+
 // ---------------------------------------------------------------------------------------------
 
 let shownUserId = null;
@@ -298,7 +326,7 @@ async function start() {
   const db = await getClient();
   const { data: prefs } = await db.from('notification_preferences').select('new_messages').eq('user_id', user.id).maybeSingle();
   const ctx = { user, profile, roster, prefs, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
-  main.replaceChildren(profileSection(ctx), rosterSection(ctx), notificationsSection(ctx));
+  main.replaceChildren(...[profileSection(ctx), rosterSection(ctx), profile.is_hosting && messageRuleSection(ctx), notificationsSection(ctx)].filter(Boolean));
   if (location.hash === '#notifications') document.getElementById('notifications').scrollIntoView();
 }
 

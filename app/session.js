@@ -5,7 +5,7 @@ import { rosterFromRow, rosterToRow } from '../core/roster.js';
 // Placeholder until the lawyer's Terms and Privacy exist (decision-log.md Q-01, DEC-017).
 export const TERMS_VERSION = 'uat-2026-11';
 
-const PROFILE_COLUMNS = 'id, display_name, base_suburb_id, bio, photo_path, work_type, is_seeking, is_hosting, terms_accepted_at';
+const PROFILE_COLUMNS = 'id, display_name, base_suburb_id, bio, photo_path, work_type, is_seeking, is_hosting, terms_accepted_at, message_rule';
 const ROSTER_COLUMNS = 'days_on, days_off, anchor_date, fly_home_last_day, fly_out_first_day';
 
 export async function getSessionUser() {

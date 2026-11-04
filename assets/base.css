@@ -64,7 +64,7 @@ a { color: var(--navy); }
   font: inherit; font-weight: 400; color: var(--navy); background: var(--white); width: 100%;
 }
 .check { display: flex; gap: var(--s-2); align-items: flex-start; font-size: var(--t-small); }
-.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--navy); }
+.check input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--navy); }
 .controls { display: grid; gap: var(--s-3); }
 @media (min-width: 768px) { .controls { grid-template-columns: 1fr 1fr; } }
 

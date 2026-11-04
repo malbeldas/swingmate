@@ -113,3 +113,15 @@ export const NOTIFY_TEXTS = {
 export function withCaptcha(options, token) {
   return token ? { ...(options ?? {}), captchaToken: token } : { ...(options ?? {}) };
 }
+
+// UC-024 and BR-TRU-004: "Who can message you", for hosts. It applies to all their listings and
+// never closes conversations already open (AC-024-1).
+export const MESSAGE_RULE_TEXTS = {
+  title: 'Who can message you',
+  options: {
+    email: { label: 'Anyone with a verified email', hint: 'The default. Most hosts keep it.' },
+    phone: { label: 'Only people with a verified phone', hint: 'Fewer messages, but each person has proven a mobile number. Conversations already open carry on.' },
+  },
+  saved: 'Saved. It applies to all your listings.',
+  failed: 'We couldn’t save that. Try again.',
+};
