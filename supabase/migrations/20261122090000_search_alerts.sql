@@ -60,7 +60,7 @@ create trigger alerts_limit before insert or update of paused, expires_at on pub
   for each row execute function public.alerts_limit();
 
 alter table public.search_alerts enable row level security;
-alter table public.alert_deliveries enable row level security; -- no policies: only the service role
+alter table public.alert_deliveries enable row level security;
 
 -- P-13: each person reads, creates, pauses and deletes only their own. Admins don't.
 create policy "P-13 search_alerts read own" on public.search_alerts
@@ -71,6 +71,10 @@ create policy "P-13 search_alerts pause own" on public.search_alerts
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "P-13 search_alerts delete own" on public.search_alerts
   for delete to authenticated using (user_id = auth.uid());
+
+-- alert_deliveries is only for the daily run (service role): no member reads or writes it.
+create policy "alert_deliveries daily run only" on public.alert_deliveries
+  for all to anon, authenticated using (false) with check (false);
 
 revoke all on public.search_alerts from anon, authenticated;
 revoke all on public.alert_deliveries from anon, authenticated;
