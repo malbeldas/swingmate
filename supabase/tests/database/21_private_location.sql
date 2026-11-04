@@ -106,6 +106,9 @@ select ok(
   'BR-LST-004 the offsets spread over every direction and distance');
 
 -- ----- Photos in Storage (P-29) -----------------------------------------------------------------
+-- Supabase refuses a plain DELETE on storage.objects unless the Storage API marks the query as its
+-- own; set that mark so the policies are what decides, as they do behind the API.
+set local storage.allow_delete_query = 'true';
 select ok((select public from storage.buckets where id = 'listing-photos'), 'schema.md §11 listing photos are public by URL');
 select is((select file_size_limit from storage.buckets where id = 'listing-photos')::int, 5242880, 'SEC-15 up to 5 MB');
 select is((select allowed_mime_types from storage.buckets where id = 'listing-photos'), array['image/jpeg', 'image/webp'],
