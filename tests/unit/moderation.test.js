@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ACTIONS_BY_TARGET, canReadConversation, checkAction, checkReport, REPORT_REASONS, REPORT_THANKS, reportQueue,
+  REPORT_TEXTS, reportErrorText, reportIssue,
 } from '../../core/moderation.js';
 
 test('BR-TRU-005 a report has a reason from the list and up to 500 characters of detail', () => {
@@ -55,4 +56,23 @@ test('AC-034-2 and UC-040 A1 the queue groups reports of the same object, oldest
   ]);
   assert.deepEqual(queue[1].reasons, ['fake', 'scam']);
   assert.equal(queue[1].oldestAt, '2026-12-02T08:00:00Z');
+});
+
+test('UC-034 the report sheet asks for a reason first and keeps the detail under 500', () => {
+  assert.equal(reportIssue({ targetType: 'listing', reason: '', details: '' }), REPORT_TEXTS.chooseReason);
+  assert.equal(reportIssue({ targetType: 'listing', reason: 'scam', details: 'x'.repeat(501) }), REPORT_TEXTS.tooLong);
+  assert.equal(reportIssue({ targetType: 'conversation', reason: 'unsafe', details: '' }), null);
+  assert.equal(REPORT_TEXTS.thanks, 'Thanks, we’ll review this within 24 hours');
+});
+
+test('SEC-12 the 21st report of the day says to try tomorrow; anything else says try again', () => {
+  assert.equal(reportErrorText({ message: 'tooMany' }), REPORT_TEXTS.tooMany);
+  assert.equal(reportErrorText({ message: 'Failed to fetch' }), REPORT_TEXTS.failed);
+  assert.equal(reportErrorText(null), REPORT_TEXTS.failed);
+});
+
+test('BR-MSG-006 the block texts speak only to the person who blocks', () => {
+  assert.equal(REPORT_TEXTS.blockHeading('Kai'), 'Block Kai?');
+  assert.match(REPORT_TEXTS.blockBody, /won’t be told/);
+  assert.equal(REPORT_TEXTS.blockedNote('Kai'), 'You blocked Kai. They can’t message you.');
 });

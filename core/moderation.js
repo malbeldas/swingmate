@@ -62,3 +62,42 @@ export function reportQueue(reports, now) {
     .map((g) => ({ ...g, count: g.reportIds.length, overdue: new Date(now) - new Date(g.oldestAt) >= limit }))
     .sort((a, b) => new Date(a.oldestAt) - new Date(b.oldestAt));
 }
+
+// UC-034: the texts of the report sheet and of blocking (en-AU). BR-MSG-006: nothing here tells the
+// blocked person; these are only shown to the person who reports or blocks.
+export const REPORT_TEXTS = {
+  reportListing: 'Report this listing',
+  report: 'Report',
+  block: 'Block',
+  unblock: 'Unblock',
+  heading: { listing: 'Report this listing', user: 'Report this person', conversation: 'Report this conversation' },
+  reasonLegend: 'What’s wrong?',
+  detailsLabel: 'Anything else we should know? (optional)',
+  alsoBlock: (name) => `Also block ${name}`,
+  send: 'Send report',
+  sending: 'Sending…',
+  thanks: REPORT_THANKS,
+  close: 'Close',
+  chooseReason: 'Choose a reason.',
+  tooLong: `Keep it under ${REPORT_DETAILS_MAX} characters.`,
+  tooMany: 'You’ve sent a lot of reports today. Try again tomorrow.',
+  failed: 'We couldn’t send your report. Try again.',
+  blockHeading: (name) => `Block ${name}?`,
+  blockBody: 'They won’t be able to message you, and they won’t be told. You can unblock them from this conversation.',
+  blockFailed: 'We couldn’t do that. Try again.',
+  cancel: 'Cancel',
+  blockedNote: (name) => `You blocked ${name}. They can’t message you.`,
+};
+
+// The first problem with the report before sending, as a text for the sheet, or null.
+export function reportIssue(report) {
+  const errors = checkReport(report);
+  if (errors.includes('reason')) return REPORT_TEXTS.chooseReason;
+  if (errors.includes('details')) return REPORT_TEXTS.tooLong;
+  return null;
+}
+
+// What the database said when a report was refused (SEC-12 raises 'tooMany').
+export function reportErrorText(error) {
+  return /\btooMany\b/.test(String(error?.message ?? '')) ? REPORT_TEXTS.tooMany : REPORT_TEXTS.failed;
+}

@@ -326,3 +326,13 @@ label.btn { cursor: pointer; }
 @media (max-width: 479px) {
   .site-header .account:not([hidden]) { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
 }
+
+/* UC-034: report and block. --danger is for reporting (design-system.md). */
+.btn-danger { background: var(--danger); color: var(--white); border: 0; }
+.plain-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.plain-fieldset legend { margin-bottom: var(--s-2); padding: 0; }
+.report-link { color: var(--danger); justify-self: start; align-self: flex-start; padding-left: 0; }
+.conversation-tools { display: flex; flex-wrap: wrap; gap: var(--s-1); margin-top: calc(-1 * var(--s-2)); }
+.conversation-tools .btn-text { padding-left: 0; }
+.conversation-tools .report-link { padding-left: var(--s-3); }
+.blocked-note { background: var(--cream); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-weight: 600; }
