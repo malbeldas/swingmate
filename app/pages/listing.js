@@ -9,6 +9,7 @@ import { openRosterPicker } from '../ui/roster-picker.js';
 import { about, calendar, gallery, locationSection } from '../ui/listing-detail.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { openReportSheet } from '../ui/report-sheet.js';
+import { loadSaved, saveButton } from '../ui/save-button.js';
 import { REPORT_TEXTS } from '../../core/moderation.js';
 import {
   deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, profileComplete, saveOwnRoster,
@@ -254,7 +255,8 @@ async function render() {
       el('div', { class: 'stack' },
         el('div', { class: 'detail-head' },
           el('div', { class: 'stack-tight' }, el('h1', {}, l.title), el('span', { class: 'small text-2' }, subtitle(l))),
-          el('div', { class: 'detail-price' }, el('strong', {}, `$${l.weekly_price}`), el('span', { class: 'small text-2' }, priceLine(l)))),
+          el('div', { class: 'detail-price' }, el('strong', {}, `$${l.weekly_price}`), el('span', { class: 'small text-2' }, priceLine(l)),
+            !view.editButton && saveButton(l.id))), // UC-005, not on the host's own listing
         fitBlock(view, need),
         about(view, l),
         locationSection(l)),
@@ -284,6 +286,7 @@ async function init() {
   initEvents('listing');
   const { data: user } = await getSessionUser();
   state.user = user;
+  const savedReady = loadSaved(user); // UC-005
   state.roster = user ? (await getOwnRoster(user.id)).data : readVisitorRoster();
   // From the Monday of the check-in week, so the calendar's first row is real nights, not blanks.
   const { data, error } = await db.rpc('get_listing', { p_id: listingId, p_start: dates.checkIn ? mondayOf(dates.checkIn) : null });
@@ -301,10 +304,13 @@ async function init() {
   const saved = readDraft(listingId);
   box.draft = saved ?? { text: '', checkIn: dates.checkIn ?? '', checkOut: dates.checkOut ?? '', pending: false };
   box.confirm = Boolean(saved?.pending && user);
+  await savedReady;
   await render();
   trackEvent('listing_viewed', { listing_id: listingId, ...(state.fitClass && { fit_class: state.fitClass }) });
   // Logging in or out from the header changes who the box sends as.
   onAuthChange((event, who) => {
+    if (event === 'SIGNED_IN' && who && who.id !== state.user?.id) loadSaved(who);
+    if (event === 'SIGNED_OUT' && state.user) loadSaved(null);
     if (event === 'SIGNED_IN' && who && who.id !== state.user?.id) {
       if (box.draft.pending) signedIn(who);
       else { state.user = who; renderBox(); }

@@ -6,8 +6,9 @@ import { initEvents, trackEvent } from '../events.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openRosterPicker } from '../ui/roster-picker.js';
+import { loadSaved, saveButton } from '../ui/save-button.js';
 import { attachSuburbList, getPlace, resolveSuburb } from '../suburbs.js';
-import { deleteOwnRoster, getOwnRoster, getSessionUser, saveOwnRoster } from '../session.js';
+import { deleteOwnRoster, getOwnRoster, getSessionUser, onAuthChange, saveOwnRoster } from '../session.js';
 import { clearVisitorRoster, readVisitorRoster, writeVisitorRoster } from '../visitor-roster.js';
 import { addDays, todayIn } from '../../core/dates.js';
 import { needFor } from '../../core/fit.js';
@@ -255,7 +256,9 @@ function card(item) {
           }))))),
       el('div', { class: 'result-bottom' },
         el('span', { class: 'small' }, t.line),
-        el('a', { class: 'btn btn-secondary btn-sm', href: listingHref(item) }, 'View home'))));
+        el('div', { class: 'cta-row result-actions' },
+          saveButton(item.id), // UC-005
+          el('a', { class: 'btn btn-secondary btn-sm', href: listingHref(item) }, 'View home')))));
 }
 
 function emptyState(view) {
@@ -321,6 +324,11 @@ async function init() {
 
   const { data: user } = await getSessionUser();
   state.user = user;
+  loadSaved(user); // UC-005: the hearts of this person's saved homes
+  onAuthChange((event, who) => {
+    if (event === 'SIGNED_IN' && who?.id !== state.user?.id) { state.user = who; loadSaved(who); }
+    if (event === 'SIGNED_OUT' && state.user) { state.user = null; loadSaved(null); }
+  });
   state.roster = user ? (await getOwnRoster(user.id)).data : readVisitorRoster();
   renderRosterButton();
 

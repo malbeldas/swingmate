@@ -1,12 +1,13 @@
-// My account: profile (UC-032), my places (UC-022), saved roster (BR-ROS-006, AC-002-4) and notifications (BR-MAIL-001).
-// Texts from the prototype's account screen (frontend-migration.md). Other sections (saved homes,
-// alerts, privacy) arrive with their own issues.
+// My account: profile (UC-032), my places (UC-022), saved roster (BR-ROS-006, AC-002-4), saved homes
+// (UC-005) and notifications (BR-MAIL-001). Texts from the prototype's account screen
+// (frontend-migration.md). Other sections (alerts, privacy) arrive with their own issues.
 import { initEvents } from '../events.js';
 import { getClient } from '../db.js';
 import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
 import { openRosterPicker, rosterLegend, weekGrid } from '../ui/roster-picker.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { loadPlaces, placesSection } from '../ui/my-places.js';
+import { loadSavedHomes, savedSection } from '../ui/saved-homes.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
@@ -327,14 +328,15 @@ async function start() {
   }
   const db = await getClient();
   const { data: prefs } = await db.from('notification_preferences').select('new_messages').eq('user_id', user.id).maybeSingle();
-  const { rows: listings } = await loadPlaces();
-  const ctx = { user, profile, roster, prefs, listings, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
+  const [{ rows: listings }, { rows: saved }] = await Promise.all([loadPlaces(), loadSavedHomes()]);
+  const ctx = { user, profile, roster, prefs, listings, saved, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
   // UC-022: "My places" for hosts, and for anyone who already has a listing or a draft.
   const hosting = profile.is_hosting || listings.length > 0;
   main.replaceChildren(...[
-    profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), hosting && messageRuleSection(ctx), notificationsSection(ctx),
+    profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), savedSection(ctx), hosting && messageRuleSection(ctx),
+    notificationsSection(ctx),
   ].filter(Boolean));
-  if (['#notifications', '#listings'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+  if (['#notifications', '#listings', '#saved'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }
 
 async function init() {
