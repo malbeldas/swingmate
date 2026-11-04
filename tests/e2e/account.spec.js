@@ -1,7 +1,7 @@
 // UC-032 (profile) and AC-002-4 (visitor roster) against the local Supabase, with Storage for the
 // photo. Needs `supabase start` and `npm run local:config`, which CI runs before Playwright.
 import { test, expect } from '@playwright/test';
-import { PASSWORD, codeFor, createMember, requireLocalSupabase, sheet, uniqueEmail } from './auth-helpers.js';
+import { PASSWORD, codeFor, createMember, local, requireLocalSupabase, sheet, uniqueEmail } from './auth-helpers.js';
 
 test.beforeAll(requireLocalSupabase);
 
@@ -145,4 +145,31 @@ test('UC-050 A1 new message emails can be switched off, and it stays off', async
   await expect(main(page).getByLabel('Email me when I get a new message')).not.toBeChecked();
   await main(page).getByLabel('Email me when I get a new message').check();
   await expect(main(page).locator('#notify-status')).toHaveText('Saved.');
+});
+
+test('UC-024 a host chooses who can message them and it stays; a seeker never sees the choice', async ({ page, browser, request }, testInfo) => {
+  const seekerEmail = uniqueEmail(testInfo, 'rule-seek');
+  await createMember(request, seekerEmail);
+  await logInOnAccountPage(page, seekerEmail);
+  await expect(main(page).locator('#who-can-message')).toHaveCount(0);
+
+  const email = uniqueEmail(testInfo, 'rule-host');
+  const session = await createMember(request, email);
+  const res = await request.patch(`${local.url}/rest/v1/profiles?id=eq.${session.user.id}`, {
+    headers: { apikey: local.anonKey, authorization: `Bearer ${session.access_token}`, 'content-type': 'application/json' },
+    data: { is_hosting: true },
+  });
+  expect(res.ok()).toBe(true);
+  // The host signs in on a browser of their own, at the same screen size.
+  const context = await browser.newContext({ baseURL: new URL(page.url()).origin, viewport: page.viewportSize() });
+  const host = await context.newPage();
+  await logInOnAccountPage(host, email);
+  const section = main(host).locator('#who-can-message');
+  await expect(section.getByRole('heading', { name: 'Who can message you' })).toBeVisible();
+  await expect(section.getByLabel('Anyone with a verified email')).toBeChecked();
+  await section.getByLabel('Only people with a verified phone').check();
+  await expect(main(host).locator('#message-rule-status')).toHaveText('Saved. It applies to all your listings.');
+  await host.reload();
+  await expect(main(host).locator('#who-can-message').getByLabel('Only people with a verified phone')).toBeChecked();
+  await context.close();
 });
