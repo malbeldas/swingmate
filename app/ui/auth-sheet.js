@@ -4,6 +4,7 @@
 // The sheet opens over the current page and closes there, so the person stays where they were
 // (AC-030-3). Google returns to the same URL (redirectTo = current page).
 import { getClient } from '../db.js';
+import { CaptchaBlocked, captchaToken } from '../captcha.js';
 import { TERMS_VERSION, getOwnProfile, getOwnRoster, profileComplete, saveOwnRoster } from '../session.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
 import { rosterWithArticle } from '../../core/roster.js';
@@ -11,6 +12,7 @@ import { formatDay } from '../../core/dates.js';
 import { attachSuburbList, resolveSuburb } from '../suburbs.js';
 import {
   INTENTS, PASSWORD_MIN, TEXTS, authErrorText, cleanCode, intentFlags, isEmail, passwordHint, resetSentText, signupIssues,
+  withCaptcha,
 } from '../../core/account.js';
 import { TEXTS as PROFILE_TEXTS, profileIssues, DISPLAY_NAME_MAX } from '../../core/trust.js';
 
@@ -67,6 +69,18 @@ function go(step, patch = {}) {
 
 function setBusy(busy) {
   for (const control of dialog.querySelectorAll('button, input')) control.disabled = busy;
+}
+
+// INT-004: a fresh Turnstile token for one auth call, as the options supabase-js takes. Returns
+// null (after showing the error on `step`) when the check can't run, so the caller stops there.
+async function authOptions(step, fields, options) {
+  try {
+    return withCaptcha(options, await captchaToken(dialog.querySelector('.sheet-body') ?? dialog));
+  } catch (err) {
+    if (!(err instanceof CaptchaBlocked)) throw err;
+    go(step, { ...fields, error: TEXTS.captchaBlocked });
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -257,8 +271,10 @@ async function signUpWithEmail(emailValue, password) {
   const issues = signupIssues({ email, password });
   if (issues.length) return go('signup', { email, error: TEXTS[issues[0]] });
   setBusy(true);
+  const options = await authOptions('signup', { email }, { emailRedirectTo: location.href });
+  if (!options) return;
   const db = await getClient();
-  const { error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: location.href } });
+  const { error } = await db.auth.signUp({ email, password, options });
   if (error) return go('signup', { email, error: authErrorText(error) });
   go('verify', { email, resent: false });
 }
@@ -273,8 +289,10 @@ async function verifyCode(token) {
 }
 
 async function resendCode() {
+  const options = await authOptions('verify', {}, {});
+  if (!options) return;
   const db = await getClient();
-  const { error } = await db.auth.resend({ type: 'signup', email: state.email });
+  const { error } = await db.auth.resend({ type: 'signup', email: state.email, options });
   go('verify', { resent: !error, error: error ? authErrorText(error) : '' });
 }
 
@@ -282,10 +300,14 @@ async function logInWithEmail(emailValue, password) {
   const email = emailValue.trim();
   if (!email || !password) return go('login', { email, error: TEXTS.credentials });
   setBusy(true);
+  const options = await authOptions('login', { email }, {});
+  if (!options) return;
   const db = await getClient();
-  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  const { data, error } = await db.auth.signInWithPassword({ email, password, options });
   if (error?.code === 'email_not_confirmed') {
-    await db.auth.resend({ type: 'signup', email });
+    const resendOptions = await authOptions('login', { email }, {});
+    if (!resendOptions) return;
+    await db.auth.resend({ type: 'signup', email, options: resendOptions });
     return go('verify', { email, resent: true });
   }
   if (error) return go('login', { email, error: authErrorText(error) });
@@ -296,8 +318,10 @@ async function sendResetLink(emailValue) {
   const email = emailValue.trim();
   if (!isEmail(email)) return go('forgot', { email, error: TEXTS.emailInvalid });
   setBusy(true);
+  const options = await authOptions('forgot', { email }, {});
+  if (!options) return;
   const db = await getClient();
-  const { error } = await db.auth.resetPasswordForEmail(email);
+  const { error } = await db.auth.resetPasswordForEmail(email, options);
   // AC-031-1: an answer from Supabase Auth, even a refusal such as the 1-per-minute limit (SEC-08),
   // shows the same words, so the screen never tells whether the email has an account. Only a
   // failure to reach the server shows an error.

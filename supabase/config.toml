@@ -216,6 +216,9 @@ token_verifications = 150
 web3 = 30
 
 # Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# INT-004: off locally and in CI (integrations-captcha.md, "Modo local"). Production turns on
+# Turnstile in the dashboard (Auth > Attack Protection) with the secret; the site key goes in
+# app/config.js. Without a site key the web sends no token.
 # [auth.captcha]
 # enabled = true
 # provider = "hcaptcha"

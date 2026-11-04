@@ -1,9 +1,10 @@
 // infrastructure.md §1: the host picks the database. Local hosts read app/config.local.json
 // (written by `npm run local:config`); any other host uses production.
 
-// Public values of swingmate-prod (project URL and anon key are meant to be public). Empty
-// until the project exists; while empty, the site works without accounts.
-const PRODUCTION = { url: '', anonKey: '' };
+// Public values of swingmate-prod (project URL, anon key and Turnstile site key are meant to be
+// public, integrations.md). Empty until the project exists; while empty, the site works without
+// accounts. With no turnstileSiteKey there is no captcha (INT-004).
+const PRODUCTION = { url: '', anonKey: '', turnstileSiteKey: '' };
 
 const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
 
@@ -22,7 +23,9 @@ async function readConfig() {
     const res = await fetch(new URL('./config.local.json', import.meta.url), { cache: 'no-store' });
     if (!res.ok) return null;
     const local = await res.json();
-    return local?.url && local?.anonKey ? { url: local.url, anonKey: local.anonKey } : null;
+    return local?.url && local?.anonKey
+      ? { url: local.url, anonKey: local.anonKey, turnstileSiteKey: local.turnstileSiteKey || '' }
+      : null;
   } catch {
     // No local Supabase running: the page still works, just without accounts.
     return null;
