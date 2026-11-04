@@ -458,3 +458,8 @@ label.btn { cursor: pointer; }
 .open-delete { justify-self: start; align-self: flex-start; padding-left: 0; }
 .delete-confirm .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .reauth { padding: var(--s-3); border-radius: var(--r-sm); background: var(--cream); }
+
+/* UC-006: alerts on the results and in My account. */
+.alert-box { padding-top: var(--s-2); }
+.place-status.alert-paused { background: var(--sand); color: var(--muted); }
+.place-status.alert-expired { background: var(--peach-soft); color: var(--peach-ink); }
