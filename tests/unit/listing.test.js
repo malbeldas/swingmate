@@ -300,6 +300,11 @@ test('UC-020 E4 what publish_listing answers is shown in words', () => {
   assert.equal(publishResultText(null), WIZARD_TEXTS.saveFailed);
 });
 
+test('BR-LST-005 house rules the base turns down ask the host to rephrase', () => {
+  assert.equal(publishResultText({ ok: false, reason: 'missing', missing: ['house_rules'] }),
+    'Keep it about the home, not about who can live there');
+});
+
 test('BR-LST-006 the detail shows features, FIFO perks and the host\'s own items as chips', () => {
   assert.deepEqual(extrasLabels({ features: ['pool', 'nope'], perks: ['rr_only_rate'], custom_items: ['Gym'] }), ['Pool', 'R&R-only rate', 'Gym']);
   assert.ok(Object.keys(FEATURES).length === 4 && Object.keys(PERKS).length === 3);
