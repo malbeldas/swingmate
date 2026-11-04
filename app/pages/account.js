@@ -289,6 +289,7 @@ function notificationsSection(ctx) {
     el('h2', { id: 'notifications-title' }, NOTIFY_TEXTS.title),
     toggle('new_messages', 'notify-new-messages', NOTIFY_TEXTS.newMessages, NOTIFY_TEXTS.newMessagesHint, 'notify-hint'),
     toggle('alerts', 'notify-alerts', ALERT_TEXTS.notify, ALERT_TEXTS.notifyHint),
+    ctx.hosting && toggle('reminders', 'notify-reminders', NOTIFY_TEXTS.reminders, NOTIFY_TEXTS.remindersHint),
     status);
 }
 
@@ -345,11 +346,12 @@ async function start() {
     return;
   }
   const db = await getClient();
-  const { data: prefs } = await db.from('notification_preferences').select('new_messages, alerts').eq('user_id', user.id).maybeSingle();
+  const { data: prefs } = await db.from('notification_preferences').select('new_messages, alerts, reminders').eq('user_id', user.id).maybeSingle();
   const [{ rows: listings }, { rows: saved }, { rows: alerts }] = await Promise.all([loadPlaces(), loadSavedHomes(), loadAlerts()]);
   const ctx = { user, profile, roster, prefs, listings, saved, alerts, onDeleted: renderDeleted, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
   // UC-022: "My places" for hosts, and for anyone who already has a listing or a draft.
   const hosting = profile.is_hosting || listings.length > 0;
+  ctx.hosting = hosting;
   main.replaceChildren(...[
     profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), savedSection(ctx), alertsSection(ctx), hosting && messageRuleSection(ctx),
     notificationsSection(ctx), privacySection(ctx),
