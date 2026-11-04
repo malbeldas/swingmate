@@ -45,6 +45,12 @@ select throws_ok($$insert into public.saved_listings (user_id, listing_id) value
   '42501', null, 'BR-LST-002 a draft cannot be saved');
 select throws_ok($$insert into public.saved_listings (user_id, listing_id) values ('00000000-0000-0000-0000-0000000030a3', '00000000-0000-0000-0000-0000000030b1')$$,
   '42501', null, 'P-13 nobody saves for someone else');
+-- Both saves share the transaction's now(): the first one moves a minute back, so the order is sure.
+reset role;
+update public.saved_listings set created_at = created_at - interval '1 minute'
+  where listing_id = '00000000-0000-0000-0000-0000000030b1';
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000030a2","role":"authenticated"}';
 select is((select count(*)::int from public.saved_listings), 2, 'P-13 the seeker reads their saved homes');
 select is(jsonb_array_length(public.my_saved_listings()), 2, 'AC-005-1 "Saved homes" lists both');
 select is(public.my_saved_listings() -> 0 ->> 'cover', '00000000-0000-0000-0000-0000000030b2/0.jpg', 'newest first, with its cover');
