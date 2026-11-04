@@ -28,8 +28,9 @@ insert into auth.identities (id, user_id, provider_id, identity_data, provider, 
 values ('00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-00000000e001',
         '{"sub":"00000000-0000-0000-0000-00000000e001","email":"seed-host@example.test","email_verified":true}', 'email', now(), now(), now())
 on conflict do nothing;
+-- Room for the 7 open seed listings plus the ones E2E files publish at the same time (list, places).
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, listing_limit)
-values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 90002, 'seed', now(), 10)
+values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 90002, 'seed', now(), 20)
 on conflict (id) do nothing;
 
 -- An admin for the moderation E2E (UC-040), local and CI only, with the password in

@@ -10,18 +10,18 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { openRosterPicker, rosterLegend } from '../ui/roster-picker.js';
 import { drawPinMap } from '../ui/map.js';
+import { nightPicker } from '../ui/night-picker.js';
 import { about, calendar, gallery, locationSection } from '../ui/listing-detail.js';
 import { getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, profileComplete, saveOwnRoster } from '../session.js';
 import { attachSuburbList, getPlace, resolveSuburb, suburbLabel } from '../suburbs.js';
-import { listingNights, validateAvailability } from '../../core/availability.js';
-import { addDays, formatDay, mondayOf, todayIn } from '../../core/dates.js';
+import { addDays, todayIn } from '../../core/dates.js';
 import { detailView, priceLine, subtitle } from '../../core/detail.js';
 import { needFor } from '../../core/fit.js';
 import {
   DESCRIPTION_MAX, exceptionsToRows, FEATURES, firstIncompleteStep, listingFromRow, listingPhotoPath, listingToRow,
   nextBlockedText, nextPhotoPosition, PARKING_OPTIONS, PERKS, PHOTO_MAX_SIDE, PHOTOS_MAX, PHOTOS_MIN, photosText,
   publishIssues, publishResultText, rangesToRows, saveIssues, SMOKING_OPTIONS, STEP_TIPS, STEP_TITLES, stepLabel,
-  TITLE_MAX, toggleNight, TOTAL_STEPS, WIZARD_TEXTS,
+  TITLE_MAX, TOTAL_STEPS, WIZARD_TEXTS,
 } from '../../core/listing.js';
 import { JPEG_QUALITY, PHOTO_INPUT_TYPES, PHOTO_TEXTS, photoIssue, scaleToFit } from '../../core/photo.js';
 import { rosterDetailText, rosterSummaryText } from '../../core/roster.js';
@@ -29,7 +29,6 @@ import { BATHROOM_LABELS, PLACE_TYPE_LABELS } from '../../core/search.js';
 import { CUSTOM_ITEM_MAX_LENGTH, CUSTOM_ITEMS_MAX, OTHER_RULES_MAX } from '../../core/text-checks.js';
 
 const main = document.getElementById('list-main');
-const PREVIEW_WEEKS = 12; // BR-AVL-004
 const TZ = 'Australia/Perth'; // BR-AVL-005: the listing's zone; the pilot's suburbs are all in WA
 
 const state = {
@@ -348,56 +347,6 @@ function stepPhotos(db) {
 
 const SOURCES = { roster: 'From my roster', from_date: 'From a date', ranges: 'Set dates' };
 
-function nightPicker() {
-  const l = state.listing;
-  const box = el('div', { class: 'stack-tight', id: 'night-picker' });
-  const draw = () => {
-    if (validateAvailability(l).length) {
-      box.replaceChildren(el('span', { class: 'hint' }, 'Your next 12 weeks show here once the availability is set.'));
-      return;
-    }
-    const now = today();
-    const from = mondayOf(now);
-    const nights = listingNights(l, from, PREVIEW_WEEKS * 7, now);
-    const changed = new Set((l.exceptions ?? []).map((e) => e.night));
-    const weeks = [];
-    for (let w = 0; w < PREVIEW_WEEKS; w++) {
-      const first = addDays(from, w * 7);
-      weeks.push(el('div', { class: 'week', role: 'row' },
-        el('span', { class: 'week-label', role: 'rowheader' }, formatDay(first)),
-        Array.from({ length: 7 }, (_, d) => {
-          const night = addDays(first, d);
-          const free = nights[w * 7 + d] === '1';
-          const past = night < now;
-          const label = `${formatDay(night)}: ${free ? 'Available' : 'Unavailable'}${changed.has(night) ? ', changed by you' : ''}`;
-          return el('span', { role: 'cell' }, el('button', {
-            type: 'button', class: `night ${free ? 'free' : 'off'}${changed.has(night) ? ' changed' : ''}${past ? ' past' : ''}`,
-            'aria-label': label, title: label, 'aria-pressed': String(free), disabled: past, 'data-night': night,
-            onclick: () => {
-              const before = (l.exceptions ?? []).length;
-              l.exceptions = toggleNight(l, night, now);
-              if (l.exceptions.length > before && l.id) trackEvent('availability_exception_added', { listing_id: l.id, n_nights: 1 });
-              state.availabilityDirty = true;
-              draw();
-              box.querySelector(`[data-night="${night}"]`)?.focus();
-            },
-          }, night.slice(8).replace(/^0/, '')));
-        })));
-    }
-    box.replaceChildren(
-      el('div', { class: 'weeks night-picker', role: 'table', 'aria-label': 'Availability, next 12 weeks' },
-        el('div', { class: 'week head', role: 'row' }, el('span', { role: 'columnheader' }),
-          ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => el('span', { role: 'columnheader' }, d))),
-        weeks),
-      el('div', { class: 'legend' },
-        el('span', {}, el('span', { class: 'swatch free', 'aria-hidden': 'true' }), 'Available'),
-        el('span', {}, el('span', { class: 'swatch off', 'aria-hidden': 'true' }), 'Unavailable'),
-        el('span', {}, el('span', { class: 'swatch changed', 'aria-hidden': 'true' }), 'Changed by you')),
-      el('span', { class: 'hint' }, WIZARD_TEXTS.nightsHint));
-  };
-  draw();
-  return { box, draw };
-}
 
 function rangesEditor(onChange) {
   const l = state.listing;
@@ -429,7 +378,14 @@ function rangesEditor(onChange) {
 
 function stepAvailability() {
   const l = state.listing;
-  const picker = nightPicker();
+  const picker = nightPicker({
+    listing: l,
+    today,
+    onToggle: (night, after, before) => {
+      if (after.length > before.length && l.id) trackEvent('availability_exception_added', { listing_id: l.id, n_nights: 1 });
+      state.availabilityDirty = true;
+    },
+  });
   const detail = el('div', { class: 'stack-tight', id: 'availability-detail' });
   const changed = () => { state.availabilityDirty = true; picker.draw(); refreshNav(); };
 
@@ -693,7 +649,7 @@ async function render() {
     el('div', { class: 'wizard-nav' },
       step > 1
         ? el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'wizard-back', onclick: () => saveAndGo(step - 1) }, 'Back')
-        : el('a', { class: 'btn btn-secondary btn-sm', id: 'wizard-back', href: 'account.html' }, 'Cancel'),
+        : el('a', { class: 'btn btn-secondary btn-sm', id: 'wizard-back', href: 'account.html#listings' }, 'Cancel'),
       el('button', { type: 'button', class: 'btn-text', id: 'save-later', onclick: () => saveAndGo(step) }, 'Save and finish later'),
       el('button', { type: 'button', class: 'btn btn-primary btn-sm', id: 'wizard-next', onclick: () => (last ? publish() : saveAndGo(step + 1)) }, last ? 'Publish' : 'Next')),
     el('p', { class: 'small text-2', id: 'next-blocked', hidden: true }),
@@ -709,7 +665,7 @@ function renderDone(title, lead) {
     lead && el('p', { class: 'lead' }, lead),
     el('div', { class: 'cta-row' },
       el('a', { class: 'btn btn-primary btn-sm', id: 'see-listing', href: `listing.html?id=${encodeURIComponent(state.listing.id)}` }, 'See your listing'),
-      el('a', { class: 'btn btn-secondary btn-sm', href: 'list.html' }, 'List another place'))));
+      el('a', { class: 'btn btn-secondary btn-sm', href: 'account.html#listings' }, 'Go to my places'))));
   main.querySelector('h1').focus();
 }
 
