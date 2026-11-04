@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { RISK_WARNING } from '../../core/text-checks.js';
 import {
   DELETED_USER, TEXTS, addMessage, conversationHead, dayLabel, inquirerView, listItem, messageGroups, relativeWhen,
   replyErrorText, requestedFit, timeLabel,
@@ -90,11 +91,20 @@ test('UC-033 messages are grouped by day, mine apart, and an inquiry shows its d
   ];
   const groups = messageGroups(messages, 'me', NOW, TZ);
   assert.deepEqual(groups.map((g) => g.label), ['Yesterday', 'Today']);
-  assert.deepEqual(groups[0].messages[0], { id: 'm1', mine: true, body: 'Free?', time: '8:05 pm', dates: '7 – 21 Dec · 14 nights' });
+  assert.deepEqual(groups[0].messages[0], { id: 'm1', mine: true, body: 'Free?', time: '8:05 pm', dates: '7 – 21 Dec · 14 nights', warning: null });
   assert.equal(groups[1].messages[0].mine, false);
   assert.equal(groups[1].messages[0].dates, null);
   assert.equal(dayLabel('2026-10-28T10:00:00+08:00', NOW, TZ), '28 Oct');
   assert.equal(timeLabel('2026-11-04T09:15:00+08:00', TZ), '9:15 am');
+});
+
+test('AC-033-3 a flagged message shows the risk warning to the person who receives it, not to the sender', () => {
+  const flagged = { id: 'm3', sender_id: 'host', kind: 'text', body: 'Send the bond via PayID', risk_flag: true, created_at: '2026-11-04T09:20:00+08:00' };
+  const received = messageGroups([flagged], 'me', NOW, TZ)[0].messages[0];
+  assert.equal(received.warning, RISK_WARNING);
+  assert.equal(received.body, 'Send the bond via PayID'); // AC-033-2: delivered unchanged
+  assert.equal(messageGroups([flagged], 'host', NOW, TZ)[0].messages[0].warning, null);
+  assert.equal(messageGroups([{ ...flagged, risk_flag: false }], 'me', NOW, TZ)[0].messages[0].warning, null);
 });
 
 test('AC-033-1 a message that arrives twice, from the insert and from Realtime, shows once', () => {
