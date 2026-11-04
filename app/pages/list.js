@@ -3,7 +3,7 @@
 // base has the final word (listings_check_publishable, publish_listing).
 // The exact address and the pin only travel between this page and listing_private (BR-LST-004,
 // BR-TRU-003); nothing about the listing goes to localStorage, the address bar or the events.
-import { initEvents } from '../events.js';
+import { initEvents, trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
@@ -374,7 +374,9 @@ function nightPicker() {
             type: 'button', class: `night ${free ? 'free' : 'off'}${changed.has(night) ? ' changed' : ''}${past ? ' past' : ''}`,
             'aria-label': label, title: label, 'aria-pressed': String(free), disabled: past, 'data-night': night,
             onclick: () => {
+              const before = (l.exceptions ?? []).length;
               l.exceptions = toggleNight(l, night, now);
+              if (l.exceptions.length > before && l.id) trackEvent('availability_exception_added', { listing_id: l.id, n_nights: 1 });
               state.availabilityDirty = true;
               draw();
               box.querySelector(`[data-night="${night}"]`)?.focus();
