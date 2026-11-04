@@ -312,6 +312,9 @@ label.btn { cursor: pointer; }
 .bubble-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .bubble-time { font-size: var(--t-micro); opacity: 0.75; justify-self: end; }
 .bubble-dates { font-weight: 600; }
+/* The outcome question in the conversation (UC-007), only for the person who searched. */
+.outcome-card { justify-self: stretch; margin: var(--s-2) 0; padding: var(--s-3); border-radius: var(--r-sm); background: var(--cream); border-left: 4px solid var(--amber); }
+.outcome-card p { margin: 0; }
 /* BR-MSG-008: the warning sits right above the flagged message, on its side. */
 .risk-warning { justify-self: start; max-width: 85%; margin: var(--s-1) 0 -2px; padding: var(--s-1) var(--s-3); border-radius: var(--r-sm); background: var(--peach-soft); color: var(--peach-ink); font-weight: 600; }
 .composer textarea { min-height: 72px; }

@@ -13,6 +13,7 @@ import {
 } from '../../core/inbox.js';
 import { TEXTS as MSG_TEXTS } from '../../core/messaging.js';
 import { REPORT_TEXTS } from '../../core/moderation.js';
+import { OUTCOME_TEXTS, outcomeCard } from '../../core/outcome.js';
 import { openBlockSheet, openReportSheet, setConversationBlock } from '../ui/report-sheet.js';
 
 const main = document.getElementById('messages-main');
@@ -29,6 +30,9 @@ const state = {
   error: '',
   sending: false,
   channel: null,
+  outcome: null, // the answer of the person who searched (UC-007)
+  outcomeError: false,
+  outcomeSaving: false,
 };
 
 function coverUrl(db, path) {
@@ -83,12 +87,30 @@ function cardBlock(view) {
     el('p', { class: 'small' }, view.bio));
 }
 
+// UC-007 and BR-MAIL-003: the outcome question, only for the person who searched. The answer can be
+// changed any time (A1).
+function outcomeBlock(m) {
+  const card = outcomeCard(state.outcome, { error: state.outcomeError });
+  return el('section', { class: 'outcome-card stack-tight', id: 'outcome-question', 'data-message': m.id, 'aria-labelledby': 'outcome-title' },
+    el('span', { class: 'micro' }, `${OUTCOME_TEXTS.from} · ${m.time}`),
+    el('p', { id: 'outcome-title' }, el('strong', {}, card.question)),
+    el('div', { class: 'segmented', role: 'group', 'aria-labelledby': 'outcome-title' },
+      card.options.map((o) => el('button', {
+        type: 'button',
+        'aria-pressed': String(o.pressed),
+        disabled: state.outcomeSaving,
+        onclick: () => answerOutcome(o.answer),
+      }, o.label))),
+    el('p', { class: `small ${card.error ? 'form-error' : 'text-2'}`, id: 'outcome-note', role: 'status' }, card.note));
+}
+
 function thread() {
-  const groups = messageGroups(state.messages, state.user.id, new Date(), timeZone);
+  const row = state.rows.find((r) => r.id === state.openId);
+  const groups = messageGroups(state.messages, state.user.id, new Date(), timeZone, { role: row?.role });
   return el('div', { class: 'thread', id: 'thread', role: 'log', 'aria-live': 'polite', 'aria-label': 'Messages' },
     groups.flatMap((g) => [
       el('p', { class: 'day-label micro' }, g.label),
-      ...g.messages.flatMap((m) => [
+      ...g.messages.flatMap((m) => m.system ? [outcomeBlock(m)] : [
         m.warning && el('p', { class: 'risk-warning small', role: 'note' }, m.warning),
         el('div', { class: `bubble ${m.mine ? 'mine' : 'theirs'}`, 'data-message': m.id },
           m.dates && el('span', { class: 'bubble-dates small' }, `Dates: ${m.dates}`),
@@ -202,16 +224,22 @@ async function openConversation(id, push) {
   state.card = null;
   state.draft = '';
   state.error = '';
+  state.outcome = null;
+  state.outcomeError = false;
   if (push) history.pushState({ c: id }, '', `messages.html?c=${encodeURIComponent(id)}`);
   const row = state.rows.find((r) => r.id === id);
   if (!row) return render(db);
   trackEvent('conversation_opened', { conversation_id: id, role: row.role });
-  const [{ data: messages }, card] = await Promise.all([
+  const [{ data: messages }, card, outcome] = await Promise.all([
     db.from('messages').select(MESSAGE_COLUMNS).eq('conversation_id', id).order('created_at').limit(500),
     row.role === 'host' ? db.rpc('inquirer_card', { p_conversation_id: id }) : Promise.resolve({ data: null }),
+    row.role === 'seeker'
+      ? db.from('outcome_responses').select('answer').eq('conversation_id', id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
   state.messages = messages ?? [];
   state.card = card.data ?? null;
+  state.outcome = outcome.data?.answer ?? null;
   await subscribe(db, id);
   // UC-033 step 4: opening marks it read.
   await db.rpc('mark_conversation_read', { p_conversation_id: id });
@@ -251,6 +279,19 @@ async function sendReply() {
   state.draft = '';
   await refreshList(db);
   document.getElementById('reply-text')?.focus();
+}
+
+// UC-007 step 1 and A1 from the conversation. outcome_answered is recorded by the database.
+async function answerOutcome(answer) {
+  const db = await getClient();
+  state.outcomeSaving = true;
+  state.outcomeError = false;
+  render(db);
+  const { data, error } = await db.rpc('answer_outcome', { p_conversation_id: state.openId, p_answer: answer });
+  state.outcomeSaving = false;
+  if (error || !data?.ok) state.outcomeError = true;
+  else state.outcome = data.answer;
+  render(db, '#outcome-question [aria-pressed="true"]');
 }
 
 // ---------------------------------------------------------------------------------------------

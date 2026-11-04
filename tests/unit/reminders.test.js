@@ -19,7 +19,9 @@ test('SEC-26 a signed link works only with our key, for its purpose and until it
   assert.equal(ok.claims.exp, Math.floor(NOW.getTime() / 1000) + 60 * 86400, '60 days (notifications-calendar-check.md)');
   assert.deepEqual(await verifyLinkToken(token, `${SECRET}x`, 'calendar', { now: NOW }), { error: 'invalid' });
   assert.deepEqual(await verifyLinkToken(token, SECRET, 'outcome', { now: NOW }), { error: 'purpose' });
-  assert.deepEqual(await verifyLinkToken(token, SECRET, 'calendar', { now: new Date('2027-01-05T00:00:00Z') }), { error: 'expired' });
+  const old = await verifyLinkToken(token, SECRET, 'calendar', { now: new Date('2027-01-05T00:00:00Z') });
+  assert.equal(old.error, 'expired');
+  assert.equal(old.claims.listing_id, LISTING, 'an expired link still says what it was for, to send the person there');
   const [h, , s] = token.split('.');
   const forged = `${h}.${Buffer.from(JSON.stringify({ purpose: 'calendar', listing_id: 'other', exp: 9e9 })).toString('base64url')}.${s}`;
   assert.deepEqual(await verifyLinkToken(forged, SECRET, 'calendar', { now: NOW }), { error: 'invalid' });
@@ -30,8 +32,8 @@ test('SEC-26 a signed link works only with our key, for its purpose and until it
 test('AC-054-1 the email link carries the token after the #, never to a server', () => {
   const url = emailActionUrl(`${APP}/`, 'calendar', 'a.b.c', 'NTF-006');
   assert.equal(url, `${APP}/email-action.html?a=calendar&src=email&ntf=NTF-006#t=a.b.c`);
-  assert.deepEqual(readEmailAction(url), { action: 'calendar', ntf: 'NTF-006', token: 'a.b.c' });
-  assert.deepEqual(readEmailAction(`${APP}/email-action.html?a=calendar`), { action: 'calendar', ntf: null, token: null });
+  assert.deepEqual(readEmailAction(url), { action: 'calendar', answer: null, ntf: 'NTF-006', token: 'a.b.c' });
+  assert.deepEqual(readEmailAction(`${APP}/email-action.html?a=calendar`), { action: 'calendar', answer: null, ntf: null, token: null });
   assert.equal(EMAIL_ACTION_TEXTS.calendarDone('Room near the port'), 'Thanks. The calendar for Room near the port is marked as up to date.');
 });
 

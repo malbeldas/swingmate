@@ -1,14 +1,11 @@
+import { OUTCOME_ANSWERS } from '../../../../core/outcome.js';
 import { button, layout, paragraph, escapeHtml, SIGN_OFF, tidy } from './layout.js';
 
 // NTF-005 (specs/notifications-outcome-question.md). Cannot be turned off and has no settings link;
 // replies go to support@swingmate.au.
-export const OUTCOME_ANSWERS = [
-  { answer: 'found_here', label: 'Yes, through SwingMate' },
-  { answer: 'found_elsewhere', label: 'Yes, somewhere else' },
-  { answer: 'not_yet', label: 'Not yet' },
-];
+export { OUTCOME_ANSWERS };
 
-// `answerUrl(answer)` builds outcome.html?t=<token>&a=<answer>.
+// `answerUrl(answer)` is the one-tap link for that answer (email-action.html, core/email-actions.js).
 export function outcomeQuestionEmail({ seekerName, listingTitle, hostName, answerUrl }) {
   const subject = `Did you find a place, ${seekerName}?`;
   const text = tidy(`Hi ${seekerName},
