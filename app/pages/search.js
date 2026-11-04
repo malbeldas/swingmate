@@ -2,6 +2,7 @@
 // The database returns active listings in the radius with their nights (search_listings); the fit,
 // the filters and the order run here with core/ (DEC-104).
 import { getClient } from '../db.js';
+import { initEvents, trackEvent } from '../events.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openRosterPicker } from '../ui/roster-picker.js';
@@ -153,6 +154,24 @@ async function load() {
   }
   state.rows = data ?? [];
   recompute();
+  trackSearch();
+}
+
+// BR-ANL-001 search_performed: how many homes of each fit came back, never the place typed.
+function trackSearch() {
+  const n = (fitClass) => state.items.filter((i) => i.fitClass === fitClass).length;
+  trackEvent('search_performed', {
+    has_dates: Boolean(state.checkIn && state.checkOut),
+    has_roster: Boolean(state.roster),
+    radius_km: state.radiusKm,
+    n_full: n('full'), n_strong: n('strong'), n_partial: n('partial'), n_poor: n('poor'),
+    state: state.place.state,
+  });
+}
+
+function showNear(view) {
+  trackEvent('near_matches_opened', { n_partial: view.nearHidden });
+  writeFilters({ ...state.filters, near: true });
 }
 
 function recompute() {
@@ -245,7 +264,7 @@ function emptyState(view) {
   // BR-SRC-005: near matches, a wider radius, alerts, "List your place", in that order. Alerts
   // arrive with UC-006.
   const outs = [
-    view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: () => writeFilters({ ...state.filters, near: true }) }, 'Show near matches'),
+    view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: () => showNear(view) }, 'Show near matches'),
     wider && el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'widen', onclick: () => { form.radius.value = String(wider); submit(); } }, TEXTS.widen(wider)),
   ];
   if (view.state === 'filtered-empty') {
@@ -280,7 +299,7 @@ function renderResults() {
         el('span', { class: 'small text-2' }, view.hasFit ? TEXTS.sortNote : TEXTS.sortNoteNoFit)),
       legend(view.hasFit)),
     el('div', { class: 'stack' }, view.shown.map(card)),
-    view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'show-near', onclick: () => writeFilters({ ...state.filters, near: true }) },
+    view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'show-near', onclick: () => showNear(view) },
       `Show near matches (${view.nearHidden})`),
     view.hasFit && view.poorCount > 0 && el('p', { class: 'small text-2' }, TEXTS.poorNote));
 }
@@ -293,6 +312,7 @@ async function init() {
   initFirstVisit();
   const db = await getClient();
   initAccountMenu(document.getElementById('account'));
+  if (db) initEvents('search');
   if (!db) {
     form.hidden = true;
     results.replaceChildren(el('p', { class: 'lead' }, 'Search opens with the pilot. ', el('a', { href: './' }, 'Back to SwingMate')));

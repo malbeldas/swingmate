@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  checkEvent, CLIENT_ERROR_MAX, EVENTS, scrubErrorMessage, shouldLoadGa, gaPageLocation, checkGaEvent, GA_EVENTS,
+  BROWSER_EVENTS, checkEvent, CLIENT_ERROR_MAX, EVENTS, SERVER_EVENTS, scrubErrorMessage, shouldLoadGa, gaPageLocation, checkGaEvent, GA_EVENTS,
 } from '../../core/analytics.js';
 import { ROSTER_PATTERNS } from '../../core/roster.js';
 
@@ -36,10 +36,12 @@ test('BR-ANL-001 known events with allowed properties and values pass', () => {
 
 test('SEC-13 unknown names, extra properties and values outside the list are rejected', () => {
   assert.deepEqual(checkEvent('page_scrolled', {}), ['unknown event page_scrolled']);
-  assert.deepEqual(checkEvent('listing_saved', { listing_id: 'a', price: 300 }), ['property price not allowed']);
+  const id = '7d1c0e2a-1b8f-4a52-9a37-0f6a1c2b3d4e';
+  assert.deepEqual(checkEvent('listing_saved', { listing_id: id, price: 300 }), ['property price not allowed']);
+  assert.deepEqual(checkEvent('listing_saved', { listing_id: 'sam@example.com' }), ['listing_id must be an id']);
   assert.deepEqual(checkEvent('auth_gate_opened', { source: 'banner' }),
     ['source must be one of header, message, save, alert, list_place']);
-  assert.deepEqual(checkEvent('listing_viewed', { listing_id: 'a', fit_class: 'great' }),
+  assert.deepEqual(checkEvent('listing_viewed', { listing_id: id, fit_class: 'great' }),
     ['fit_class must be one of full, strong, partial, poor']);
   assert.deepEqual(checkEvent('landing_viewed', { page: { path: '/' } }), ['page must be a plain value']);
   assert.deepEqual(checkEvent('client_error', { message: 'x'.repeat(2100) }), ['props over 2 KB']);
@@ -92,4 +94,61 @@ test('DEC-019 the GA4 event list matches observability.md §6', () => {
   const section = md.split('## 6. Visitas de la página pública (GA4)')[1].split('\n## ')[0];
   const rows = section.split('\n').filter((l) => /^\| `[a-z_]+` \|/.test(l)).map((l) => l.split('|')[1].trim().replaceAll('`', ''));
   assert.deepEqual(rows.sort(), Object.keys(GA_EVENTS).sort());
+});
+
+// The migration repeats both lists: the CHECK on every name and the P-26 policy on the names the
+// browser may write.
+function sqlList(sql, marker) {
+  const at = sql.indexOf(marker);
+  const open = sql.indexOf('(', sql.indexOf(' in (', at) + 1);
+  const close = sql.indexOf(')', open);
+  return [...sql.slice(open, close).matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
+}
+
+test('BR-ANL-001 and P-26 the base knows the same events, and the browser writes only its own', () => {
+  const sql = readFileSync(new URL('../../supabase/migrations/20261116090000_analytics.sql', import.meta.url), 'utf8');
+  assert.deepEqual(sqlList(sql, 'name text not null check'), Object.keys(EVENTS).sort());
+  assert.deepEqual(sqlList(sql, '"P-26 analytics_events browser events"'), [...BROWSER_EVENTS].sort());
+  for (const name of SERVER_EVENTS) assert.ok(EVENTS[name], name);
+  assert.equal(BROWSER_EVENTS.length + SERVER_EVENTS.length, 30);
+});
+
+test('BR-ANL-002 a uuid with long runs of digits is an id, not a phone number', () => {
+  assert.deepEqual(checkEvent('listing_viewed', { listing_id: '12345678-1234-4123-8123-123456789012', fit_class: 'full' }), []);
+  assert.deepEqual(checkEvent('message_draft_started', { listing_id: '00000000-0000-0000-0000-00000000f001', logged_in: false }), []);
+});
+
+test('observability.md §3 the weekly metrics turn counts into the pilot rates', async () => {
+  const { metricsRows, METRICS } = await import('../../core/analytics.js');
+  const [week, empty] = metricsRows([
+    { week_start: '2026-11-30', visitors: 40, signups: 9, profiles_completed: 7, active_listings: 12, searches: 50,
+      searches_with_fit: 35, listing_views: 80, send_clicks: 12, gate_opens_message: 10, signups_from_message: 6,
+      conversations: 8, replied_48h: 6, median_reply_hours: '5.5', agreements: 2 },
+    { week_start: '2026-11-23', visitors: 0, signups: 0, profiles_completed: 0, active_listings: 0, searches: 0,
+      searches_with_fit: 0, listing_views: 0, send_clicks: 0, gate_opens_message: 0, signups_from_message: 0,
+      conversations: 0, replied_48h: 0, median_reply_hours: null, agreements: 0 },
+  ]);
+  assert.equal(METRICS.length, 12);
+  assert.equal(week.label, 'Week of 30 Nov 2026');
+  const value = (row, key) => row.cells.find((c) => c.key === key).value;
+  assert.equal(value(week, 'fit'), '70%');
+  assert.equal(value(week, 'send'), '15%');
+  assert.equal(value(week, 'gate'), '60%');
+  assert.equal(value(week, 'reply'), '75%');
+  assert.equal(value(week, 'hours'), '5.5');
+  assert.equal(value(week, 'listings'), '12');
+  // An empty week shows a dash, never "NaN%".
+  assert.equal(value(empty, 'reply'), '–');
+  assert.equal(value(empty, 'hours'), '–');
+});
+
+test('observability.md §2 landing_viewed says only the kind of source', async () => {
+  const { landingSource } = await import('../../core/analytics.js');
+  assert.equal(landingSource('https://swingmate.au/search.html', ''), 'direct');
+  assert.equal(landingSource('https://swingmate.au/search.html?utm_source=instagram&utm_campaign=bio', ''), 'social');
+  assert.equal(landingSource('https://swingmate.au/listing.html?utm_medium=email', ''), 'email');
+  assert.equal(landingSource('https://swingmate.au/', 'https://l.instagram.com/'), 'social');
+  assert.equal(landingSource('https://swingmate.au/', 'https://www.google.com/'), 'other');
+  assert.equal(landingSource('https://swingmate.au/listing.html', 'https://swingmate.au/search.html'), 'direct');
+  assert.equal(landingSource('https://swingmate.au/', 'not a url'), 'other');
 });

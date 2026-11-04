@@ -3,6 +3,7 @@
 // forgot and newPassword (UC-031, NTF-002), roster (offer to save the visitor roster, AC-002-4).
 // The sheet opens over the current page and closes there, so the person stays where they were
 // (AC-030-3). Google returns to the same URL (redirectTo = current page).
+import { trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { CaptchaBlocked, captchaToken } from '../captcha.js';
 import { TERMS_VERSION, getOwnProfile, getOwnRoster, profileComplete, saveOwnRoster } from '../session.js';
@@ -259,7 +260,13 @@ function render() {
 // Actions
 // ---------------------------------------------------------------------------------------------
 
+// BR-ANL-001: which button led to the sheet (auth_gate_opened.source), when it is one of the list.
+function trackSignupStarted(method) {
+  if (state.source) trackEvent('signup_started', { method, source: state.source });
+}
+
 async function withGoogle() {
+  trackSignupStarted('google');
   const db = await getClient();
   // INT-001: back to this same page, so the person keeps their place (AC-030-3).
   const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
@@ -270,6 +277,7 @@ async function signUpWithEmail(emailValue, password) {
   const email = emailValue.trim();
   const issues = signupIssues({ email, password });
   if (issues.length) return go('signup', { email, error: TEXTS[issues[0]] });
+  trackSignupStarted('email');
   setBusy(true);
   const options = await authOptions('signup', { email }, { emailRedirectTo: location.href });
   if (!options) return;
@@ -371,6 +379,7 @@ async function saveProfile(name, suburbLabel, termsAccepted) {
     ? await db.from('profiles').update(values).eq('id', state.userId)
     : await db.from('profiles').insert({ id: state.userId, ...values });
   if (error) return go('profile', { error: TEXTS.generic });
+  trackEvent('profile_completed', { intent: state.intent });
   const { data } = await db.auth.getUser();
   await complete(data.user);
 }
@@ -416,12 +425,14 @@ function build() {
 
 // step: 'signup' | 'login' | 'profile' | 'forgot' | 'newPassword'. onDone runs with the signed-in user.
 // error: a message to show on the first step (an expired reset link).
-export async function openAuthSheet({ step = 'signup', user = null, error = '', onDone = () => {} } = {}) {
+// source: what opened the sign-up (observability.md §2 auth_gate_opened), when it is on the list.
+export async function openAuthSheet({ step = 'signup', user = null, error = '', source = null, onDone = () => {} } = {}) {
   if (!dialog) build();
   onDoneCallback = onDone;
   state = {
-    step, email: '', error, resent: false, sent: false, intent: 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null,
+    step, email: '', error, resent: false, sent: false, intent: 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null, source,
   };
+  if (step === 'signup' && source) trackEvent('auth_gate_opened', { source });
   if (step === 'profile' && user) {
     state.name = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
   }
