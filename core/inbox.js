@@ -1,6 +1,6 @@
 import { addDays, daysBetween, formatDay, formatRange, groupConsecutive, todayIn, weekdayIndex } from './dates.js';
 import { conversationView } from './listing.js';
-import { checkMessage, datesLine } from './messaging.js';
+import { TEXTS as MSG_TEXTS, checkMessage, datesLine } from './messaging.js';
 import { RISK_WARNING } from './text-checks.js';
 import {
   memberSince, publicBioText, publicCardLine, seekerActivity, trustBadges,
@@ -159,6 +159,7 @@ export function replyErrorText(error) {
   const message = String(error?.message ?? '');
   if (/\bsuspended\b/.test(message)) return TEXTS.suspended;
   if (/\bblocked\b/.test(message)) return TEXTS.cantSend; // never says it was a block
+  if (/\bhourlyLimit\b/.test(message)) return MSG_TEXTS.hourlyLimit; // SEC-11
   return TEXTS.failed;
 }
 

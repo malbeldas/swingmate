@@ -20,7 +20,7 @@ import { TEXTS as LISTING_TEXTS } from '../../core/listing.js';
 import { readSearchParams, searchParamsFor } from '../../core/search.js';
 import { TEXTS, detailView, priceLine, subtitle } from '../../core/detail.js';
 import {
-  BOX_TEXTS, MESSAGE_MAX, TEXTS as MSG_TEXTS, conflictText, datesLine, draftIssues, refusalText, showProfileNudge,
+  BOX_TEXTS, MESSAGE_MAX, TEXTS as MSG_TEXTS, conflictText, datesLine, draftIssues, refusalText, sendErrorText, showProfileNudge,
   unavailableNights,
 } from '../../core/messaging.js';
 
@@ -237,7 +237,7 @@ async function send() {
   if (error || !data) {
     // UC-004 E4: the message stays in the box with "Try again".
     box.stage = 'edit';
-    box.error = MSG_TEXTS.failed;
+    box.error = sendErrorText(error);
     return renderBox('#send-message');
   }
   if (!data.ok) {
