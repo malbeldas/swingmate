@@ -1,6 +1,7 @@
 // Listing detail (UC-003). Layout and texts from the prototype's detail screen (frontend-migration.md).
 // get_listing returns the public listing with its nights; the fit, the reasons and the 12-week
 // calendar come from one calculation in core/ (BR-FIT-005, AC-003-3).
+import { initEvents, trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
@@ -180,7 +181,14 @@ function messageBox(l) {
   };
   checkIn.addEventListener('change', () => { saveDraft({ checkIn: checkIn.value }); checkOut.min = checkIn.value || today; refresh(); });
   checkOut.addEventListener('change', () => { saveDraft({ checkOut: checkOut.value }); refresh(); });
-  text.addEventListener('input', () => { saveDraft({ text: text.value }); refresh(); });
+  text.addEventListener('input', () => {
+    if (!box.draftTracked) {
+      box.draftTracked = true;
+      trackEvent('message_draft_started', { listing_id: listingId, logged_in: Boolean(state.user) });
+    }
+    saveDraft({ text: text.value });
+    refresh();
+  });
   refresh();
 
   return el('section', { class: 'card stack message-box', id: 'message-box', 'aria-labelledby': 'message-title' },
@@ -214,6 +222,7 @@ function signedIn(user) {
 }
 
 async function send() {
+  trackEvent('send_message_clicked', { listing_id: listingId, logged_in: Boolean(state.user), dates_conflict: Boolean(conflictFor(box.draft)) });
   const today = listingToday();
   const issues = draftIssues(box.draft, today);
   if (issues.length) {
@@ -222,7 +231,7 @@ async function send() {
   }
   saveDraft({ pending: true });
   // AC-004-1: without an account, sign up here; the draft waits in the session (AC-004-2).
-  if (!state.user) return openAuthSheet({ step: 'signup', onDone: signedIn });
+  if (!state.user) return openAuthSheet({ step: 'signup', source: 'message', onDone: signedIn });
   // AC-004-3: the minimum profile, asked in the same flow.
   const { data: profile } = await getOwnProfile(state.user.id);
   if (!profileComplete(profile)) return openAuthSheet({ step: 'profile', user: state.user, onDone: signedIn });
@@ -284,6 +293,7 @@ async function render() {
   const today = todayIn(l.timezone ?? 'Australia/Perth');
   const need = needFor({ checkIn: dates.checkIn, checkOut: dates.checkOut, roster: state.roster }, today);
   const view = detailView(l, need);
+  state.fitClass = view.fit.fitClass ?? null;
   document.title = `${l.title} · SwingMate`;
 
   const side = [
@@ -328,6 +338,7 @@ async function init() {
   const db = await getClient();
   initAccountMenu(document.getElementById('account'));
   if (!db || !listingId) return gone();
+  initEvents('listing');
   const { data: user } = await getSessionUser();
   state.user = user;
   state.roster = user ? (await getOwnRoster(user.id)).data : readVisitorRoster();
@@ -348,6 +359,7 @@ async function init() {
   box.draft = saved ?? { text: '', checkIn: dates.checkIn ?? '', checkOut: dates.checkOut ?? '', pending: false };
   box.confirm = Boolean(saved?.pending && user);
   await render();
+  trackEvent('listing_viewed', { listing_id: listingId, ...(state.fitClass && { fit_class: state.fitClass }) });
   // Logging in or out from the header changes who the box sends as.
   onAuthChange((event, who) => {
     if (event === 'SIGNED_IN' && who && who.id !== state.user?.id) {

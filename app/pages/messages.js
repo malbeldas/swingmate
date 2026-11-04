@@ -1,6 +1,7 @@
 // Inbox and conversation (UC-023, UC-033). Layout and texts from the prototype's Messages screens
 // (frontend-migration.md). The list comes from my_conversations, the host's card from inquirer_card,
 // the messages straight from the table (P-17) and new ones through Supabase Realtime (AC-033-1).
+import { initEvents, trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
@@ -204,6 +205,7 @@ async function openConversation(id, push) {
   if (push) history.pushState({ c: id }, '', `messages.html?c=${encodeURIComponent(id)}`);
   const row = state.rows.find((r) => r.id === id);
   if (!row) return render(db);
+  trackEvent('conversation_opened', { conversation_id: id, role: row.role });
   const [{ data: messages }, card] = await Promise.all([
     db.from('messages').select(MESSAGE_COLUMNS).eq('conversation_id', id).order('created_at').limit(500),
     row.role === 'host' ? db.rpc('inquirer_card', { p_conversation_id: id }) : Promise.resolve({ data: null }),
@@ -266,6 +268,7 @@ function signedOut() {
 async function init() {
   const db = await getClient();
   if (!db) return signedOut();
+  initEvents('messages');
   const { data: user } = await getSessionUser();
   if (!user) return signedOut();
   state.user = user;

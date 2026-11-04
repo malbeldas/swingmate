@@ -363,6 +363,15 @@ label.btn { cursor: pointer; }
 .admin-tabs a { padding: var(--s-2) var(--s-4); border-radius: var(--r-pill); font-weight: 600; color: var(--navy); text-decoration: none; min-height: 40px; display: inline-flex; align-items: center; }
 .admin-tabs a[aria-current='page'] { background: var(--navy); color: var(--cream); }
 .admin-tabs a:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.admin-tabs { flex-wrap: wrap; }
+/* Weekly metrics (#29): the table scrolls inside its card on a phone, never the page. */
+.table-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.table-scroll:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.metrics-table { border-collapse: collapse; font-size: var(--t-small); min-width: 100%; }
+.metrics-table th, .metrics-table td { padding: var(--s-2) var(--s-3); text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.metrics-table thead th { font-weight: 600; color: var(--text-2); }
+.metrics-table tbody th { text-align: left; font-weight: 500; position: sticky; left: 0; background: var(--white); white-space: normal; min-width: 11rem; }
+.metrics-table td { font-variant-numeric: tabular-nums; }
 .find-form { display: grid; gap: var(--s-3); }
 .find-form input[type='search'] { height: 48px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3); font: inherit; font-weight: 400; color: var(--navy); background: var(--white); width: 100%; box-sizing: border-box; }
 .find-form input[type='search']:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }

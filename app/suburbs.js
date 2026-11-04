@@ -59,5 +59,5 @@ export async function getPlace(id) {
   const db = await getClient();
   if (!db) return null;
   const { data } = await db.from('suburbs').select('id, name, state, lat, lng, timezone, is_city').eq('id', id).maybeSingle();
-  return data ? { id: data.id, label: suburbText(data), lat: data.lat, lng: data.lng, timezone: data.timezone, isCity: data.is_city } : null;
+  return data ? { id: data.id, label: suburbText(data), state: data.state, lat: data.lat, lng: data.lng, timezone: data.timezone, isCity: data.is_city } : null;
 }

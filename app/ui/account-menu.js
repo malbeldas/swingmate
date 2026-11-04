@@ -19,7 +19,7 @@ async function render(container, user, { askProfile = true } = {}) {
   if (!user) {
     container.replaceChildren(
       button('Log in', 'btn-text', () => openAuthSheet({ step: 'login', onDone: (u) => render(container, u) })),
-      button('Sign up', 'btn btn-primary btn-sm', () => openAuthSheet({ step: 'signup', onDone: (u) => render(container, u) })),
+      button('Sign up', 'btn btn-primary btn-sm', () => openAuthSheet({ step: 'signup', source: 'header', onDone: (u) => render(container, u) })),
     );
     return;
   }

@@ -7,6 +7,8 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { getSessionUser, onAuthChange } from '../session.js';
 import { createFinder } from './admin-find.js';
+import { createMetrics } from './admin-metrics.js';
+import { METRIC_TEXTS } from '../../core/analytics.js';
 import {
   SEARCH_TEXTS, ACTION_LABELS, ADMIN_TEXTS, REPORT_REASONS, actResultText, actionIssue, adminActions, adminQueue, ageText, isAdmin,
 } from '../../core/moderation.js';
@@ -122,18 +124,21 @@ function detailSection() {
     actionForm(g));
 }
 
-// Reports (UC-040) and Find (UC-041), as two tabs of the same page.
+// Reports (UC-040), Find (UC-041) and Metrics (#29), as tabs of the same page.
 function tabs() {
-  const onReports = state.view === 'reports';
+  const current = state.view === 'record' ? 'find' : state.view;
+  const tab = (href, id, view, text) => el('a', { href, id, 'aria-current': current === view ? 'page' : null }, text);
   return el('nav', { class: 'admin-tabs', 'aria-label': 'Admin' },
-    el('a', { href: '#', id: 'tab-reports', 'aria-current': onReports ? 'page' : null }, ADMIN_TEXTS.title),
-    el('a', { href: '#find', id: 'tab-find', 'aria-current': onReports ? null : 'page' }, SEARCH_TEXTS.tab));
+    tab('#', 'tab-reports', 'reports', ADMIN_TEXTS.title),
+    tab('#find', 'tab-find', 'find', SEARCH_TEXTS.tab),
+    tab('#metrics', 'tab-metrics', 'metrics', METRIC_TEXTS.tab));
 }
 
 function render(focus) {
   let content;
   if (state.view === 'find') content = finder.searchView();
   else if (state.view === 'record') content = finder.recordView();
+  else if (state.view === 'metrics') content = metrics.view();
   else {
     const open = Boolean(state.openId);
     content = el('div', { class: `admin-layout${open ? ' has-open' : ''}` },
@@ -145,6 +150,7 @@ function render(focus) {
 }
 
 const finder = createFinder(render);
+const metrics = createMetrics(render);
 
 // ---------------------------------------------------------------------------------------------
 // Data
@@ -257,6 +263,10 @@ async function route() {
   if (hash.has('find')) {
     state.view = 'find';
     return render(from === 'reports' ? '#find-query' : null);
+  }
+  if (hash.has('metrics')) {
+    state.view = 'metrics';
+    return metrics.load();
   }
   state.view = 'reports';
   if (from !== 'reports') {

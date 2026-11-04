@@ -1,6 +1,7 @@
 // My account: profile (UC-032), saved roster (BR-ROS-006, AC-002-4) and notifications (BR-MAIL-001).
 // Texts from the prototype's account screen (frontend-migration.md). Other sections (saved homes,
 // alerts, privacy) arrive with their own issues.
+import { initEvents } from '../events.js';
 import { getClient } from '../db.js';
 import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
 import { openRosterPicker, rosterLegend, weekGrid } from '../ui/roster-picker.js';
@@ -335,6 +336,7 @@ async function init() {
     main.replaceChildren(el('p', { class: 'lead' }, 'Accounts open with the pilot in Perth.'), el('a', { class: 'link-btn', href: './' }, 'Back to SwingMate'));
     return;
   }
+  initEvents('account');
   await initAccountMenu(document.getElementById('account'));
   await start();
   // Logging in or out from the header redraws the page too.
