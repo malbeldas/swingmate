@@ -130,3 +130,19 @@ test('AC-002-4 the roster a visitor tried is offered, filled in, when they sign 
   await expect(main(page).locator('#roster-summary')).toContainText('8:6 · next swing');
   await expect(main(page).locator('#public-card')).toContainText('8:6 roster');
 });
+
+test('UC-050 A1 new message emails can be switched off, and it stays off', async ({ page, request }, testInfo) => {
+  const email = uniqueEmail(testInfo, 'notify');
+  await createMember(request, email);
+  await logInOnAccountPage(page, email);
+  const box = main(page).getByLabel('Email me when I get a new message');
+  await expect(box).toBeChecked();
+  await expect(main(page).locator('#notify-hint')).toHaveText('We always email you about a new enquiry, even with this off.');
+  await box.uncheck();
+  await expect(main(page).locator('#notify-status')).toHaveText('Saved.');
+  // The link in the emails opens this section.
+  await page.goto('/account.html#notifications');
+  await expect(main(page).getByLabel('Email me when I get a new message')).not.toBeChecked();
+  await main(page).getByLabel('Email me when I get a new message').check();
+  await expect(main(page).locator('#notify-status')).toHaveText('Saved.');
+});
