@@ -1,5 +1,5 @@
 import { daysBetween } from './dates.js';
-import { validateAvailability } from './availability.js';
+import { listingNights, validateAvailability } from './availability.js';
 import { checkCustomItems, checkOtherRules, REPHRASE_RULES } from './text-checks.js';
 
 // The listing wizard (UC-020) and what each listing status shows (BR-LST-002). Pure: the page
@@ -268,4 +268,227 @@ export function calendarUpdatedText(confirmedOn, today) {
 
 export function calendarCheckDue(confirmedOn, today) {
   return calendarAgeDays(confirmedOn, today) >= CALENDAR_CHECK_DAYS;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The wizard page (#13, UC-020, DEC-016). Titles from the prototype; the tips are ours and Tomás
+// reviews them at the next demo (decision-log.md Q-27).
+// ---------------------------------------------------------------------------------------------
+
+export const STEP_TITLES = [
+  'Where is it and what are you offering?',
+  'Price, bills and the household',
+  'Photos and description',
+  'Availability',
+  'Review and publish',
+];
+
+export const STEP_TIPS = [
+  'Only you see the address and the pin. People who search see the suburb and a 1 km circle around it.',
+  'People on a roster compare the weekly price with bills included. Saying who lives here saves you questions.',
+  'Clear photos of the room, the bathroom, the kitchen and the living area get the most messages.',
+  'From my roster keeps your calendar right on its own: the home is free while you are on site.',
+  'Check the preview the way someone searching will see it. You can change anything after you publish.',
+];
+
+// schema.md §5: `features` and `perks` hold values from these fixed lists; Furnished and Parking have
+// their own columns. The host's own items go in `custom_items` (BR-LST-006).
+export const FEATURES = {
+  air_conditioning: 'Air conditioning',
+  washing_machine: 'Washing machine',
+  door_lock: 'Door lock',
+  pool: 'Pool',
+};
+export const PERKS = {
+  luggage_storage: 'Luggage storage',
+  airport_lift: 'Airport lift',
+  rr_only_rate: 'R&R-only rate',
+};
+export const SMOKING_OPTIONS = { no: 'No smoking', outside: 'Outside only', yes: 'Smoking OK' };
+export const PARKING_OPTIONS = { none: 'No parking', street: 'Street parking', off_street: 'Off-street parking', garage: 'Garage' };
+
+export const WIZARD_TEXTS = {
+  addressHint: 'Private. Only you see it, and you share it in the chat when you both agree.',
+  pinHint: 'Tap the map where the home is.',
+  pinFallback: 'The map didn’t load, so we used the middle of the suburb. Mark the home when the map is back.',
+  otherRulesHint: 'Shown on your listing. Keep it about the home, not about who can live there. We check it like any message.',
+  rosterHint: 'Available on the days you are away on swing. When you are home it shows as unavailable.',
+  fromDateHint: 'Open from that date on. Tap any night below to block it.',
+  rangesHint: 'Open only on the dates you add. Tap any night below to change it.',
+  nightsHint: 'Each square is a night. Tap one to block it (holiday, guest staying) or open it again.',
+  verifyPhone: 'Verify your mobile to publish. It takes 30 seconds and keeps fake listings out. People who search see “Phone verified” on your listing. We never show your number.',
+  verifyPhoneSoon: 'Mobile verification opens with the pilot. Your listing is saved as a draft, ready to publish then.',
+  declaration: 'The photos and details are real and current. I’ll keep the calendar up to date.',
+  saved: 'Saved. You can finish later from this page.',
+  saveFailed: 'We couldn’t save this. Check your connection and try again.',
+  published: 'Your place is live',
+  publishedLead: 'People whose R&R fits your away days will see it first. We’ll email you when someone sends a message.',
+  changesSaved: 'Changes saved',
+  cantEdit: 'This listing can no longer be edited',
+  notFound: 'We couldn’t find this listing',
+  suspended: 'Your account is suspended, so you can’t publish for now.',
+  status: 'This listing can’t go live from here.',
+  photoFailed: 'We couldn’t upload this photo. Try again.',
+};
+
+const fromRange = (r) => ({ startNight: r.start_night, endExclusive: r.end_exclusive });
+const toRange = (r) => ({ start_night: r.startNight, end_exclusive: r.endExclusive });
+
+// What my_listing returns, as the wizard's listing shape. `roster` is the host's saved one, the
+// rule "From my roster" reads it (BR-AVL-003).
+export function listingFromRow(data, roster = null) {
+  const l = data?.listing ?? {};
+  return {
+    id: l.id ?? null,
+    status: l.status ?? 'draft',
+    title: l.title ?? '',
+    description: l.description ?? '',
+    suburbId: l.suburb_id ?? null,
+    address: data?.address ? { ...data.address } : null,
+    placeType: l.place_type ?? null,
+    bathroom: l.bathroom ?? null,
+    weeklyPrice: l.weekly_price ?? null,
+    billsIncluded: l.bills_included ?? null,
+    bond: l.bond ?? null,
+    furnished: l.furnished ?? null,
+    minStayWeeks: l.min_stay_weeks ?? null,
+    householdSize: l.household_size ?? null,
+    householdOnRoster: l.household_on_roster ?? null,
+    hostLivesOnsite: l.host_lives_onsite ?? null,
+    airportMinutes: l.airport_minutes ?? null,
+    couplesOk: l.couples_ok ?? null,
+    petsOk: l.pets_ok ?? null,
+    smoking: l.smoking ?? null,
+    parking: l.parking ?? null,
+    features: [...(l.features ?? [])],
+    perks: [...(l.perks ?? [])],
+    customItems: [...(l.custom_items ?? [])],
+    otherRules: l.other_rules ?? '',
+    photos: (data?.photos ?? []).map((p) => ({ ...p })),
+    availabilityType: l.availability_type ?? null,
+    availableFrom: l.available_from ?? null,
+    ranges: (data?.ranges ?? []).map(fromRange),
+    exceptions: (data?.exceptions ?? []).map((e) => ({ night: e.night, available: e.available })),
+    roster,
+    accuracyDeclared: Boolean(l.accuracy_declared_at),
+  };
+}
+
+const orNull = (v) => (v === undefined || v === '' ? null : v);
+const textOrNull = (v) => (String(v ?? '').trim() === '' ? null : String(v).trim());
+
+// The `listings` columns the browser may write (column grants in 20261105090000_listings.sql).
+export function listingToRow(l) {
+  return {
+    title: textOrNull(l.title),
+    description: textOrNull(l.description),
+    suburb_id: orNull(l.suburbId),
+    place_type: orNull(l.placeType),
+    bathroom: orNull(l.bathroom),
+    weekly_price: orNull(l.weeklyPrice),
+    bills_included: orNull(l.billsIncluded),
+    bond: orNull(l.bond),
+    furnished: orNull(l.furnished),
+    min_stay_weeks: orNull(l.minStayWeeks),
+    household_size: orNull(l.householdSize),
+    household_on_roster: orNull(l.householdOnRoster),
+    host_lives_onsite: orNull(l.hostLivesOnsite),
+    airport_minutes: orNull(l.airportMinutes),
+    couples_ok: orNull(l.couplesOk),
+    pets_ok: orNull(l.petsOk),
+    smoking: orNull(l.smoking),
+    parking: orNull(l.parking),
+    features: (l.features ?? []).filter((f) => f in FEATURES),
+    perks: (l.perks ?? []).filter((p) => p in PERKS),
+    custom_items: (l.customItems ?? []).map((i) => i.trim()).filter(Boolean),
+    other_rules: textOrNull(l.otherRules),
+    availability_type: orNull(l.availabilityType),
+    available_from: l.availabilityType === 'from_date' ? orNull(l.availableFrom) : null,
+  };
+}
+
+export function rangesToRows(listingId, l) {
+  if (l.availabilityType !== 'ranges') return [];
+  return (l.ranges ?? []).map((r) => ({ listing_id: listingId, ...toRange(r) }));
+}
+
+export function exceptionsToRows(listingId, l) {
+  return (l.exceptions ?? []).map((e) => ({ listing_id: listingId, night: e.night, available: e.available }));
+}
+
+// The issues that only say something is still empty. "Save and finish later" (UC-020 A1) saves
+// with those; a value that is there but wrong (a 2-character title, a rule to rephrase) is fixed first,
+// because the database would refuse it.
+const MISSING = new Set(['suburbId', 'address', 'placeType', 'bathroom', 'weeklyPrice', 'billsIncluded', 'bond', 'furnished',
+  'title', 'photos', 'availabilityType', 'roster', 'availableFrom', 'ranges', 'emailVerified', 'phoneVerified', 'accuracyDeclared']);
+
+export function saveIssues(listing, step, account) {
+  return stepIssues(listing, step, account).filter((i) => !MISSING.has(i.code));
+}
+
+// "Next" is disabled and says what is missing (UC-020 E1): the first issue's text.
+export function nextBlockedText(listing, step, account) {
+  return stepIssues(listing, step, account)[0]?.text ?? null;
+}
+
+// The night picker of step 4 (BR-AVL-002): tapping a night flips it. The exception is kept only when
+// it differs from what the rule says, so tapping twice leaves no trace.
+export function toggleNight(listing, night, today) {
+  const rest = (listing.exceptions ?? []).filter((e) => e.night !== night);
+  const byRule = listingNights({ ...listing, exceptions: [] }, night, 1, today) === '1';
+  const now = listingNights(listing, night, 1, today) === '1';
+  const exceptions = now === byRule ? [...rest, { night, available: !now }] : rest;
+  return exceptions.sort((a, b) => (a.night < b.night ? -1 : a.night > b.night ? 1 : 0));
+}
+
+// What publish_listing answers, as the text under Publish (UC-020 E4, BR-LST-001, BR-LST-003).
+const MISSING_TEXT = {
+  title: TEXTS.title,
+  suburb_id: TEXTS.suburbId,
+  public_circle: TEXTS.address,
+  address: TEXTS.address,
+  place_type: TEXTS.placeType,
+  bathroom: TEXTS.bathroom,
+  weekly_price: TEXTS.weeklyPrice,
+  bills_included: TEXTS.billsIncluded,
+  bond: TEXTS.bond,
+  furnished: TEXTS.furnished,
+  accuracy_declared_at: TEXTS.accuracyDeclared,
+  availability: TEXTS.availabilityType,
+  photos: photosText(0).replace(/ \(.*\)$/, ''),
+  verified_contact: TEXTS.phoneVerified,
+};
+
+export function publishResultText(result) {
+  if (!result) return WIZARD_TEXTS.saveFailed;
+  if (result.ok) return null;
+  switch (result.reason) {
+    case 'limit': return TEXTS.limit;
+    case 'suspended': return WIZARD_TEXTS.suspended;
+    case 'status': return WIZARD_TEXTS.status;
+    case 'not_found': return WIZARD_TEXTS.notFound;
+    case 'missing': return (result.missing ?? []).map((m) => MISSING_TEXT[m]).filter(Boolean)[0] ?? WIZARD_TEXTS.saveFailed;
+    default: return WIZARD_TEXTS.saveFailed;
+  }
+}
+
+// The detail's chips (BR-LST-006): the fixed features and perks with their labels, then the host's own.
+export function extrasLabels({ features = [], perks = [], custom_items: custom = [] } = {}) {
+  return [
+    ...(features ?? []).map((f) => FEATURES[f]).filter(Boolean),
+    ...(perks ?? []).map((p) => PERKS[p]).filter(Boolean),
+    ...(custom ?? []),
+  ];
+}
+
+// listing-photos paths (schema.md §11, SEC-18): {listing_id}/{uuid}.jpg, never the file's name.
+export function listingPhotoPath(listingId, uuid) {
+  return `${listingId}/${uuid}.jpg`;
+}
+
+// The first free position 0 to 11 (listing_photos.position is unique per listing), or -1 when full.
+export function nextPhotoPosition(photos) {
+  const used = new Set((photos ?? []).map((p) => p.position));
+  for (let i = 0; i < PHOTOS_MAX; i++) if (!used.has(i)) return i;
+  return -1;
 }

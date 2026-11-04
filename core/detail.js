@@ -1,7 +1,7 @@
 import { mondayOf } from './dates.js';
 import { computeFit, fitLabel, fitReasons, NO_FIT_TEXT } from './fit.js';
 import { BATHROOM_LABELS, PLACE_TYPE_LABELS, nightWeeks } from './search.js';
-import { calendarUpdatedText, listingView } from './listing.js';
+import { calendarUpdatedText, extrasLabels, listingView } from './listing.js';
 import { hostFacts } from './trust.js';
 
 // The listing detail (UC-003). Pure: the page passes what get_listing returned and the nights the
@@ -83,8 +83,8 @@ export function detailView(listing, need, { now = new Date() } = {}) {
     weeks: nightWeeks(listing.nights, need, listing.start, DETAIL_WEEKS, { from: mondayOf(listing.start) }),
     calendarText: calendarUpdatedText(listing.calendar_confirmed_on, listing.today),
     facts: detailFacts(listing),
-    // The host's own items (BR-LST-006). Features and FIFO perks get their labels with the wizard (#13).
-    extras: listing.custom_items ?? [],
+    // Features, FIFO perks and the host's own items as chips (BR-LST-006).
+    extras: extrasLabels(listing),
     host,
   };
 }
