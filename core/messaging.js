@@ -185,3 +185,9 @@ export function parseDraft(raw, listingId) {
     pending: value.pending === true,
   };
 }
+
+// What the database said when a send failed. SEC-11 raises 'hourlyLimit'; anything else keeps the
+// text in the box and asks to try again (UC-004 E4, UC-033 E1).
+export function sendErrorText(error) {
+  return /\bhourlyLimit\b/.test(String(error?.message ?? '')) ? TEXTS.hourlyLimit : TEXTS.failed;
+}

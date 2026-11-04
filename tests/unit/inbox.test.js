@@ -120,3 +120,7 @@ test('BR-MSG-006 a refused reply never says it was a block', () => {
   assert.equal(replyErrorText({ message: 'Failed to fetch' }), TEXTS.failed);
   assert.equal(replyErrorText(null), TEXTS.failed);
 });
+
+test('SEC-11 a reply refused for sending too fast says so; the text stays', () => {
+  assert.equal(replyErrorText({ message: 'hourlyLimit' }), 'You’re sending messages too fast. Try again in a few minutes.');
+});
