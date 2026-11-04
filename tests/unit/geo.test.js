@@ -60,3 +60,17 @@ test('BR-LST-004 crypto randomness stays in [0, 1)', () => {
     assert.ok(r >= 0 && r < 1);
   }
 });
+
+test('BR-LST-004 destination() gives the points in tests/fixtures/geo.json, the cases offset_point (SQL) must match', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { GEO_PARITY_TEST_PATH, geoPgtap } = await import('../fixtures/geo-pgtap.js');
+  const fixture = JSON.parse(readFileSync(new URL('../fixtures/geo.json', import.meta.url), 'utf8'));
+  assert.ok(fixture.cases.length >= 5);
+  for (const c of fixture.cases) {
+    const to = destination(c.from, c.km, c.bearing);
+    assert.ok(Math.abs(to.lat - c.to.lat) < 1e-12 && Math.abs(to.lng - c.to.lng) < 1e-12, c.name);
+    assert.ok(Math.abs(distanceKm(c.from, to) - c.km) < 1e-9, `${c.name}: distance`);
+  }
+  const onDisk = readFileSync(new URL(`../../${GEO_PARITY_TEST_PATH}`, import.meta.url), 'utf8');
+  assert.equal(onDisk, geoPgtap(fixture), `Run: node tests/fixtures/geo-pgtap.js > ${GEO_PARITY_TEST_PATH}`);
+});

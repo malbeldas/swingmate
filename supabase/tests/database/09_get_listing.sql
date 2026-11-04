@@ -35,8 +35,14 @@ select is(char_length(public.get_listing('00000000-0000-0000-0000-00000000d101')
 select is(jsonb_array_length(public.get_listing('00000000-0000-0000-0000-00000000d101') -> 'photos'), 3, 'UC-003 the gallery has every photo');
 select is(public.get_listing('00000000-0000-0000-0000-00000000d101')::text like '%Secret Lane%', false,
   'AC-003-1 the exact address never travels');
-select is(public.get_listing('00000000-0000-0000-0000-00000000d101')::text ~ '(-42\.8971|147\.3251|gus@example|61400000002)', false,
-  'BR-TRU-003 no exact coordinates, email or phone');
+-- The public centre is now drawn at random near the address (BR-LST-004), so its digits can start
+-- like the address's: compare the numbers, not the text.
+select is(
+  (select public.get_listing('00000000-0000-0000-0000-00000000d101')::text ~ '(gus@example|61400000002)'
+       or (g ->> 'public_lat')::double precision = -42.8971 or (g ->> 'public_lng')::double precision = 147.3251
+       or g::text ~ '"lat"|"lng"'
+     from (select public.get_listing('00000000-0000-0000-0000-00000000d101') as g) x),
+  false, 'BR-TRU-003 no exact coordinates, email or phone');
 select is(public.get_listing('00000000-0000-0000-0000-00000000d101') -> 'host' ->> 'phone_verified', 'true', 'BR-TRU-002 phone verified host');
 select is(public.get_listing('00000000-0000-0000-0000-00000000d101') -> 'host' -> 'roster_pattern', '{"days_on": 8, "days_off": 6}'::jsonb,
   'BR-TRU-002 the host roster pattern, never its dates');

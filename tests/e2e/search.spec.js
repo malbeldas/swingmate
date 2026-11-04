@@ -173,3 +173,20 @@ test('AC-002-5 the first-visit strip goes away for good once closed, without per
   const stored = await page.evaluate(() => ({ ...localStorage }));
   expect(stored).toEqual({ 'swingmate.firstVisitDone': '1' });
 });
+
+test('AC-003-1 searching never brings the exact address, the host email or phone to the browser', async ({ page }) => {
+  const bodies = [];
+  page.on('response', async (res) => {
+    if (res.url().includes('/rest/v1/')) bodies.push(await res.text().catch(() => ''));
+  });
+  await page.goto(`/search.html?place=${BALDIVIS}&${stay}`);
+  await expect(card(page, SEED.allFree)).toBeVisible();
+  await expect.poll(() => bodies.length).toBeGreaterThan(0);
+  for (const body of bodies) {
+    expect(body).not.toContain('Private St');
+    expect(body).not.toContain('address_line');
+    expect(body).not.toContain('seed-host@example.test');
+    expect(body).not.toContain('61400000999');
+  }
+  expect(await page.content()).not.toContain('Private St');
+});

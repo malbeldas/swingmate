@@ -1,0 +1,70 @@
+{
+  "note": "destination() in core/geo.js and public.offset_point() in SQL must give these points (BR-LST-004).",
+  "cases": [
+    {
+      "name": "Perth CBD, 100 m north",
+      "from": {
+        "lat": -31.9523,
+        "lng": 115.8613
+      },
+      "km": 0.1,
+      "bearing": 0,
+      "to": {
+        "lat": -31.951400679636272,
+        "lng": 115.86130000000003
+      }
+    },
+    {
+      "name": "Baldivis, 499 m east",
+      "from": {
+        "lat": -32.329,
+        "lng": 115.831
+      },
+      "km": 0.499,
+      "bearing": 90,
+      "to": {
+        "lat": -32.328999888775535,
+        "lng": 115.8363108343217
+      }
+    },
+    {
+      "name": "Karratha, 300 m south-west",
+      "from": {
+        "lat": -20.7364,
+        "lng": 116.8463
+      },
+      "km": 0.3,
+      "bearing": 225,
+      "to": {
+        "lat": -20.73830773455804,
+        "lng": 116.84426008201035
+      }
+    },
+    {
+      "name": "Near the antimeridian, 450 m east",
+      "from": {
+        "lat": -16.5,
+        "lng": 179.999
+      },
+      "km": 0.45,
+      "bearing": 90,
+      "to": {
+        "lat": -16.49999995766436,
+        "lng": -179.9967792466207
+      }
+    },
+    {
+      "name": "Port Hedland, 250 m at 359.9 degrees",
+      "from": {
+        "lat": -20.3107,
+        "lng": 118.6066
+      },
+      "km": 0.25,
+      "bearing": 359.9,
+      "to": {
+        "lat": -20.308451702514997,
+        "lng": 118.60659581588243
+      }
+    }
+  ]
+}
