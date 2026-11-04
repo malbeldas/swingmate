@@ -5,6 +5,9 @@ export const PASSWORD_MIN = 8; // BR-ACC-002
 export const CODE_LENGTH = 6; // BR-ACC-002, NTF-001
 
 export const TEXTS = {
+  // INT-004 (Turnstile): the security check before sign-up, log-in and reset emails.
+  captchaBlocked: 'Something blocked our security check. Disable blockers or try another browser.',
+  captchaFailed: 'Our security check didn’t go through. Try again.',
   emailInvalid: 'Enter a valid email address',
   emailDisposable: 'Please use a permanent email address.',
   passwordShort: `At least ${PASSWORD_MIN} characters`,
@@ -68,6 +71,7 @@ export function authErrorText(error) {
   if (code === 'otp_expired' || code === 'otp_disabled' || /token has expired|invalid/i.test(message) && /otp|token/i.test(message)) {
     return TEXTS.codeInvalid;
   }
+  if (code === 'captcha_failed') return TEXTS.captchaFailed;
   if (code === 'invalid_credentials') return TEXTS.credentials;
   if (code === 'email_not_confirmed') return TEXTS.notConfirmed;
   if (code.startsWith('over_') || error.status === 429) return TEXTS.rateLimited;
@@ -103,6 +107,12 @@ export const NOTIFY_TEXTS = {
   saved: 'Saved.',
   failed: 'We couldn’t save that. Try again.',
 };
+
+// INT-004: the auth options with the captcha token, only when there is one (no site key, as in
+// local and CI, means no captcha). supabase-js sends it as gotrue_meta_security.captcha_token.
+export function withCaptcha(options, token) {
+  return token ? { ...(options ?? {}), captchaToken: token } : { ...(options ?? {}) };
+}
 
 // UC-024 and BR-TRU-004: "Who can message you", for hosts. It applies to all their listings and
 // never closes conversations already open (AC-024-1).

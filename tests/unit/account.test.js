@@ -68,3 +68,12 @@ test('UC-031 the reset form checks the email and the new password errors read pl
   assert.equal(authErrorText({ code: 'same_password' }), TEXTS.samePassword);
   assert.equal(authErrorText({ code: 'weak_password' }), TEXTS.passwordShort);
 });
+
+test('INT-004 the auth calls carry a captcha token only when there is one', async () => {
+  const { withCaptcha, authErrorText, TEXTS } = await import('../../core/account.js');
+  assert.deepEqual(withCaptcha({ emailRedirectTo: 'https://swingmate.au/' }, null), { emailRedirectTo: 'https://swingmate.au/' });
+  assert.deepEqual(withCaptcha(undefined, 'tok'), { captchaToken: 'tok' });
+  assert.deepEqual(withCaptcha({ emailRedirectTo: 'x' }, 'tok'), { emailRedirectTo: 'x', captchaToken: 'tok' });
+  assert.equal(authErrorText({ code: 'captcha_failed', status: 400 }), TEXTS.captchaFailed);
+  assert.match(TEXTS.captchaBlocked, /Disable blockers or try another browser/);
+});
