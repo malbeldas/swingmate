@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ACTIONS_BY_TARGET, canReadConversation, checkAction, checkReport, REPORT_REASONS, REPORT_THANKS, reportQueue,
-  REPORT_TEXTS, reportErrorText, reportIssue,
+  REPORT_TEXTS, reportErrorText, reportIssue, ADMIN_TEXTS, actResultText, actionIssue, adminActions, adminQueue, ageText, isAdmin,
 } from '../../core/moderation.js';
 
 test('BR-TRU-005 a report has a reason from the list and up to 500 characters of detail', () => {
@@ -75,4 +75,51 @@ test('BR-MSG-006 the block texts speak only to the person who blocks', () => {
   assert.equal(REPORT_TEXTS.blockHeading('Kai'), 'Block Kai?');
   assert.match(REPORT_TEXTS.blockBody, /won’t be told/);
   assert.equal(REPORT_TEXTS.blockedNote('Kai'), 'You blocked Kai. They can’t message you.');
+});
+
+test('BR-ADM-004 only an app_metadata admin sees the panel', () => {
+  assert.equal(isAdmin({ app_metadata: { role: 'admin' } }), true);
+  assert.equal(isAdmin({ app_metadata: {}, user_metadata: { role: 'admin' } }), false);
+  assert.equal(isAdmin(null), false);
+});
+
+test('BR-ADM-001 the action form offers the actions of each object; reading is a separate button', () => {
+  assert.deepEqual(adminActions('listing'), ['hide_listing', 'warn_user', 'suspend_user', 'dismiss']);
+  assert.deepEqual(adminActions('conversation'), ['warn_user', 'suspend_user', 'dismiss']);
+  assert.deepEqual(adminActions('photo'), []);
+});
+
+test('AC-040-1 the panel refuses an action without a note before calling the database', () => {
+  assert.equal(actionIssue({ action: '', targetType: 'listing', note: 'Fake' }), ADMIN_TEXTS.chooseAction);
+  assert.equal(actionIssue({ action: 'hide_listing', targetType: 'listing', note: '  ' }), ADMIN_TEXTS.noteNeeded);
+  assert.equal(actionIssue({ action: 'hide_listing', targetType: 'user', note: 'Spam' }), ADMIN_TEXTS.result.action);
+  assert.equal(actionIssue({ action: 'dismiss', targetType: 'user', note: 'Not a problem' }), null);
+});
+
+test('UC-040 A1 the queue groups reports of one object, oldest first, flagging the overdue', () => {
+  const now = new Date('2026-11-04T12:00:00Z');
+  const rows = [
+    { id: 'r1', target_type: 'listing', target_id: 'L', reason: 'fake', created_at: '2026-11-03T10:00:00Z', target_label: 'Room in Baldivis', person_name: 'Sam', target_status: 'active' },
+    { id: 'r2', target_type: 'conversation', target_id: 'C', reason: 'unsafe', created_at: '2026-11-04T11:55:00Z', target_label: 'Conversation about Room', person_name: 'Kai' },
+    { id: 'r3', target_type: 'listing', target_id: 'L', reason: 'scam', created_at: '2026-11-04T09:00:00Z', target_label: 'Room in Baldivis', person_name: 'Sam', target_status: 'active' },
+  ];
+  const queue = adminQueue(rows, now);
+  assert.deepEqual(queue.map((g) => g.key), ['r1', 'r2']);
+  assert.equal(queue[0].countText, '2 reports');
+  assert.equal(queue[0].reasonText, 'Fake listing or photos · Scam or asking for money');
+  assert.equal(queue[0].overdue, true);
+  assert.equal(queue[0].age, '26 h ago');
+  assert.equal(queue[0].type, 'Listing');
+  assert.equal(queue[1].overdue, false);
+  assert.equal(queue[1].age, '5 min ago');
+  assert.equal(queue[1].countText, '1 report');
+  assert.equal(ageText('2026-11-01T12:00:00Z', now), '3 days ago');
+});
+
+test('UC-040 the panel says what admin_act did', () => {
+  assert.equal(actResultText({ ok: true, closed: 2 }), 'Done. 2 reports closed.');
+  assert.equal(actResultText({ ok: true, closed: 1 }), 'Done. 1 report closed.');
+  assert.equal(actResultText({ ok: false, reason: 'note' }), ADMIN_TEXTS.result.note);
+  assert.equal(actResultText({ ok: false, reason: 'closed' }), ADMIN_TEXTS.result.closed);
+  assert.equal(actResultText(null, { message: 'Failed to fetch' }), ADMIN_TEXTS.result.failed);
 });
