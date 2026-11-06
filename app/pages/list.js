@@ -8,6 +8,7 @@ import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
+import { phoneVerifyForm } from '../ui/phone-verify.js';
 import { openRosterPicker, rosterLegend } from '../ui/roster-picker.js';
 import { drawPinMap } from '../ui/map.js';
 import { nightPicker } from '../ui/night-picker.js';
@@ -461,6 +462,11 @@ async function previewBlock(db) {
   return box;
 }
 
+function phoneVerified(user) {
+  state.user = user ?? { ...state.user, phone_confirmed_at: new Date().toISOString() };
+  refreshNav();
+}
+
 function stepReview(db) {
   const acc = account();
   const declaration = el('input', { type: 'checkbox', id: 'accuracy', checked: state.declared });
@@ -475,7 +481,8 @@ function stepReview(db) {
         ? el('span', { class: 'badge verified', id: 'phone-status' }, '✓ Mobile verified')
         : el('div', { class: 'stack-tight', id: 'phone-status' },
           el('span', { class: 'small' }, WIZARD_TEXTS.verifyPhone),
-          el('span', { class: 'small text-2' }, WIZARD_TEXTS.verifyPhoneSoon))),
+          // UC-021 in place: once verified, Publish opens without leaving the step (BR-LST-003).
+          phoneVerifyForm({ onVerified: phoneVerified }))),
     isDraft() && el('label', { class: 'check declaration' }, declaration, el('span', {}, WIZARD_TEXTS.declaration)),
     preview,
   ];

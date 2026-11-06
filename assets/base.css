@@ -479,3 +479,12 @@ label.btn { cursor: pointer; }
 .alert-box { padding-top: var(--s-2); }
 .place-status.alert-paused { background: var(--sand); color: var(--muted); }
 .place-status.alert-expired { background: var(--peach-soft); color: var(--peach-ink); }
+
+/* UC-021: the mobile and the code, each with its button beside it (wraps under it on a phone). */
+.phone-verify .inline-form { display: flex; flex-wrap: wrap; gap: var(--s-2); max-width: 480px; }
+.phone-verify input { flex: 1 1 180px; min-width: 0; height: 48px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 var(--s-3); font: inherit; color: var(--navy); background: var(--white); }
+.phone-verify input:focus-visible, .phone-verify .btn:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.phone-verify .code-input { font-weight: 600; font-size: 20px; letter-spacing: 0.3em; }
+.phone-verify .code-input::placeholder { font-weight: 400; font-size: 16px; letter-spacing: normal; }
+.phone-verify .btn { flex: 0 0 auto; }
+.phone-verify .btn:disabled { opacity: 0.6; cursor: default; }

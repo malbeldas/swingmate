@@ -13,6 +13,8 @@ import { alertsSection, loadAlerts } from '../ui/alerts-section.js';
 import { ALERT_TEXTS } from '../../core/alerts.js';
 import { PRIVACY_TEXTS } from '../../core/privacy.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
+import { openPhoneSheet } from '../ui/phone-verify.js';
+import { PHONE_TEXTS } from '../../core/phone.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
 import { INTENTS, MESSAGE_RULE_TEXTS, NOTIFY_TEXTS, TEXTS } from '../../core/account.js';
@@ -191,7 +193,13 @@ function profileSection(ctx) {
     el('span', { class: 'badge verified' }, '✓ Email verified'),
     user.phone_confirmed_at
       ? el('span', { class: 'badge verified' }, '✓ Phone verified')
-      : el('span', { class: 'small text-2' }, 'Phone not verified. Optional, some hosts ask for it.')),
+      : el('div', { class: 'stack-tight', id: 'phone-status' },
+        el('span', { class: 'small text-2' }, 'Phone not verified. Optional, some hosts ask for it.'),
+        // UC-021 for someone who searches: optional, and the number stays private (BR-TRU-004).
+        el('button', {
+          type: 'button', class: 'btn btn-secondary btn-sm', id: 'verify-phone',
+          onclick: (e) => openPhoneSheet({ onDone: () => e.target.closest('#phone-status')?.replaceWith(el('span', { class: 'badge verified' }, '✓ Phone verified')) }),
+        }, PHONE_TEXTS.verifyButton))),
   error,
   el('button', { type: 'submit', class: 'btn btn-primary btn-sm' }, 'Save changes'),
   status);

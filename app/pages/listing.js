@@ -9,6 +9,7 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { openRosterPicker } from '../ui/roster-picker.js';
 import { about, calendar, gallery, locationSection } from '../ui/listing-detail.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
+import { openPhoneSheet } from '../ui/phone-verify.js';
 import { openReportSheet } from '../ui/report-sheet.js';
 import { loadSaved, saveButton } from '../ui/save-button.js';
 import { REPORT_TEXTS } from '../../core/moderation.js';
@@ -20,6 +21,7 @@ import { clearDraft, readDraft, writeDraft } from '../message-draft.js';
 import { mondayOf, todayIn } from '../../core/dates.js';
 import { needFor } from '../../core/fit.js';
 import { TEXTS as LISTING_TEXTS } from '../../core/listing.js';
+import { PHONE_TEXTS } from '../../core/phone.js';
 import { readSearchParams, searchParamsFor } from '../../core/search.js';
 import { TEXTS, detailView, priceLine, subtitle } from '../../core/detail.js';
 import {
@@ -198,6 +200,21 @@ async function send() {
     if (data.reason === 'profile' && data.missing?.[0] !== 'emailVerified') {
       box.stage = 'edit';
       return openAuthSheet({ step: 'profile', user: state.user, onDone: signedIn });
+    }
+    // AC-004-6, AC-024-1: the host only takes verified phones. Verify here, then the same message
+    // goes, without losing the text (UC-021, BR-TRU-004).
+    if (data.reason === 'phone') {
+      box.stage = 'edit';
+      box.error = refusalText(data);
+      await renderBox();
+      return openPhoneSheet({
+        host: state.listing.host.display_name,
+        submitLabel: PHONE_TEXTS.verifyAndSend,
+        onDone: (user) => {
+          if (user) state.user = user;
+          send();
+        },
+      });
     }
     // UC-004 E1: the listing stopped taking messages; the text stays so it can be copied.
     box.stage = data.reason === 'inactive' || data.reason === 'owner' ? 'closed' : 'edit';
