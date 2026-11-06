@@ -72,7 +72,7 @@ export const DISCRIMINATION_PHRASES = {
 };
 
 // Inclusive wording is not an exclusion: "LGBTQ friendly", "all nationalities welcome".
-const INCLUSIVE = [/ all( [a-z0-9]+){1,6} (welcome|welcomed) /g, / [a-z0-9]+ (friendly|welcome|welcomed|welcoming) /g];
+export const INCLUSIVE = [/ all( [a-z0-9]+){1,6} (welcome|welcomed) /g, / [a-z0-9]+ (friendly|welcome|welcomed|welcoming) /g];
 
 function dropInclusive(haystack) {
   let out = haystack;

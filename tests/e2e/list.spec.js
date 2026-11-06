@@ -137,6 +137,10 @@ test('UC-020 AC-020-1 AC-020-2 AC-020-8 the host publishes, photos lose their EX
   // AC-020-5: house rules stop at 200 characters.
   await page.getByLabel('Other house rules (optional)').fill('x'.repeat(250));
   await expect(page.getByLabel('Other house rules (optional)')).toHaveValue('x'.repeat(200));
+  // BR-LST-005: a rule that excludes people can't go through; the host is asked to rephrase it.
+  await page.getByLabel('Other house rules (optional)').fill('Christians welcome, no Muslims');
+  await expect(page.locator('#next-blocked')).toHaveText('Keep it about the home, not about who can live there');
+  await expect(page.locator('#wizard-next')).toBeDisabled();
   await page.getByLabel('Other house rules (optional)').fill('Quiet after 9pm, I fly out at 4am.');
   await page.locator('#wizard-next').click();
 

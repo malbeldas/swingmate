@@ -457,6 +457,7 @@ const MISSING_TEXT = {
   availability: TEXTS.availabilityType,
   photos: photosText(0).replace(/ \(.*\)$/, ''),
   verified_contact: TEXTS.phoneVerified,
+  house_rules: REPHRASE_RULES, // BR-LST-005
 };
 
 export function publishResultText(result) {
