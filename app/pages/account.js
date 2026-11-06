@@ -1,6 +1,6 @@
 // My account: profile (UC-032), my places (UC-022), saved roster (BR-ROS-006, AC-002-4), saved homes
 // (UC-005) and notifications (BR-MAIL-001). Texts from the prototype's account screen
-// (frontend-migration.md). Other sections (alerts, privacy) arrive with their own issues.
+// (frontend-migration.md), and privacy and data (UC-035). Alerts arrive with their own issue.
 import { initEvents } from '../events.js';
 import { getClient } from '../db.js';
 import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
@@ -8,6 +8,8 @@ import { openRosterPicker, rosterLegend, weekGrid } from '../ui/roster-picker.js
 import { initAccountMenu } from '../ui/account-menu.js';
 import { loadPlaces, placesSection } from '../ui/my-places.js';
 import { loadSavedHomes, savedSection } from '../ui/saved-homes.js';
+import { privacySection, signOutHere } from '../ui/privacy.js';
+import { PRIVACY_TEXTS } from '../../core/privacy.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
@@ -316,6 +318,16 @@ function messageRuleSection(ctx) {
 
 let shownUserId = null;
 
+// AC-035-1: once the account is gone, the page says so and the session is cleared on this device.
+// shownUserId goes first, so the sign-out doesn't redraw the page as "Log in".
+async function renderDeleted() {
+  shownUserId = null;
+  await signOutHere();
+  main.replaceChildren(
+    el('p', { class: 'lead', role: 'status', id: 'account-deleted' }, PRIVACY_TEXTS.deleted),
+    el('a', { class: 'link-btn', href: './' }, 'Back to SwingMate'));
+}
+
 async function start() {
   const { data: user } = await getSessionUser();
   shownUserId = user?.id ?? null;
@@ -329,14 +341,14 @@ async function start() {
   const db = await getClient();
   const { data: prefs } = await db.from('notification_preferences').select('new_messages').eq('user_id', user.id).maybeSingle();
   const [{ rows: listings }, { rows: saved }] = await Promise.all([loadPlaces(), loadSavedHomes()]);
-  const ctx = { user, profile, roster, prefs, listings, saved, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
+  const ctx = { user, profile, roster, prefs, listings, saved, onDeleted: renderDeleted, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
   // UC-022: "My places" for hosts, and for anyone who already has a listing or a draft.
   const hosting = profile.is_hosting || listings.length > 0;
   main.replaceChildren(...[
     profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), savedSection(ctx), hosting && messageRuleSection(ctx),
-    notificationsSection(ctx),
+    notificationsSection(ctx), privacySection(ctx),
   ].filter(Boolean));
-  if (['#notifications', '#listings', '#saved'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+  if (['#notifications', '#listings', '#saved', '#privacy'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }
 
 async function init() {
