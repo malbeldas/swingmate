@@ -130,11 +130,18 @@ export function inquirerView(card, now = new Date()) {
 }
 
 // Messages grouped by day, oldest first, each marked mine or theirs. An inquiry shows its dates.
-export function messageGroups(messages, myId, now = new Date(), timeZone = 'Australia/Perth') {
+// A system message (the outcome question, UC-052) is only for the person who searched: it comes
+// back as { system: true } for role 'seeker' and is left out for the host.
+export function messageGroups(messages, myId, now = new Date(), timeZone = 'Australia/Perth', { role } = {}) {
   const groups = [];
   for (const m of [...messages].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
+    if (m.kind === 'system' && role !== 'seeker') continue;
     const label = dayLabel(m.created_at, now, timeZone);
     if (groups[groups.length - 1]?.label !== label) groups.push({ label, messages: [] });
+    if (m.kind === 'system') {
+      groups[groups.length - 1].messages.push({ id: m.id, system: true, body: m.body, time: timeLabel(m.created_at, timeZone) });
+      continue;
+    }
     groups[groups.length - 1].messages.push({
       id: m.id,
       mine: m.sender_id === myId,

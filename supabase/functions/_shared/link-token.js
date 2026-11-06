@@ -1,4 +1,4 @@
-// Signed links in emails that act without logging in (AC-054-1, and AC-007-1 later): an HS256 JWT
+// Signed links in emails that act without logging in (AC-054-1, AC-007-1): an HS256 JWT
 // with { purpose, exp } and the id the link is for (notifications-calendar-check.md
 // "Implementación"). The key is the EMAIL_LINK_SECRET secret of the Edge Functions (SEC-26), never in
 // the repo. Web Crypto only, so the same code runs in Deno and in node:test.
@@ -33,7 +33,8 @@ export async function signLinkToken(claims, secret, { days = 60, now = new Date(
 }
 
 // The claims when the token is ours, for this purpose and not expired; otherwise { error } with
-// 'invalid', 'purpose' or 'expired'.
+// 'invalid', 'purpose' or 'expired'. An expired token of ours still says what it was for, so the
+// page can send the person there (UC-007 E1); it never acts.
 export async function verifyLinkToken(token, secret, purpose, { now = new Date() } = {}) {
   const parts = String(token ?? '').split('.');
   if (parts.length !== 3) return { error: 'invalid' };
@@ -54,6 +55,6 @@ export async function verifyLinkToken(token, secret, purpose, { now = new Date()
   }
   if (!ok) return { error: 'invalid' };
   if (claims?.purpose !== purpose) return { error: 'purpose' };
-  if (!Number.isFinite(claims.exp) || claims.exp * 1000 <= now.getTime()) return { error: 'expired' };
+  if (!Number.isFinite(claims.exp) || claims.exp * 1000 <= now.getTime()) return { error: 'expired', claims };
   return { claims };
 }

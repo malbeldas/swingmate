@@ -81,12 +81,12 @@ test('AC-051-1 NTF-004 host reminder text and links', () => {
 test('AC-007-1 NTF-005 three one-tap answers with their own links and no settings link', () => {
   const mail = outcomeQuestionEmail({
     seekerName: 'Alex', listingTitle: 'Modern room in Baldivis', hostName: 'Matt',
-    answerUrl: (a) => `${APP}/outcome.html?t=TOKEN&a=${a}`,
+    answerUrl: (a) => `${APP}/email-action.html?a=outcome&answer=${a}#t=TOKEN`,
   });
   assertShape(mail);
   assert.equal(mail.subject, 'Did you find a place, Alex?');
-  for (const a of ['found_here', 'found_elsewhere', 'not_yet']) assert.ok(mail.html.includes(`outcome.html?t=TOKEN&amp;a=${a}`), a);
-  assert.match(mail.text, /Yes, through SwingMate: .*a=found_here\nYes, somewhere else: .*a=found_elsewhere\nNot yet: .*a=not_yet/);
+  for (const a of ['found_here', 'found_elsewhere', 'not_yet']) assert.ok(mail.html.includes(`a=outcome&amp;answer=${a}#t=TOKEN`), a);
+  assert.match(mail.text, /Yes, through SwingMate: .*answer=found_here#t=TOKEN\nYes, somewhere else: .*answer=found_elsewhere#t=TOKEN\nNot yet: .*answer=not_yet#t=TOKEN/);
   assert.doesNotMatch(mail.text, /Manage email settings/);
 });
 
