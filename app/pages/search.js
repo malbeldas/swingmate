@@ -7,6 +7,7 @@ import { el } from '../ui/dom.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { openRosterPicker } from '../ui/roster-picker.js';
 import { loadSaved, saveButton } from '../ui/save-button.js';
+import { alertBox, resumePendingAlert } from '../ui/alert-button.js';
 import { attachSuburbList, getPlace, resolveSuburb } from '../suburbs.js';
 import { deleteOwnRoster, getOwnRoster, getSessionUser, onAuthChange, saveOwnRoster } from '../session.js';
 import { clearVisitorRoster, readVisitorRoster, writeVisitorRoster } from '../visitor-roster.js';
@@ -261,11 +262,16 @@ function card(item) {
           el('a', { class: 'btn btn-secondary btn-sm', href: listingHref(item) }, 'View home')))));
 }
 
+// UC-006: what "Create an alert" saves, read when it is tapped.
+const currentSearch = () => ({
+  placeId: state.place?.id ?? null, radiusKm: state.radiusKm, checkIn: state.checkIn, checkOut: state.checkOut,
+  roster: state.roster, filters: state.filters, user: state.user,
+});
+
 function emptyState(view) {
   const place = state.place.label;
   const wider = widerRadius(state.radiusKm, state.place);
-  // BR-SRC-005: near matches, a wider radius, alerts, "List your place", in that order. Alerts
-  // arrive with UC-006.
+  // BR-SRC-005: near matches, a wider radius, alerts, "List your place", in that order.
   const outs = [
     view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-primary btn-sm', onclick: () => showNear(view) }, 'Show near matches'),
     wider && el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'widen', onclick: () => { form.radius.value = String(wider); submit(); } }, TEXTS.widen(wider)),
@@ -281,6 +287,7 @@ function emptyState(view) {
   return el('div', { class: 'card stack empty-state', id: 'no-results' },
     el('h1', {}, view.state === 'none' ? TEXTS.noResultsTitle(place) : TEXTS.noFitTitle(place)),
     el('div', { class: 'cta-row' }, outs),
+    alertBox(currentSearch),
     el('p', { class: 'small' }, el('a', { href: 'list.html' }, TEXTS.listYourPlace(place))));
 }
 
@@ -295,7 +302,8 @@ function renderResults() {
     results.replaceChildren(emptyState(view));
     return;
   }
-  results.replaceChildren(
+  // filter(Boolean): replaceChildren would print "false" for a part that doesn't show.
+  results.replaceChildren(...[
     el('div', { class: 'results-head' },
       el('div', {},
         el('h1', { id: 'results-heading' }, resultsHeading(view.shown.length, state.place.label)),
@@ -304,7 +312,9 @@ function renderResults() {
     el('div', { class: 'stack' }, view.shown.map(card)),
     view.nearHidden > 0 && el('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'show-near', onclick: () => showNear(view) },
       `Show near matches (${view.nearHidden})`),
-    view.hasFit && view.poorCount > 0 && el('p', { class: 'small text-2' }, TEXTS.poorNote));
+    view.hasFit && view.poorCount > 0 && el('p', { class: 'small text-2' }, TEXTS.poorNote),
+    alertBox(currentSearch),
+  ].filter(Boolean));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -359,6 +369,7 @@ async function init() {
     form.checkOut.value = params.checkOut;
   }
   await submit();
+  await resumePendingAlert(currentSearch); // UC-006 after a Google sign-in
 }
 
 init();

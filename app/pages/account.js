@@ -1,6 +1,6 @@
 // My account: profile (UC-032), my places (UC-022), saved roster (BR-ROS-006, AC-002-4), saved homes
 // (UC-005) and notifications (BR-MAIL-001). Texts from the prototype's account screen
-// (frontend-migration.md), and privacy and data (UC-035). Alerts arrive with their own issue.
+// (frontend-migration.md), alerts (UC-006) and privacy and data (UC-035).
 import { initEvents } from '../events.js';
 import { getClient } from '../db.js';
 import { deleteOwnRoster, getOwnProfile, getOwnRoster, getSessionUser, onAuthChange, photoUrl, saveOwnRoster } from '../session.js';
@@ -9,6 +9,8 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { loadPlaces, placesSection } from '../ui/my-places.js';
 import { loadSavedHomes, savedSection } from '../ui/saved-homes.js';
 import { privacySection, signOutHere } from '../ui/privacy.js';
+import { alertsSection, loadAlerts } from '../ui/alerts-section.js';
+import { ALERT_TEXTS } from '../../core/alerts.js';
 import { PRIVACY_TEXTS } from '../../core/privacy.js';
 import { openAuthSheet } from '../ui/auth-sheet.js';
 import { attachSuburbList, resolveSuburb, suburbLabel } from '../suburbs.js';
@@ -259,30 +261,34 @@ function rosterSection(ctx) {
   return section;
 }
 
-// Notifications (BR-MAIL-001, UC-050 A1). The emails link here (account.html#notifications).
-// No row means everything on (notification_preferences defaults).
+// Notifications (BR-MAIL-001, BR-MAIL-004, BR-MAIL-005, UC-050 A1). The emails link here
+// (account.html#notifications). No row means everything on (notification_preferences defaults).
 function notificationsSection(ctx) {
-  const box = el('input', { type: 'checkbox', id: 'notify-new-messages', checked: ctx.prefs?.new_messages ?? true });
   const status = el('p', { class: 'small text-2', role: 'status', id: 'notify-status' });
-  box.addEventListener('change', async () => {
-    const db = await getClient();
-    const value = box.checked;
-    const { error } = ctx.prefs
-      ? await db.from('notification_preferences').update({ new_messages: value }).eq('user_id', ctx.user.id)
-      : await db.from('notification_preferences').insert({ user_id: ctx.user.id, new_messages: value });
-    if (error) {
-      box.checked = !value;
-      status.textContent = NOTIFY_TEXTS.failed;
-      return;
-    }
-    ctx.prefs = { ...(ctx.prefs ?? {}), new_messages: value };
-    status.textContent = NOTIFY_TEXTS.saved;
-  });
+  const toggle = (key, id, label, hint, hintId = `${id}-hint`) => {
+    const box = el('input', { type: 'checkbox', id, checked: ctx.prefs?.[key] ?? true });
+    box.addEventListener('change', async () => {
+      const db = await getClient();
+      const value = box.checked;
+      const { error } = ctx.prefs
+        ? await db.from('notification_preferences').update({ [key]: value }).eq('user_id', ctx.user.id)
+        : await db.from('notification_preferences').insert({ user_id: ctx.user.id, [key]: value });
+      if (error) {
+        box.checked = !value;
+        status.textContent = NOTIFY_TEXTS.failed;
+        return;
+      }
+      ctx.prefs = { ...(ctx.prefs ?? {}), [key]: value };
+      status.textContent = NOTIFY_TEXTS.saved;
+    });
+    return el('label', { class: 'check' }, box, el('span', { class: 'stack-tight' },
+      el('span', {}, label),
+      el('span', { class: 'small text-2', id: hintId }, hint)));
+  };
   return el('section', { class: 'card stack', id: 'notifications', 'aria-labelledby': 'notifications-title' },
     el('h2', { id: 'notifications-title' }, NOTIFY_TEXTS.title),
-    el('label', { class: 'check' }, box, el('span', { class: 'stack-tight' },
-      el('span', {}, NOTIFY_TEXTS.newMessages),
-      el('span', { class: 'small text-2', id: 'notify-hint' }, NOTIFY_TEXTS.newMessagesHint))),
+    toggle('new_messages', 'notify-new-messages', NOTIFY_TEXTS.newMessages, NOTIFY_TEXTS.newMessagesHint, 'notify-hint'),
+    toggle('alerts', 'notify-alerts', ALERT_TEXTS.notify, ALERT_TEXTS.notifyHint),
     status);
 }
 
@@ -339,16 +345,16 @@ async function start() {
     return;
   }
   const db = await getClient();
-  const { data: prefs } = await db.from('notification_preferences').select('new_messages').eq('user_id', user.id).maybeSingle();
-  const [{ rows: listings }, { rows: saved }] = await Promise.all([loadPlaces(), loadSavedHomes()]);
-  const ctx = { user, profile, roster, prefs, listings, saved, onDeleted: renderDeleted, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
+  const { data: prefs } = await db.from('notification_preferences').select('new_messages, alerts').eq('user_id', user.id).maybeSingle();
+  const [{ rows: listings }, { rows: saved }, { rows: alerts }] = await Promise.all([loadPlaces(), loadSavedHomes(), loadAlerts()]);
+  const ctx = { user, profile, roster, prefs, listings, saved, alerts, onDeleted: renderDeleted, suburbText: await suburbLabel(profile.base_suburb_id), photoUrl: await photoUrl(profile.photo_path) };
   // UC-022: "My places" for hosts, and for anyone who already has a listing or a draft.
   const hosting = profile.is_hosting || listings.length > 0;
   main.replaceChildren(...[
-    profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), savedSection(ctx), hosting && messageRuleSection(ctx),
+    profileSection(ctx), hosting && placesSection(ctx), rosterSection(ctx), savedSection(ctx), alertsSection(ctx), hosting && messageRuleSection(ctx),
     notificationsSection(ctx), privacySection(ctx),
   ].filter(Boolean));
-  if (['#notifications', '#listings', '#saved', '#privacy'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+  if (['#notifications', '#listings', '#saved', '#alerts', '#privacy'].includes(location.hash)) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }
 
 async function init() {
