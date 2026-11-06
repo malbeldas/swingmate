@@ -98,12 +98,14 @@ export function readRecoveryLink(href) {
   return { tokenHash, cleanUrl: url.pathname + url.search + url.hash };
 }
 
-// "Notifications" in My account (BR-MAIL-001, BR-MAIL-005, UC-050 A1). The other switches
-// (alerts, reminders) join when their emails exist.
+// "Notifications" in My account (BR-MAIL-001, BR-MAIL-005, UC-050 A1). Reminders (NTF-004, NTF-006)
+// show only to hosts.
 export const NOTIFY_TEXTS = {
   title: 'Notifications',
   newMessages: 'Email me when I get a new message',
   newMessagesHint: 'We always email you about a new enquiry, even with this off.',
+  reminders: 'Remind me about my listings',
+  remindersHint: 'An enquiry you haven’t answered in 2 days, and a calendar check every 30 days.',
   saved: 'Saved.',
   failed: 'We couldn’t save that. Try again.',
 };
