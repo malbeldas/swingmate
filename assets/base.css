@@ -438,7 +438,7 @@ label.btn { cursor: pointer; }
 .place-title-row h3 a { color: inherit; }
 .place-status { border-radius: var(--r-pill); padding: 2px var(--s-3); font-size: var(--t-micro); font-weight: 700; background: var(--teal-soft); color: var(--teal-ink); }
 .place-status.paused, .place-status.draft { background: var(--sand); color: var(--muted); }
-.place-status.filled, .place-status.hidden { background: var(--peach-soft); color: var(--peach-ink); }
+.place-status.filled, .place-status.hidden, .place-status.gone { background: var(--peach-soft); color: var(--peach-ink); }
 .place-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
 .place-actions .btn-sm { border: 0; }
 .place-actions .btn-secondary.btn-sm { border: 1.5px solid var(--navy); }
@@ -446,3 +446,11 @@ label.btn { cursor: pointer; }
 .place-remove { color: var(--danger); }
 .place-calendar:empty { display: none; }
 .place-calendar { width: 100%; max-width: 560px; display: grid; gap: var(--s-3); }
+
+/* Save (UC-005): the heart is drawn, the word says the state */
+.save-wrap { display: inline-flex; flex-direction: column; gap: var(--s-1); align-items: flex-start; }
+.save-btn { display: inline-flex; align-items: center; gap: var(--s-2); }
+.save-btn .heart { fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linejoin: round; }
+.save-btn[aria-pressed="true"] .heart { fill: currentColor; }
+.result-actions { align-items: center; }
+.detail-price .save-wrap { margin-top: var(--s-2); }
