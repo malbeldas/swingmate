@@ -68,6 +68,15 @@ jobs:
           ls -lh out
           head -12 out/suburbs.sql
 
+      # La misma migración en el log, comprimida, para quien no llega al almacenamiento de artifacts:
+      #   gh run view <id> --log | sed -n '/BEGIN suburbs.sql.gz/,/END suburbs.sql.gz/p' | ...
+      - name: Migración en el log (gzip + base64)
+        run: |
+          echo "BEGIN suburbs.sql.gz"
+          gzip -9c out/suburbs.sql | base64 -w 0 | fold -w 4000
+          echo
+          echo "END suburbs.sql.gz"
+
       - uses: actions/upload-artifact@v4
         with:
           name: suburbs-migration

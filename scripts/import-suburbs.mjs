@@ -32,7 +32,7 @@ export const CITIES = new Set([
   'WA|Broome', 'WA|Albany', 'WA|Newman',
   'NSW|Sydney', 'NSW|Newcastle', 'NSW|Wollongong', 'NSW|Dubbo', 'NSW|Wagga Wagga', 'NSW|Tamworth', 'NSW|Orange',
   'NSW|Broken Hill', 'NSW|Muswellbrook', 'NSW|Singleton',
-  'VIC|Melbourne', 'VIC|Geelong', 'VIC|Ballarat', 'VIC|Bendigo', 'VIC|Mildura', 'VIC|Traralgon',
+  'VIC|Melbourne', 'VIC|Geelong', 'VIC|Ballarat Central', 'VIC|Bendigo', 'VIC|Mildura', 'VIC|Traralgon',
   'QLD|Brisbane City', 'QLD|Townsville City', 'QLD|Cairns City', 'QLD|Mackay', 'QLD|Rockhampton City',
   'QLD|Toowoomba City', 'QLD|Gladstone Central', 'QLD|Bundaberg Central', 'QLD|Emerald', 'QLD|Moranbah',
   'QLD|Mount Isa City',
