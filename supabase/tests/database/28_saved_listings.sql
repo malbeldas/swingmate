@@ -4,21 +4,21 @@ create extension if not exists pgtap with schema extensions;
 select plan(13);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73001, 'Dampier', 'WA', -20.6630, 116.7100, 'Australia/Perth');
+  (973001, 'Dampier', 'WA', -20.6630, 116.7100, 'Australia/Perth');
 -- 30a1 host · 30a2 seeker · 30a3 another member
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
   ('00000000-0000-0000-0000-0000000030a1', 'host30@example.com', now(), '61400000030', now()),
   ('00000000-0000-0000-0000-0000000030a2', 'seeker30@example.com', now(), null, null),
   ('00000000-0000-0000-0000-0000000030a3', 'other30@example.com', now(), null, null);
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000030a1', 'Lou', 73001, 'test', now()),
-  ('00000000-0000-0000-0000-0000000030a2', 'Mia', 73001, 'test', now()),
-  ('00000000-0000-0000-0000-0000000030a3', 'Ned', 73001, 'test', now());
+  ('00000000-0000-0000-0000-0000000030a1', 'Lou', 973001, 'test', now()),
+  ('00000000-0000-0000-0000-0000000030a2', 'Mia', 973001, 'test', now()),
+  ('00000000-0000-0000-0000-0000000030a3', 'Ned', 973001, 'test', now());
 
 -- b1 live · b2 live, then hidden · b3 draft
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from)
-  select ('00000000-0000-0000-0000-0000000030b' || i)::uuid, '00000000-0000-0000-0000-0000000030a1', 'Room near the wharf ' || i, 73001,
+  select ('00000000-0000-0000-0000-0000000030b' || i)::uuid, '00000000-0000-0000-0000-0000000030a1', 'Room near the wharf ' || i, 973001,
     'private_room', 'own', 270, true, 540, true, 'from_date', current_date
   from generate_series(1, 3) i;
 insert into public.listing_private (listing_id, address_line, lat, lng)

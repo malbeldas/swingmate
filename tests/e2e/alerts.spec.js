@@ -6,8 +6,8 @@ import { PASSWORD, codeFor, createMember, local, requireLocalSupabase, sheet, un
 
 test.beforeAll(requireLocalSupabase);
 
-const BALDIVIS = 90002;
-const KALGOORLIE = 90006; // no homes in the seed
+const BALDIVIS = 50054;
+const KALGOORLIE = 50712; // no homes in the seed
 const TILE = new URL('./fixtures/tile.png', import.meta.url).pathname;
 
 const perthToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Perth' }).format(new Date());

@@ -5,7 +5,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(29);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73501, 'Karratha', 'WA', -20.7364, 116.8463, 'Australia/Perth');
+  (973501, 'Karratha', 'WA', -20.7364, 116.8463, 'Australia/Perth');
 -- 31a1 seeker with a roster · 31a2 another seeker · 31a3 unconfirmed email · 31a4 alerts switched off
 insert into auth.users (id, email, email_confirmed_at, created_at, last_sign_in_at) values
   ('00000000-0000-0000-0000-0000000031a1', 'alerts1@example.com', now(), now() - interval '30 days', now()),
@@ -13,7 +13,7 @@ insert into auth.users (id, email, email_confirmed_at, created_at, last_sign_in_
   ('00000000-0000-0000-0000-0000000031a3', 'alerts3@example.com', null, now() - interval '30 days', now()),
   ('00000000-0000-0000-0000-0000000031a4', 'alerts4@example.com', now(), now() - interval '30 days', now());
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-  select id, 'P' || right(id::text, 2), 73501, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000031a%';
+  select id, 'P' || right(id::text, 2), 973501, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000031a%';
 insert into public.rosters (user_id, days_on, days_off, anchor_date)
   values ('00000000-0000-0000-0000-0000000031a1', 14, 7, current_date);
 insert into public.notification_preferences (user_id, alerts) values ('00000000-0000-0000-0000-0000000031a4', false);
@@ -24,17 +24,17 @@ grant all on t to authenticated;
 -- ----- P-13: each person their own -------------------------------------------------------------------
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000031a1","role":"authenticated"}';
-insert into public.search_alerts (suburb_id, radius_km, use_roster) values (73501, 15, true);
+insert into public.search_alerts (suburb_id, radius_km, use_roster) values (973501, 15, true);
 insert into t select 'roster', id from public.search_alerts where use_roster;
 select is((select count(*)::int from public.search_alerts), 1, 'UC-006 a member creates an alert with their roster');
 select is((select expires_at::date from public.search_alerts), (now() + interval '90 days')::date, 'BR-MAIL-004 it lasts 90 days');
-select throws_ok($$insert into public.search_alerts (user_id, suburb_id, radius_km, use_roster) values ('00000000-0000-0000-0000-0000000031a2', 73501, 15, true)$$,
+select throws_ok($$insert into public.search_alerts (user_id, suburb_id, radius_km, use_roster) values ('00000000-0000-0000-0000-0000000031a2', 973501, 15, true)$$,
   '42501', null, 'P-13 never for someone else');
-select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, stay_from, stay_to, use_roster) values (73501, 15, current_date + 10, current_date + 17, true)$$,
+select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, stay_from, stay_to, use_roster) values (973501, 15, current_date + 10, current_date + 17, true)$$,
   '23514', null, 'BR-SRC-001 dates or the roster, not both');
-select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (73501, 15, false)$$,
+select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (973501, 15, false)$$,
   '23514', null, 'and never neither');
-select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (73501, 7, true)$$,
+select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (973501, 7, true)$$,
   '23514', null, 'BR-SRC-003 only the radius choices of the search');
 select throws_ok($$update public.search_alerts set expires_at = now() + interval '5 years'$$,
   '42501', null, 'the end date only moves with renew_alert');
@@ -61,9 +61,9 @@ reset role;
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000031a1","role":"authenticated"}';
 insert into public.search_alerts (suburb_id, radius_km, stay_from, stay_to, use_roster)
-  select 73501, 15, current_date + 10 + i, current_date + 17 + i, false from generate_series(1, 5) i;
+  select 973501, 15, current_date + 10 + i, current_date + 17 + i, false from generate_series(1, 5) i;
 select is((select count(*)::int from public.search_alerts where not paused), 5, 'five alerts on, the paused one apart');
-select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (73501, 25, true)$$,
+select throws_ok($$insert into public.search_alerts (suburb_id, radius_km, use_roster) values (973501, 25, true)$$,
   'P0001', 'You have 5 alerts on', 'UC-006 E1 a sixth asks to delete one first');
 select throws_ok($$update public.search_alerts set paused = false where use_roster$$,
   'P0001', 'You have 5 alerts on', 'resuming one counts too');
@@ -78,8 +78,8 @@ reset role;
 update public.search_alerts set expires_at = now() - interval '1 minute' where stay_from = current_date + 11;
 update public.search_alerts set stay_from = current_date - 9, stay_to = current_date - 2 where stay_from = current_date + 12;
 insert into public.search_alerts (user_id, suburb_id, radius_km, use_roster) values
-  ('00000000-0000-0000-0000-0000000031a3', 73501, 15, true),
-  ('00000000-0000-0000-0000-0000000031a4', 73501, 15, true);
+  ('00000000-0000-0000-0000-0000000031a3', 973501, 15, true),
+  ('00000000-0000-0000-0000-0000000031a4', 973501, 15, true);
 insert into t select 'dated', id from public.search_alerts where stay_from = current_date + 13;
 
 select is((select jsonb_array_length(public.pending_alerts())), 3,
@@ -93,7 +93,7 @@ select is((select a #>> '{place,timezone}' from jsonb_array_elements(public.pend
 
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-0000000031b1', '00000000-0000-0000-0000-0000000031a2', 'Room near the port', 73501,
+  values ('00000000-0000-0000-0000-0000000031b1', '00000000-0000-0000-0000-0000000031a2', 'Room near the port', 973501,
     'private_room', 'own', 260, true, 520, true, 'from_date', current_date, now());
 insert into public.alert_deliveries (alert_id, listing_id) values ((select v from t where k = 'dated'), '00000000-0000-0000-0000-0000000031b1');
 select is((select a -> 'delivered' from jsonb_array_elements(public.pending_alerts()) a where (a ->> 'alert_id')::uuid = (select v from t where k = 'dated')),

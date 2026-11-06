@@ -5,20 +5,20 @@ create extension if not exists pgtap with schema extensions;
 select plan(20);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73401, 'Newman', 'WA', -23.3590, 119.7310, 'Australia/Perth');
+  (973401, 'Newman', 'WA', -23.3590, 119.7310, 'Australia/Perth');
 -- 34a1 host · 34a2 seeker
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at, last_sign_in_at) values
   ('00000000-0000-0000-0000-0000000034a1', 'host34@example.com', now(), '61400000034', now(), now() - interval '60 days', now() - interval '1 hour'),
   ('00000000-0000-0000-0000-0000000034a2', 'seeker34@example.com', now(), null, null, now() - interval '30 days', now() - interval '1 hour');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, photo_path) values
-  ('00000000-0000-0000-0000-0000000034a1', 'Ari', 73401, 'test', now(), '00000000-0000-0000-0000-0000000034a1/00000000-0000-0000-0000-0000000034f1.jpg'),
-  ('00000000-0000-0000-0000-0000000034a2', 'Bo', 73401, 'test', now(), null);
+  ('00000000-0000-0000-0000-0000000034a1', 'Ari', 973401, 'test', now(), '00000000-0000-0000-0000-0000000034a1/00000000-0000-0000-0000-0000000034f1.jpg'),
+  ('00000000-0000-0000-0000-0000000034a2', 'Bo', 973401, 'test', now(), null);
 insert into public.rosters (user_id, days_on, days_off, anchor_date)
   values ('00000000-0000-0000-0000-0000000034a2', 14, 7, current_date + 2);
 
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-0000000034b1', '00000000-0000-0000-0000-0000000034a1', 'Room near the mine bus', 73401,
+  values ('00000000-0000-0000-0000-0000000034b1', '00000000-0000-0000-0000-0000000034a1', 'Room near the mine bus', 973401,
     'private_room', 'own', 280, true, 560, true, 'from_date', current_date - 5, now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-0000000034b1', '8 Pit Rd', -23.3591, 119.7311);

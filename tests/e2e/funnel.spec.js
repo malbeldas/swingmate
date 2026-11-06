@@ -5,7 +5,7 @@ import { SEED_ADMIN, requireLocalSupabase, sheet } from './auth-helpers.js';
 
 test.beforeAll(requireLocalSupabase);
 
-const BALDIVIS = 90002;
+const BALDIVIS = 50054;
 const ALWAYS_FREE = '00000000-0000-0000-0000-00000000f001';
 const TILE = new URL('./fixtures/tile.png', import.meta.url).pathname;
 

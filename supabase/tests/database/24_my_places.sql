@@ -5,24 +5,24 @@ create extension if not exists pgtap with schema extensions;
 select plan(18);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (71401, 'Kununurra', 'WA', -15.7790, 128.7390, 'Australia/Perth');
+  (971401, 'Kununurra', 'WA', -15.7790, 128.7390, 'Australia/Perth');
 -- 14a1 host · 14a2 another member
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
   ('00000000-0000-0000-0000-0000000014a1', 'host14@example.com', now(), '61400000014', now()),
   ('00000000-0000-0000-0000-0000000014a2', 'other14@example.com', now(), null, null);
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000014a1', 'Huw', 71401, 'test', now()),
-  ('00000000-0000-0000-0000-0000000014a2', 'Ola', 71401, 'test', now());
+  ('00000000-0000-0000-0000-0000000014a1', 'Huw', 971401, 'test', now()),
+  ('00000000-0000-0000-0000-0000000014a2', 'Ola', 971401, 'test', now());
 
 -- One live listing free from today, one draft and one hidden by an admin.
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from)
   values
-  ('00000000-0000-0000-0000-0000000014b1', '00000000-0000-0000-0000-0000000014a1', 'Room by the river', 71401,
+  ('00000000-0000-0000-0000-0000000014b1', '00000000-0000-0000-0000-0000000014a1', 'Room by the river', 971401,
     'private_room', 'own', 230, true, 460, true, 'from_date', current_date - 30),
-  ('00000000-0000-0000-0000-0000000014b2', '00000000-0000-0000-0000-0000000014a1', 'Half done', 71401,
+  ('00000000-0000-0000-0000-0000000014b2', '00000000-0000-0000-0000-0000000014a1', 'Half done', 971401,
     null, null, null, null, null, null, null, null),
-  ('00000000-0000-0000-0000-0000000014b3', '00000000-0000-0000-0000-0000000014a1', 'Hidden room', 71401,
+  ('00000000-0000-0000-0000-0000000014b3', '00000000-0000-0000-0000-0000000014a1', 'Hidden room', 971401,
     'private_room', 'own', 230, true, 460, true, 'from_date', current_date - 30);
 insert into public.listing_private (listing_id, address_line, lat, lng)
   select id, '4 River Rd', -15.7791, 128.7391 from public.listings where id in ('00000000-0000-0000-0000-0000000014b1', '00000000-0000-0000-0000-0000000014b3');

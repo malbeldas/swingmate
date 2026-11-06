@@ -5,7 +5,7 @@ import { PASSWORD, codeFor, createMember, requireLocalSupabase, sheet, uniqueEma
 
 test.beforeAll(requireLocalSupabase);
 
-const BALDIVIS = 90002;
+const BALDIVIS = 50054;
 const ALWAYS_FREE = { id: '00000000-0000-0000-0000-00000000f001', title: 'Seed: room free every night' };
 const PAUSED = { id: '00000000-0000-0000-0000-00000000f008', title: 'Seed: paused by the host' };
 const TILE = new URL('./fixtures/tile.png', import.meta.url).pathname;

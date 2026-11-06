@@ -5,17 +5,17 @@ create extension if not exists pgtap with schema extensions;
 select plan(17);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73601, 'Dampier', 'WA', -20.6630, 116.7130, 'Australia/Perth');
+  (973601, 'Dampier', 'WA', -20.6630, 116.7130, 'Australia/Perth');
 -- 32a0 host · 32a1..32a6 seekers
 insert into auth.users (id, email, email_confirmed_at, created_at)
   select ('00000000-0000-0000-0000-0000000032a' || i)::uuid, 'remind' || i || '@example.com', now(), now() - interval '60 days'
   from generate_series(0, 6) i;
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-  select id, 'R' || right(id::text, 1), 73601, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000032a%';
+  select id, 'R' || right(id::text, 1), 973601, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000032a%';
 
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  select ('00000000-0000-0000-0000-0000000032b' || i)::uuid, '00000000-0000-0000-0000-0000000032a0', 'Dampier room ' || i, 73601,
+  select ('00000000-0000-0000-0000-0000000032b' || i)::uuid, '00000000-0000-0000-0000-0000000032a0', 'Dampier room ' || i, 973601,
     'private_room', 'own', 250, true, 500, true, 'from_date', current_date - 40, now()
   from generate_series(1, 3) i;
 -- What publishing needs (BR-LST-003): a verified phone, the address and 3 photos.

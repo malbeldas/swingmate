@@ -1,16 +1,7 @@
 -- Local and CI only (BR-TRU-006, engineering-constitution.md §8). Never loaded into production.
--- A handful of suburbs so the profile step works before the ABS import (INT-006) exists.
--- Ids are placeholders, not ABS SAL codes; the import replaces this table.
-insert into public.suburbs (id, name, state, postcode, lat, lng, timezone, is_city) values
-  (90001, 'Perth', 'WA', '6000', -31.9523, 115.8613, 'Australia/Perth', true),
-  (90002, 'Baldivis', 'WA', '6171', -32.3322, 115.8270, 'Australia/Perth', false),
-  (90003, 'Rockingham', 'WA', '6168', -32.2810, 115.7300, 'Australia/Perth', false),
-  (90004, 'Mandurah', 'WA', '6210', -32.5269, 115.7217, 'Australia/Perth', true),
-  (90005, 'Karratha', 'WA', '6714', -20.7364, 116.8463, 'Australia/Perth', true),
-  (90006, 'Kalgoorlie', 'WA', '6430', -30.7490, 121.4660, 'Australia/Perth', true),
-  (90007, 'Port Hedland', 'WA', '6721', -20.3106, 118.6060, 'Australia/Perth', true),
-  (90008, 'Joondalup', 'WA', '6027', -31.7448, 115.7661, 'Australia/Perth', false)
-on conflict (id) do nothing;
+-- Suburbs come from the ABS import (INT-006, migration 20261126090000_suburbs.sql); the ids below
+-- are SAL codes: 51230 Perth, 50054 Baldivis, 51301 Rockingham, 50890 Mandurah, 50737 Karratha,
+-- 50712 Kalgoorlie, 51259 Port Hedland, 50701 Joondalup.
 
 -- Example listings for the search E2E tests (tests/e2e/search.spec.js). Local and CI only: never
 -- loaded into production (BR-TRU-006). Dates are relative to the day the seed runs, in Perth.
@@ -30,7 +21,7 @@ values ('00000000-0000-0000-0000-00000000e001', '00000000-0000-0000-0000-0000000
 on conflict do nothing;
 -- Room for the 7 open seed listings plus the ones E2E files publish at the same time (list, places).
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, listing_limit)
-values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 90002, 'seed', now(), 20)
+values ('00000000-0000-0000-0000-00000000e001', 'Seed Host', 50054, 'seed', now(), 20)
 on conflict (id) do nothing;
 
 -- An admin for the moderation E2E (UC-040), local and CI only, with the password in
@@ -47,7 +38,7 @@ values ('00000000-0000-0000-0000-00000000ad01', '00000000-0000-0000-0000-0000000
         '{"sub":"00000000-0000-0000-0000-00000000ad01","email":"seed-admin@example.test","email_verified":true}', 'email', now(), now(), now())
 on conflict do nothing;
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-values ('00000000-0000-0000-0000-00000000ad01', 'Seed Admin', 90001, 'seed', now())
+values ('00000000-0000-0000-0000-00000000ad01', 'Seed Admin', 51230, 'seed', now())
 on conflict (id) do nothing;
 
 do $$
@@ -59,14 +50,14 @@ begin
   -- id, suburb, title, type, bathroom, price, offset from the suburb centre, rule, status
   for l in
     select * from (values
-      ('00000000-0000-0000-0000-00000000f001'::uuid, 90002, 'Seed: room free every night', 'private_room', 'own', 250, 0.004, 'from_date', 'active'),
-      ('00000000-0000-0000-0000-00000000f002'::uuid, 90003, 'Seed: entire place, one night taken', 'entire_place', 'own', 420, 0.003, 'from_date', 'active'),
-      ('00000000-0000-0000-0000-00000000f003'::uuid, 90002, 'Seed: room free for half the stay', 'private_room', 'shared', 300, -0.004, 'ranges', 'active'),
-      ('00000000-0000-0000-0000-00000000f004'::uuid, 90002, 'Seed: room free most of the stay', 'private_room', 'ensuite', 280, 0.006, 'ranges', 'active'),
-      ('00000000-0000-0000-0000-00000000f005'::uuid, 90004, 'Seed: room in Mandurah', 'private_room', 'shared', 230, 0.002, 'from_date', 'active'),
-      ('00000000-0000-0000-0000-00000000f006'::uuid, 90005, 'Seed: room in Karratha', 'private_room', 'shared', 350, 0.002, 'from_date', 'active'),
-      ('00000000-0000-0000-0000-00000000f007'::uuid, 90002, 'Seed: draft never shown', 'private_room', 'own', 100, 0.001, 'from_date', 'draft'),
-      ('00000000-0000-0000-0000-00000000f008'::uuid, 90002, 'Seed: paused by the host', 'private_room', 'own', 240, -0.002, 'from_date', 'paused')
+      ('00000000-0000-0000-0000-00000000f001'::uuid, 50054, 'Seed: room free every night', 'private_room', 'own', 250, 0.004, 'from_date', 'active'),
+      ('00000000-0000-0000-0000-00000000f002'::uuid, 51301, 'Seed: entire place, one night taken', 'entire_place', 'own', 420, 0.003, 'from_date', 'active'),
+      ('00000000-0000-0000-0000-00000000f003'::uuid, 50054, 'Seed: room free for half the stay', 'private_room', 'shared', 300, -0.004, 'ranges', 'active'),
+      ('00000000-0000-0000-0000-00000000f004'::uuid, 50054, 'Seed: room free most of the stay', 'private_room', 'ensuite', 280, 0.006, 'ranges', 'active'),
+      ('00000000-0000-0000-0000-00000000f005'::uuid, 50890, 'Seed: room in Mandurah', 'private_room', 'shared', 230, 0.002, 'from_date', 'active'),
+      ('00000000-0000-0000-0000-00000000f006'::uuid, 50737, 'Seed: room in Karratha', 'private_room', 'shared', 350, 0.002, 'from_date', 'active'),
+      ('00000000-0000-0000-0000-00000000f007'::uuid, 50054, 'Seed: draft never shown', 'private_room', 'own', 100, 0.001, 'from_date', 'draft'),
+      ('00000000-0000-0000-0000-00000000f008'::uuid, 50054, 'Seed: paused by the host', 'private_room', 'own', 240, -0.002, 'from_date', 'paused')
     ) as t(id, suburb, title, place_type, bathroom, price, offset_deg, rule, status)
   loop
     insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,

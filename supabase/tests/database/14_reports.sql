@@ -5,7 +5,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(25);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (75001, 'Lindisfarne', 'TAS', -42.8480, 147.3600, 'Australia/Hobart');
+  (975001, 'Lindisfarne', 'TAS', -42.8480, 147.3600, 'Australia/Hobart');
 -- 81 host · 82 seeker · 83 outsider · 84 admin
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at, raw_app_meta_data) values
   ('00000000-0000-0000-0000-000000000081', 'hostb@example.com', now(), '61400000007', now(), now() - interval '90 days', '{}'),
@@ -13,14 +13,14 @@ insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at
   ('00000000-0000-0000-0000-000000000083', 'otherb@example.com', now(), null, null, now() - interval '30 days', '{}'),
   ('00000000-0000-0000-0000-000000000084', 'adminb@example.com', now(), null, null, now() - interval '30 days', '{"role":"admin"}');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000081', 'Bea', 75001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000082', 'Cal', 75001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000083', 'Dee', 75001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000084', 'Eve', 75001, 'test', now());
+  ('00000000-0000-0000-0000-000000000081', 'Bea', 975001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000082', 'Cal', 975001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000083', 'Dee', 975001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000084', 'Eve', 975001, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000008301', '00000000-0000-0000-0000-000000000081', 'Room with a view', 75001,
+  values ('00000000-0000-0000-0000-000000008301', '00000000-0000-0000-0000-000000000081', 'Room with a view', 975001,
     -42.8490, 147.3610, 'private_room', 'own', 230, true, 460, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000008301', '2 Hill Rd', -42.8481, 147.3601);

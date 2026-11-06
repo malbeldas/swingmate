@@ -1,0 +1,84 @@
+# INT-006: arma la migración de suburbios desde el dataset SAL del ABS (ASGS Edition 3, 2021).
+# Manual (Actions → "Importar suburbios (ABS)" → Run workflow) y en cada push que cambie el script
+# o este archivo, para revisar el resultado en el PR. No toca ninguna base: baja el
+# shapefile, confirma la licencia, corre scripts/import-suburbs.mjs y deja la migración como
+# artifact para revisarla y commitearla en un PR. Corre acá porque abs.gov.au no responde desde
+# todas las máquinas.
+name: Importar suburbios (ABS)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/import-suburbs.mjs
+      - .github/workflows/import-suburbs.yml
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    name: Bajar SAL y armar la migración
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PAGE: https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files
+      COPYRIGHT: https://www.abs.gov.au/website-privacy-copyright-and-disclaimer
+      FILE: SAL_2021_AUST_GDA2020_SHP.zip
+      UA: 'Mozilla/5.0 (X11; Linux x86_64) SwingMate suburb import'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Confirmar la licencia (CC BY 4.0)
+        run: |
+          curl -fsSL -A "$UA" "$COPYRIGHT" -o copyright.html
+          if grep -qi 'Creative Commons Attribution 4.0' copyright.html; then
+            echo "La página de copyright del ABS dice Creative Commons Attribution 4.0."
+            grep -oi '[^.<>]\{0,120\}Creative Commons Attribution 4.0[^.<>]\{0,120\}' copyright.html | head -3
+          else
+            echo "::error::No encontré 'Creative Commons Attribution 4.0' en $COPYRIGHT. No se importa sin confirmar la licencia."
+            exit 1
+          fi
+
+      - name: Bajar el shapefile SAL
+        run: |
+          curl -fsSL -A "$UA" "$PAGE" -o page.html || true
+          url=$(grep -oE "href=\"[^\"]*${FILE}\"" page.html 2>/dev/null | head -1 | sed -E 's/^href="//; s/"$//')
+          case "$url" in
+            '') url="$PAGE/$FILE" ;;
+            /*) url="https://www.abs.gov.au$url" ;;
+          esac
+          echo "Bajando $url"
+          curl -fSL -A "$UA" --retry 3 "$url" -o sal.zip
+          ls -lh sal.zip
+          sha256sum sal.zip
+          mkdir sal && unzip -q sal.zip -d sal
+          ls -lh sal
+
+      - name: Armar la migración
+        run: |
+          shp=$(ls sal/*.shp | head -1)
+          dbf=$(ls sal/*.dbf | head -1)
+          mkdir out
+          node --max-old-space-size=6144 scripts/import-suburbs.mjs "$shp" "$dbf" out/suburbs.sql | tee out/summary.txt
+          ls -lh out
+          head -12 out/suburbs.sql
+
+      # La misma migración en el log, comprimida, para quien no llega al almacenamiento de artifacts:
+      #   gh run view <id> --log | sed -n '/BEGIN suburbs.sql.gz/,/END suburbs.sql.gz/p' | ...
+      - name: Migración en el log (gzip + base64)
+        run: |
+          echo "BEGIN suburbs.sql.gz"
+          gzip -9c out/suburbs.sql | base64 -w 0 | fold -w 4000
+          echo
+          echo "END suburbs.sql.gz"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suburbs-migration
+          path: out/
+          retention-days: 7

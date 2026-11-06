@@ -5,16 +5,16 @@ create extension if not exists pgtap with schema extensions;
 select plan(8);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (72301, 'Exmouth', 'WA', -21.9310, 114.1280, 'Australia/Perth');
+  (972301, 'Exmouth', 'WA', -21.9310, 114.1280, 'Australia/Perth');
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
   ('00000000-0000-0000-0000-0000000023a1', 'host23@example.com', now(), '61400000023', now());
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, listing_limit) values
-  ('00000000-0000-0000-0000-0000000023a1', 'Kai', 72301, 'test', now(), 10);
+  ('00000000-0000-0000-0000-0000000023a1', 'Kai', 972301, 'test', now(), 10);
 
 -- b1 rule that excludes · b2 own item that excludes · b3 rule asking for a transfer · b4 inclusive
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from, other_rules, custom_items)
-  select ('00000000-0000-0000-0000-0000000023b' || i)::uuid, '00000000-0000-0000-0000-0000000023a1', 'Room by the gulf ' || i, 72301,
+  select ('00000000-0000-0000-0000-0000000023b' || i)::uuid, '00000000-0000-0000-0000-0000000023a1', 'Room by the gulf ' || i, 972301,
     'private_room', 'own', 250, true, 500, true, 'from_date', current_date, r, c
   from (values
     (1, 'Christians welcome, no Muslims', '{}'::text[]),

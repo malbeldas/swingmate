@@ -5,23 +5,23 @@ create extension if not exists pgtap with schema extensions;
 select plan(19);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (71301, 'Kalamunda', 'WA', -31.9740, 116.0580, 'Australia/Perth');
+  (971301, 'Kalamunda', 'WA', -31.9740, 116.0580, 'Australia/Perth');
 -- 13a1 host, phone and email confirmed · 13a2 another member · 13a3 host with no phone
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
   ('00000000-0000-0000-0000-0000000013a1', 'host13@example.com', now(), '61400000013', now()),
   ('00000000-0000-0000-0000-0000000013a2', 'other13@example.com', now(), null, null),
   ('00000000-0000-0000-0000-0000000013a3', 'nophone13@example.com', now(), null, null);
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000013a1', 'Hana', 71301, 'test', now()),
-  ('00000000-0000-0000-0000-0000000013a2', 'Otto', 71301, 'test', now()),
-  ('00000000-0000-0000-0000-0000000013a3', 'Nell', 71301, 'test', now());
+  ('00000000-0000-0000-0000-0000000013a1', 'Hana', 971301, 'test', now()),
+  ('00000000-0000-0000-0000-0000000013a2', 'Otto', 971301, 'test', now()),
+  ('00000000-0000-0000-0000-0000000013a3', 'Nell', 971301, 'test', now());
 
 -- A complete draft for 13a1 and a half-finished one for 13a3, written the way the wizard writes them.
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000013a1","role":"authenticated"}';
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from)
-  values ('00000000-0000-0000-0000-0000000013b1', '00000000-0000-0000-0000-0000000013a1', 'Room in the hills', 71301,
+  values ('00000000-0000-0000-0000-0000000013b1', '00000000-0000-0000-0000-0000000013a1', 'Room in the hills', 971301,
     'private_room', 'own', 260, true, 520, true, 'from_date', '2026-01-01');
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-0000000013b1', '3 Hidden Rd', -31.9741, 116.0581);
@@ -30,7 +30,7 @@ insert into public.listing_photos (listing_id, storage_path, position, width, he
   from generate_series(0, 2) i;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000013a3","role":"authenticated"}';
 insert into public.listings (id, owner_id, title, suburb_id)
-  values ('00000000-0000-0000-0000-0000000013b3', '00000000-0000-0000-0000-0000000013a3', 'Half a draft', 71301);
+  values ('00000000-0000-0000-0000-0000000013b3', '00000000-0000-0000-0000-0000000013a3', 'Half a draft', 971301);
 
 -- ----- Who may publish --------------------------------------------------------------------------
 select throws_ok(
@@ -101,7 +101,7 @@ update public.listings set status = 'paused' where id = '00000000-0000-0000-0000
 update public.profiles set listing_limit = 1 where id = '00000000-0000-0000-0000-0000000013a1';
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from)
-  values ('00000000-0000-0000-0000-0000000013b2', '00000000-0000-0000-0000-0000000013a1', 'Second room', 71301,
+  values ('00000000-0000-0000-0000-0000000013b2', '00000000-0000-0000-0000-0000000013a1', 'Second room', 971301,
     'private_room', 'shared', 200, true, 400, true, 'from_date', '2026-01-01');
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-0000000013b2', '3 Hidden Rd', -31.9741, 116.0581);

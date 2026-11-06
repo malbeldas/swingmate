@@ -4,7 +4,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(15);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone)
-values (50001, 'Baldivis', 'WA', -32.33, 115.82, 'Australia/Perth');
+values (950001, 'Baldivis', 'WA', -32.33, 115.82, 'Australia/Perth');
 
 -- a1: confirmed email. a2: another confirmed user. a3: email not confirmed yet.
 insert into auth.users (id, email, email_confirmed_at) values
@@ -23,7 +23,7 @@ set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000a1","
 
 select lives_ok(
   $$insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-    values ('00000000-0000-0000-0000-0000000000a1', 'Ana', 50001, 'uat', now())$$,
+    values ('00000000-0000-0000-0000-0000000000a1', 'Ana', 950001, 'uat', now())$$,
   'P-04 owner creates their profile'
 );
 select throws_ok(
@@ -66,7 +66,7 @@ select is((select bio from public.profiles where id = '00000000-0000-0000-0000-0
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000a3","role":"authenticated"}';
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-values ('00000000-0000-0000-0000-0000000000a3', 'Cat', 50001, 'uat', now());
+values ('00000000-0000-0000-0000-0000000000a3', 'Cat', 950001, 'uat', now());
 select is(public.profile_is_ready('00000000-0000-0000-0000-0000000000a3'), false,
   'AC-030-1 profile_is_ready is false while the email is not confirmed');
 reset role;

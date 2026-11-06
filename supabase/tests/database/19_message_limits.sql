@@ -6,20 +6,20 @@ create extension if not exists pgtap with schema extensions;
 select plan(7);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (78201, 'Bicheno', 'TAS', -41.8740, 148.3000, 'Australia/Hobart');
+  (978201, 'Bicheno', 'TAS', -41.8740, 148.3000, 'Australia/Hobart');
 -- 71 host · 72 seeker · 73 another seeker
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at) values
   ('00000000-0000-0000-0000-000000000071', 'bhost@example.com', now(), '61400000071', now(), now() - interval '90 days'),
   ('00000000-0000-0000-0000-000000000072', 'bseek@example.com', now(), null, null, now() - interval '30 days'),
   ('00000000-0000-0000-0000-000000000073', 'bseek2@example.com', now(), null, null, now() - interval '30 days');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000071', 'Bea', 78201, 'test', now()),
-  ('00000000-0000-0000-0000-000000000072', 'Cal', 78201, 'test', now()),
-  ('00000000-0000-0000-0000-000000000073', 'Dee', 78201, 'test', now());
+  ('00000000-0000-0000-0000-000000000071', 'Bea', 978201, 'test', now()),
+  ('00000000-0000-0000-0000-000000000072', 'Cal', 978201, 'test', now()),
+  ('00000000-0000-0000-0000-000000000073', 'Dee', 978201, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000007101', '00000000-0000-0000-0000-000000000071', 'Room by the blowhole', 78201,
+  values ('00000000-0000-0000-0000-000000007101', '00000000-0000-0000-0000-000000000071', 'Room by the blowhole', 978201,
     -41.8750, 148.3010, 'private_room', 'own', 200, true, 400, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000007101', '2 Gulch Rd', -41.8741, 148.3001);

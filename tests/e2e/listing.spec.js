@@ -106,13 +106,13 @@ test('UC-003 E1 a draft or a missing listing shows that the home is no longer av
 
 test('UC-003 from the results, View home opens the detail with the same stay and fit', async ({ page }) => {
   await page.addInitScript(() => { try { localStorage.setItem('swingmate.firstVisitDone', '1'); } catch { /* */ } });
-  await page.goto(`/search.html?place=90002&${stay}`);
+  await page.goto(`/search.html?place=50054&${stay}`);
   const card = page.locator('.result-card').filter({ hasText: 'Seed: entire place, one night taken' });
   await card.getByRole('link', { name: 'View home' }).click();
-  await expect(page).toHaveURL(new RegExp(`listing\\.html\\?id=${ONE_TAKEN}&place=90002&radius=15&in=${perthDay(7)}&out=${perthDay(21)}`));
+  await expect(page).toHaveURL(new RegExp(`listing\\.html\\?id=${ONE_TAKEN}&place=50054&radius=15&in=${perthDay(7)}&out=${perthDay(21)}`));
   await expect(page.locator('#fit-block .fit-badge')).toHaveText('Good date fit');
   await page.getByRole('link', { name: /Back to search/ }).click();
-  await expect(page).toHaveURL(new RegExp(`search\\.html\\?place=90002&radius=15&in=${perthDay(7)}&out=${perthDay(21)}`));
+  await expect(page).toHaveURL(new RegExp(`search\\.html\\?place=50054&radius=15&in=${perthDay(7)}&out=${perthDay(21)}`));
   await expect(page.locator('.result-card')).toHaveCount(2);
 });
 

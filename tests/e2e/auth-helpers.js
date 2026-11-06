@@ -52,7 +52,7 @@ export async function createMember(request, email, name = 'Ana') {
   const profile = await request.post(`${local.url}/rest/v1/profiles`, {
     headers: { apikey: local.anonKey, authorization: `Bearer ${session.access_token}`, 'content-type': 'application/json' },
     data: {
-      id: session.user.id, display_name: name, base_suburb_id: 90001, is_seeking: true, is_hosting: false,
+      id: session.user.id, display_name: name, base_suburb_id: 51230, is_seeking: true, is_hosting: false,
       terms_version: 'uat-2026-11', terms_accepted_at: new Date().toISOString(),
     },
   });

@@ -5,20 +5,20 @@ create extension if not exists pgtap with schema extensions;
 select plan(16);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (77001, 'Kingston', 'TAS', -42.9760, 147.3080, 'Australia/Hobart');
+  (977001, 'Kingston', 'TAS', -42.9760, 147.3080, 'Australia/Hobart');
 -- 61 host · 62 seeker · 63 someone else
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at) values
   ('00000000-0000-0000-0000-000000000061', 'hostm@example.com', now(), '61400000008', now(), now() - interval '90 days'),
   ('00000000-0000-0000-0000-000000000062', 'seekerm@example.com', now(), null, null, now() - interval '30 days'),
   ('00000000-0000-0000-0000-000000000063', 'otherm@example.com', now(), null, null, now() - interval '30 days');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000061', 'Ida', 77001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000062', 'Jai', 77001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000063', 'Kit', 77001, 'test', now());
+  ('00000000-0000-0000-0000-000000000061', 'Ida', 977001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000062', 'Jai', 977001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000063', 'Kit', 977001, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000006301', '00000000-0000-0000-0000-000000000061', 'Room near the beach', 77001,
+  values ('00000000-0000-0000-0000-000000006301', '00000000-0000-0000-0000-000000000061', 'Room near the beach', 977001,
     -42.9770, 147.3090, 'private_room', 'own', 220, true, 440, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000006301', '4 Sand St', -42.9761, 147.3081);

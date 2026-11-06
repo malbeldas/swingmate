@@ -9,16 +9,16 @@ delete from public.analytics_events;
 
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (72901, 'Sandy Bay', 'TAS', -42.9010, 147.3290, 'Australia/Hobart');
+  (972901, 'Sandy Bay', 'TAS', -42.9010, 147.3290, 'Australia/Hobart');
 -- 29a1 host · 29a2 seeker · 29a3 admin
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, raw_app_meta_data) values
   ('00000000-0000-0000-0000-0000000029a1', 'host29@example.com', now(), '61400000029', now(), '{"provider":"email"}'),
   ('00000000-0000-0000-0000-0000000029a2', 'seeker29@example.com', now(), null, null, '{"provider":"google"}'),
   ('00000000-0000-0000-0000-0000000029a3', 'admin29@example.com', now(), null, null, '{"provider":"email","role":"admin"}');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000029a1', 'Hal', 72901, 'test', now()),
-  ('00000000-0000-0000-0000-0000000029a2', 'Sia', 72901, 'test', now()),
-  ('00000000-0000-0000-0000-0000000029a3', 'Ada', 72901, 'test', now());
+  ('00000000-0000-0000-0000-0000000029a1', 'Hal', 972901, 'test', now()),
+  ('00000000-0000-0000-0000-0000000029a2', 'Sia', 972901, 'test', now()),
+  ('00000000-0000-0000-0000-0000000029a3', 'Ada', 972901, 'test', now());
 
 create temp table s (k text primary key, v uuid);
 insert into s values ('tab', '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f'), ('busy', '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e50');
@@ -84,7 +84,7 @@ select ok(exists (select 1 from public.analytics_events where name = 'phone_veri
 
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-0000000029b1', '00000000-0000-0000-0000-0000000029a1', 'Room by the bay', 72901,
+  values ('00000000-0000-0000-0000-0000000029b1', '00000000-0000-0000-0000-0000000029a1', 'Room by the bay', 972901,
     'private_room', 'own', 240, true, 480, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-0000000029b1', '9 Quiet Lane', -42.9011, 147.3291);
