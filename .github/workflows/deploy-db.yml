@@ -6,7 +6,7 @@
 #   SUPABASE_DB_PASSWORD   contraseña de la base del proyecto
 #   SUPABASE_PROJECT_REF   el id del proyecto (lo que va en <ref>.supabase.co)
 #
-# No corre seed.sql (BR-TRU-006) ni `supabase config push`: supabase/config.toml es la
+# No carga los datos de ejemplo (BR-TRU-006) ni corre `supabase config push`: supabase/config.toml es la
 # configuración local y de CI (site_url local, números de prueba, sin captcha), y subirla pisaría
 # la de Auth del proyecto. Esa se cambia en el dashboard.
 name: Deploy de base y funciones
