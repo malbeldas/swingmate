@@ -87,6 +87,14 @@ a { color: var(--navy); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between; }
 .site-footer .analytics-note { display: block; margin-top: var(--s-4); }
 .site-footer .analytics-note[hidden] { display: none; }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+.footer-links a { color: var(--navy); min-height: 24px; display: inline-flex; align-items: center; }
+/* How it works, Safety, Terms and Privacy (#20). */
+.info-page { max-width: 820px; }
+.info-page h1 { font-size: var(--t-h1); }
+.draft-notice { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s-3) var(--s-4); color: var(--navy); }
+.info-body { min-height: 100vh; display: flex; flex-direction: column; }
+.info-body main { flex: 1; }
 
 /* Coming soon page: buttons, pitch band, example card, FAQ (design-system.md tokens only). */
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s-5); border-radius: var(--r-sm); font-weight: 600; text-decoration: none; text-align: center; }
