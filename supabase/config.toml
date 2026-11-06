@@ -277,20 +277,46 @@ content_path = "./supabase/templates/password-reset.html"
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
 enable_signup = false
-# If enabled, users need to confirm their phone number before signing in.
-enable_confirmations = false
-# Template for sending OTP to users
-template = "Your code is {{ .Code }}"
-# Controls the minimum amount of time that must pass before sending another sms otp.
-max_frequency = "5s"
+# The code is always asked (UC-021). With false, Auth would mark the number verified without a code.
+enable_confirmations = true
+# NTF-008, one SMS segment.
+template = "{{ .Code }} is your SwingMate code. It expires in 10 minutes. Never share it with anyone."
+# SEC-09, UC-021 A1: one code every 60 seconds.
+max_frequency = "60s"
 
 # Use pre-defined map of phone number to OTP for testing.
 # Keys are the phone number with country code and without the + prefix.
-# Integration tests: fixed codes, never Twilio (integrations-sms.md).
+# Fixed codes, never Twilio (integrations-sms.md): no SMS leaves for these numbers.
+# 61400000001 to 61400000010: people trying the test environment (UAT), one number each.
+# 614000101xx to 614000104xx: the E2E tests (tests/e2e/phone-helpers.js), one per test, viewport
+# and retry, because a number verified in one account can't be verified in another (AC-021-1).
 [auth.sms.test_otp]
 61400000001 = "123456"
 61400000002 = "123456"
-# 14152127777 = "123456"
+61400000003 = "123456"
+61400000004 = "123456"
+61400000005 = "123456"
+61400000006 = "123456"
+61400000007 = "123456"
+61400000008 = "123456"
+61400000009 = "123456"
+61400000010 = "123456"
+61400010100 = "123456"
+61400010101 = "123456"
+61400010110 = "123456"
+61400010111 = "123456"
+61400010200 = "123456"
+61400010201 = "123456"
+61400010210 = "123456"
+61400010211 = "123456"
+61400010300 = "123456"
+61400010301 = "123456"
+61400010310 = "123456"
+61400010311 = "123456"
+61400010400 = "123456"
+61400010401 = "123456"
+61400010410 = "123456"
+61400010411 = "123456"
 
 # Configure logged in session timeouts.
 # [auth.sessions]

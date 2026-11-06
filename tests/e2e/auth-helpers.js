@@ -80,3 +80,11 @@ export async function startConversation(request, session, listingId, body, stayF
   if (!result?.ok) throw new Error(`start_conversation failed: ${JSON.stringify(result)}`);
   return result.conversation_id;
 }
+
+// UC-021: a test mobile from [auth.sms.test_otp] in supabase/config.toml, written the way a person
+// types it. One per test slot, viewport and retry, since a number verified in one account can't be
+// verified in another (AC-021-1). Every one takes the code TEST_SMS_CODE; no SMS leaves.
+export const TEST_SMS_CODE = '123456';
+export function testMobile(testInfo, slot) {
+  return `0400 010 ${slot}${testInfo.project.name === 'mobile' ? 0 : 1}${Math.min(testInfo.retry, 1)}`;
+}

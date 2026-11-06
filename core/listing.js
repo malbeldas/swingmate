@@ -317,7 +317,6 @@ export const WIZARD_TEXTS = {
   rangesHint: 'Open only on the dates you add. Tap any night below to change it.',
   nightsHint: 'Each square is a night. Tap one to block it (holiday, guest staying) or open it again.',
   verifyPhone: 'Verify your mobile to publish. It takes 30 seconds and keeps fake listings out. People who search see “Phone verified” on your listing. We never show your number.',
-  verifyPhoneSoon: 'Mobile verification opens with the pilot. Your listing is saved as a draft, ready to publish then.',
   declaration: 'The photos and details are real and current. I’ll keep the calendar up to date.',
   saved: 'Saved. You can finish later from this page.',
   saveFailed: 'We couldn’t save this. Check your connection and try again.',
