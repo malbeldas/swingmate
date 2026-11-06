@@ -6,16 +6,16 @@ create extension if not exists pgtap with schema extensions;
 select plan(32);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73602, 'Karratha', 'WA', -20.7364, 116.8463, 'Australia/Perth');
+  (973602, 'Karratha', 'WA', -20.7364, 116.8463, 'Australia/Perth');
 -- 33a0 host · 33a1..33a5 seekers
 insert into auth.users (id, email, email_confirmed_at, created_at)
   select ('00000000-0000-0000-0000-0000000033a' || i)::uuid, 'outcome' || i || '@example.com', now(), now() - interval '60 days'
   from generate_series(0, 5) i;
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at)
-  select id, 'O' || right(id::text, 1), 73602, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000033a%';
+  select id, 'O' || right(id::text, 1), 973602, 'test', now() from auth.users where id::text like '00000000-0000-0000-0000-0000000033a%';
 insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
     bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-0000000033b1', '00000000-0000-0000-0000-0000000033a0', 'Karratha room', 73602,
+  values ('00000000-0000-0000-0000-0000000033b1', '00000000-0000-0000-0000-0000000033a0', 'Karratha room', 973602,
     'private_room', 'own', 250, true, 500, true, 'from_date', current_date - 40, now());
 
 -- c1 is 15 days old · c2 is 10 days old · c3 was already asked · c4 is 25 days old ·

@@ -5,7 +5,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(33);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (78101, 'Swansea', 'TAS', -42.1240, 148.0750, 'Australia/Hobart');
+  (978101, 'Swansea', 'TAS', -42.1240, 148.0750, 'Australia/Hobart');
 -- 61 host · 62 seeker · 63 admin · 64 another admin
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at, raw_app_meta_data) values
   ('00000000-0000-0000-0000-000000000061', 'oyster.host@example.com', now(), '61400000061', now(), now() - interval '90 days', '{"provider":"email"}'),
@@ -13,14 +13,14 @@ insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at
   ('00000000-0000-0000-0000-000000000063', 'admin.one@example.com', now(), null, null, now() - interval '30 days', '{"role":"admin"}'),
   ('00000000-0000-0000-0000-000000000064', 'admin.two@example.com', now(), null, null, now() - interval '30 days', '{"role":"admin"}');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000061', 'Odile', 78101, 'test', now()),
-  ('00000000-0000-0000-0000-000000000062', 'Pip', 78101, 'test', now()),
-  ('00000000-0000-0000-0000-000000000063', 'Una', 78101, 'test', now()),
-  ('00000000-0000-0000-0000-000000000064', 'Vik', 78101, 'test', now());
+  ('00000000-0000-0000-0000-000000000061', 'Odile', 978101, 'test', now()),
+  ('00000000-0000-0000-0000-000000000062', 'Pip', 978101, 'test', now()),
+  ('00000000-0000-0000-0000-000000000063', 'Una', 978101, 'test', now()),
+  ('00000000-0000-0000-0000-000000000064', 'Vik', 978101, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000006101', '00000000-0000-0000-0000-000000000061', 'Oyster Bay cottage room', 78101,
+  values ('00000000-0000-0000-0000-000000006101', '00000000-0000-0000-0000-000000000061', 'Oyster Bay cottage room', 978101,
     -42.1250, 148.0760, 'private_room', 'own', 230, true, 460, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000006101', '9 Esplanade', -42.1241, 148.0751);

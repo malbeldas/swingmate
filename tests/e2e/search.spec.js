@@ -5,8 +5,8 @@ import { requireLocalSupabase } from './auth-helpers.js';
 
 test.beforeAll(requireLocalSupabase);
 
-const BALDIVIS = 90002;
-const KALGOORLIE = 90006;
+const BALDIVIS = 50054;
+const KALGOORLIE = 50712;
 const SEED = {
   allFree: 'Seed: room free every night',
   oneTaken: 'Seed: entire place, one night taken',

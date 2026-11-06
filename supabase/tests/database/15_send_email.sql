@@ -4,13 +4,13 @@ create extension if not exists pgtap with schema extensions;
 select plan(7);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (76001, 'Bellerive', 'TAS', -42.8740, 147.3700, 'Australia/Hobart');
+  (976001, 'Bellerive', 'TAS', -42.8740, 147.3700, 'Australia/Hobart');
 insert into auth.users (id, email, email_confirmed_at, created_at, raw_app_meta_data) values
   ('00000000-0000-0000-0000-000000000071', 'membern@example.com', now(), now() - interval '30 days', '{}'),
   ('00000000-0000-0000-0000-000000000072', 'adminn@example.com', now(), now() - interval '30 days', '{"role":"admin"}');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000071', 'Fin', 76001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000072', 'Gus', 76001, 'test', now());
+  ('00000000-0000-0000-0000-000000000071', 'Fin', 976001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000072', 'Gus', 976001, 'test', now());
 
 insert into public.notification_log (user_id, template, ref_id, status, provider_message_id)
   values ('00000000-0000-0000-0000-000000000072', 'NTF-009', '00000000-0000-0000-0000-0000000000aa', 'sent', 'msg_1');

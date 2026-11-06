@@ -6,7 +6,7 @@ import { SEED_ADMIN, SEED_HOST, authPost, local, requireLocalSupabase, sheet } f
 
 test.beforeAll(requireLocalSupabase);
 
-const PORT_HEDLAND = { id: 90007, lat: -20.3106, lng: 118.6060 };
+const PORT_HEDLAND = { id: 51259, lat: -20.34962, lng: 118.64047 };
 
 async function passwordSession(request, { email, password }) {
   const res = await authPost(request, 'token?grant_type=password', { email, password });

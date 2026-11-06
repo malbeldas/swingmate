@@ -4,19 +4,19 @@ create extension if not exists pgtap with schema extensions;
 select plan(14);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (71001, 'Sandy Bay', 'TAS', -42.8960, 147.3240, 'Australia/Hobart');
+  (971001, 'Sandy Bay', 'TAS', -42.8960, 147.3240, 'Australia/Hobart');
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
   ('00000000-0000-0000-0000-0000000000d1', 'gus@example.com', now(), '61400000002', now()),
   ('00000000-0000-0000-0000-0000000000d2', 'ivy@example.com', now(), null, null);
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000000d1', 'Gus', 71001, 'test', now()),
-  ('00000000-0000-0000-0000-0000000000d2', 'Ivy', 71001, 'test', now());
+  ('00000000-0000-0000-0000-0000000000d1', 'Gus', 971001, 'test', now()),
+  ('00000000-0000-0000-0000-0000000000d2', 'Ivy', 971001, 'test', now());
 insert into public.rosters (user_id, days_on, days_off, anchor_date)
   values ('00000000-0000-0000-0000-0000000000d1', 8, 6, '2026-11-02');
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  select ('00000000-0000-0000-0000-00000000d10' || i)::uuid, '00000000-0000-0000-0000-0000000000d1', 'Room by the river ' || i, 71001,
+  select ('00000000-0000-0000-0000-00000000d10' || i)::uuid, '00000000-0000-0000-0000-0000000000d1', 'Room by the river ' || i, 971001,
     -42.8950, 147.3230, 'private_room', 'own', 260, true, 520, true, 'from_date', '2026-01-01', now()
   from generate_series(1, 4) i;
 insert into public.listing_private (listing_id, address_line, lat, lng)

@@ -5,18 +5,18 @@ create extension if not exists pgtap with schema extensions;
 select plan(8);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (74001, 'Sandy Bay', 'TAS', -42.9000, 147.3300, 'Australia/Hobart');
+  (974001, 'Sandy Bay', 'TAS', -42.9000, 147.3300, 'Australia/Hobart');
 -- 91 host · 92 seeker
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at) values
   ('00000000-0000-0000-0000-000000000091', 'hostr@example.com', now(), '61400000006', now(), now() - interval '90 days'),
   ('00000000-0000-0000-0000-000000000092', 'seekerr@example.com', now(), null, null, now() - interval '30 days');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000091', 'Rita', 74001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000092', 'Jo', 74001, 'test', now());
+  ('00000000-0000-0000-0000-000000000091', 'Rita', 974001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000092', 'Jo', 974001, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000009301', '00000000-0000-0000-0000-000000000091', 'Room by the bay', 74001,
+  values ('00000000-0000-0000-0000-000000009301', '00000000-0000-0000-0000-000000000091', 'Room by the bay', 974001,
     -42.9010, 147.3310, 'private_room', 'own', 260, true, 520, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000009301', '1 Shore St', -42.9001, 147.3301);

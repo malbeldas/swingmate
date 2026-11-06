@@ -5,7 +5,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(39);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (72001, 'Battery Point', 'TAS', -42.8890, 147.3320, 'Australia/Hobart');
+  (972001, 'Battery Point', 'TAS', -42.8890, 147.3320, 'Australia/Hobart');
 -- e1 host · e2 seeker (account a month old) · e3 new seeker · e4 outsider · e5 no Terms yet
 -- e6 email not confirmed · e7 suspended
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at) values
@@ -17,14 +17,14 @@ insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at
   ('00000000-0000-0000-0000-0000000000e6', 'unconfirmed@example.com', null, null, null, now()),
   ('00000000-0000-0000-0000-0000000000e7', 'suspended@example.com', now(), null, null, now() - interval '30 days');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, listing_limit) values
-  ('00000000-0000-0000-0000-0000000000e1', 'Hana', 72001, 'test', now(), 20),
-  ('00000000-0000-0000-0000-0000000000e2', 'Sam', 72001, 'test', now(), 5),
-  ('00000000-0000-0000-0000-0000000000e3', 'Noa', 72001, 'test', now(), 5),
-  ('00000000-0000-0000-0000-0000000000e4', 'Ola', 72001, 'test', now(), 5),
-  ('00000000-0000-0000-0000-0000000000e6', 'Uma', 72001, 'test', now(), 5),
-  ('00000000-0000-0000-0000-0000000000e7', 'Zed', 72001, 'test', now(), 5);
+  ('00000000-0000-0000-0000-0000000000e1', 'Hana', 972001, 'test', now(), 20),
+  ('00000000-0000-0000-0000-0000000000e2', 'Sam', 972001, 'test', now(), 5),
+  ('00000000-0000-0000-0000-0000000000e3', 'Noa', 972001, 'test', now(), 5),
+  ('00000000-0000-0000-0000-0000000000e4', 'Ola', 972001, 'test', now(), 5),
+  ('00000000-0000-0000-0000-0000000000e6', 'Uma', 972001, 'test', now(), 5),
+  ('00000000-0000-0000-0000-0000000000e7', 'Zed', 972001, 'test', now(), 5);
 insert into public.profiles (id, display_name, base_suburb_id) values
-  ('00000000-0000-0000-0000-0000000000e5', 'Tim', 72001);
+  ('00000000-0000-0000-0000-0000000000e5', 'Tim', 972001);
 update public.profiles set status = 'suspended' where id = '00000000-0000-0000-0000-0000000000e7';
 insert into public.rosters (user_id, days_on, days_off, anchor_date)
   values ('00000000-0000-0000-0000-0000000000e2', 14, 7, '2026-11-02');
@@ -32,7 +32,7 @@ insert into public.rosters (user_id, days_on, days_off, anchor_date)
 -- Twelve active listings of e1 (ids ...e201 to ...e212); e212 is then paused.
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  select ('00000000-0000-0000-0000-00000000e' || (200 + i))::uuid, '00000000-0000-0000-0000-0000000000e1', 'Cottage ' || i, 72001,
+  select ('00000000-0000-0000-0000-00000000e' || (200 + i))::uuid, '00000000-0000-0000-0000-0000000000e1', 'Cottage ' || i, 972001,
     -42.8880, 147.3310, 'private_room', 'own', 240, true, 480, true, 'from_date', '2026-01-01', now()
   from generate_series(1, 12) i;
 insert into public.listing_private (listing_id, address_line, lat, lng)

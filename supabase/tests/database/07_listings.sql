@@ -6,9 +6,9 @@ create extension if not exists pgtap with schema extensions;
 select plan(34);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone, is_city) values
-  (70001, 'Hobart', 'TAS', -42.8821, 147.3272, 'Australia/Hobart', true),
-  (70002, 'Sandy Bay', 'TAS', -42.8960, 147.3240, 'Australia/Hobart', false),
-  (70003, 'Launceston', 'TAS', -41.4332, 147.1441, 'Australia/Hobart', true);
+  (970001, 'Hobart', 'TAS', -42.8821, 147.3272, 'Australia/Hobart', true),
+  (970002, 'Sandy Bay', 'TAS', -42.8960, 147.3240, 'Australia/Hobart', false),
+  (970003, 'Launceston', 'TAS', -41.4332, 147.1441, 'Australia/Hobart', true);
 
 -- Hana hosts (ready profile, confirmed phone), Sam searches (ready), Nia has no ready profile.
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at) values
@@ -16,8 +16,8 @@ insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at
   ('00000000-0000-0000-0000-0000000000b2', 'sam@example.com', now(), null, null),
   ('00000000-0000-0000-0000-0000000000b3', 'nia@example.com', now(), null, null);
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-0000000000b1', 'Hana', 70001, 'test', now()),
-  ('00000000-0000-0000-0000-0000000000b2', 'Sam', 70001, 'test', now()),
+  ('00000000-0000-0000-0000-0000000000b1', 'Hana', 970001, 'test', now()),
+  ('00000000-0000-0000-0000-0000000000b2', 'Sam', 970001, 'test', now()),
   ('00000000-0000-0000-0000-0000000000b3', 'Nia', null, null, null);
 
 -- ----- P-07 create -----
@@ -27,7 +27,7 @@ select lives_ok(
   $$insert into public.listings (id, owner_id, title, suburb_id, place_type, bathroom, weekly_price,
       bills_included, bond, furnished, availability_type, available_from)
     values ('00000000-0000-0000-0000-00000000c001', '00000000-0000-0000-0000-0000000000b1',
-      'Quiet room near the bay', 70002, 'private_room', 'own', 280, true, 560, true, 'from_date', '2026-01-01')$$,
+      'Quiet room near the bay', 970002, 'private_room', 'own', 280, true, 560, true, 'from_date', '2026-01-01')$$,
   'P-07 a member with a ready profile creates a draft'
 );
 select throws_ok(
@@ -124,9 +124,9 @@ select lives_ok(
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
   values
-  ('00000000-0000-0000-0000-00000000c002', '00000000-0000-0000-0000-0000000000b1', 'Room in Launceston', 70003,
+  ('00000000-0000-0000-0000-00000000c002', '00000000-0000-0000-0000-0000000000b1', 'Room in Launceston', 970003,
     -41.4340, 147.1450, 'private_room', 'shared', 200, true, 400, true, 'from_date', '2026-01-01', now()),
-  ('00000000-0000-0000-0000-00000000c003', '00000000-0000-0000-0000-0000000000b1', 'Draft in Hobart', 70001,
+  ('00000000-0000-0000-0000-00000000c003', '00000000-0000-0000-0000-0000000000b1', 'Draft in Hobart', 970001,
     -42.8830, 147.3280, 'private_room', 'shared', 200, true, 400, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng) values
   ('00000000-0000-0000-0000-00000000c002', '2 Example St', -41.4335, 147.1445);

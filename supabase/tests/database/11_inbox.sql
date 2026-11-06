@@ -5,22 +5,22 @@ create extension if not exists pgtap with schema extensions;
 select plan(20);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (73001, 'New Town', 'TAS', -42.8580, 147.3100, 'Australia/Hobart');
+  (973001, 'New Town', 'TAS', -42.8580, 147.3100, 'Australia/Hobart');
 -- f1 host · f2 seeker · f3 someone else
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at) values
   ('00000000-0000-0000-0000-0000000000f1', 'hostf@example.com', now(), '61400000004', now(), now() - interval '90 days'),
   ('00000000-0000-0000-0000-0000000000f2', 'seekerf@example.com', now(), '61400000005', now(), now() - interval '2 days'),
   ('00000000-0000-0000-0000-0000000000f3', 'otherf@example.com', now(), null, null, now() - interval '40 days');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at, bio, work_type) values
-  ('00000000-0000-0000-0000-0000000000f1', 'Ruth', 73001, 'test', now(), null, null),
-  ('00000000-0000-0000-0000-0000000000f2', 'Kai', 73001, 'test', now(), 'Quiet, on site most of the month.', 'fifo'),
-  ('00000000-0000-0000-0000-0000000000f3', 'Lee', 73001, 'test', now(), null, null);
+  ('00000000-0000-0000-0000-0000000000f1', 'Ruth', 973001, 'test', now(), null, null),
+  ('00000000-0000-0000-0000-0000000000f2', 'Kai', 973001, 'test', now(), 'Quiet, on site most of the month.', 'fifo'),
+  ('00000000-0000-0000-0000-0000000000f3', 'Lee', 973001, 'test', now(), null, null);
 insert into public.rosters (user_id, days_on, days_off, anchor_date)
   values ('00000000-0000-0000-0000-0000000000f2', 8, 6, '2026-11-02');
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-00000000f301', '00000000-0000-0000-0000-0000000000f1', 'Sunny room near the rivulet', 73001,
+  values ('00000000-0000-0000-0000-00000000f301', '00000000-0000-0000-0000-0000000000f1', 'Sunny room near the rivulet', 973001,
     -42.8570, 147.3090, 'private_room', 'own', 250, true, 500, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-00000000f301', '9 Quiet Close', -42.8581, 147.3101);

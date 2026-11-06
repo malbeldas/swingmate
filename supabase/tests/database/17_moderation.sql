@@ -5,20 +5,20 @@ create extension if not exists pgtap with schema extensions;
 select plan(28);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
-  (78001, 'Sorell', 'TAS', -42.7810, 147.5620, 'Australia/Hobart');
+  (978001, 'Sorell', 'TAS', -42.7810, 147.5620, 'Australia/Hobart');
 -- 51 host · 52 seeker · 53 admin
 insert into auth.users (id, email, email_confirmed_at, phone, phone_confirmed_at, created_at, raw_app_meta_data) values
   ('00000000-0000-0000-0000-000000000051', 'hosta@example.com', now(), '61400000009', now(), now() - interval '90 days', '{}'),
   ('00000000-0000-0000-0000-000000000052', 'seekera@example.com', now(), null, null, now() - interval '30 days', '{}'),
   ('00000000-0000-0000-0000-000000000053', 'admina@example.com', now(), null, null, now() - interval '30 days', '{"role":"admin"}');
 insert into public.profiles (id, display_name, base_suburb_id, terms_version, terms_accepted_at) values
-  ('00000000-0000-0000-0000-000000000051', 'Lou', 78001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000052', 'Max', 78001, 'test', now()),
-  ('00000000-0000-0000-0000-000000000053', 'Ned', 78001, 'test', now());
+  ('00000000-0000-0000-0000-000000000051', 'Lou', 978001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000052', 'Max', 978001, 'test', now()),
+  ('00000000-0000-0000-0000-000000000053', 'Ned', 978001, 'test', now());
 
 insert into public.listings (id, owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from, accuracy_declared_at)
-  values ('00000000-0000-0000-0000-000000005301', '00000000-0000-0000-0000-000000000051', 'Cosy room by the bay', 78001,
+  values ('00000000-0000-0000-0000-000000005301', '00000000-0000-0000-0000-000000000051', 'Cosy room by the bay', 978001,
     -42.7820, 147.5630, 'private_room', 'own', 210, true, 420, true, 'from_date', '2026-01-01', now());
 insert into public.listing_private (listing_id, address_line, lat, lng)
   values ('00000000-0000-0000-0000-000000005301', '6 Bay Rd', -42.7811, 147.5621);
@@ -131,7 +131,7 @@ select throws_ok(format($$ insert into public.messages (conversation_id, sender_
   '42501', 'suspended', 'AC-040-4 a suspended account cannot send messages');
 select throws_ok($$ insert into public.listings (owner_id, title, suburb_id, public_lat, public_lng, place_type, bathroom,
     weekly_price, bills_included, bond, furnished, availability_type, available_from)
-  values ('00000000-0000-0000-0000-000000000051', 'Another room', 78001, -42.78, 147.56, 'private_room', 'own', 200, true, 400, true, 'from_date', '2026-01-01') $$,
+  values ('00000000-0000-0000-0000-000000000051', 'Another room', 978001, -42.78, 147.56, 'private_room', 'own', 200, true, 400, true, 'from_date', '2026-01-01') $$,
   '42501', null, 'AC-040-4 nor create a listing to publish');
 reset role;
 

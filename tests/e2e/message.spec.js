@@ -40,7 +40,7 @@ async function conversationsOf(request, session) {
 }
 
 test('UC-004 the box brings the dates of the search and the host name', async ({ page }) => {
-  await page.goto(`/listing.html?id=${ALWAYS_FREE}&place=90002&in=${IN}&out=${OUT}`);
+  await page.goto(`/listing.html?id=${ALWAYS_FREE}&place=50054&in=${IN}&out=${OUT}`);
   await expect(box(page).getByRole('heading', { name: 'Message Seed Host' })).toBeVisible();
   await expect(box(page).getByLabel('Move in')).toHaveValue(IN);
   await expect(box(page).getByLabel('Move out')).toHaveValue(OUT);
