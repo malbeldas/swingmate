@@ -75,6 +75,19 @@ test('BR-TRU-002 the host block shows name, phone verified and member since', as
   await expect(host).toContainText(/Member since \w{3} \d{4}/);
 });
 
+test('BR-TRU-008 the detail shows "Before you agree" open, with its four tips', async ({ page }) => {
+  await page.goto(`/listing.html?id=${ONE_TAKEN}`);
+  const guide = page.locator('#before-you-agree');
+  await expect(guide).toHaveAttribute('open', '');
+  await expect(guide.locator('summary')).toHaveText('Before you agree');
+  await expect(guide.locator('li')).toHaveText([
+    'See the place, or do a video call, before you pay anything.',
+    'Show your ID only in person, never in the chat.',
+    'Put what you agree in writing.',
+    'Lodge the bond with the WA Bond Administrator when one applies.',
+  ]);
+});
+
 test('INT-005 when the tiles fail the map hides and the suburb text stays', async ({ page }) => {
   await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.route('https://tile.openstreetmap.org/**', (route) => route.abort());

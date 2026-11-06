@@ -65,6 +65,11 @@ test('AC-023-1 AC-023-2 the host sees the new inquiry unread, with the card and 
   expect(await page.content()).not.toContain(seeker.email);
   // UC-033 step 4: opening marks it read.
   await expect(row.getByRole('img', { name: 'Unread' })).toHaveCount(0);
+  // BR-TRU-008: "Before you agree" is at hand in the conversation.
+  const guide = page.locator('#before-you-agree');
+  await guide.locator('summary').click();
+  await expect(guide.locator('li').first()).toHaveText('See the place, or do a video call, before you pay anything.');
+  await expect(guide.locator('li')).toHaveCount(4);
 });
 
 test('AC-033-1 AC-033-2 a reply shows in the other open session within 3 seconds, phone number and all', async ({ browser, request }, testInfo) => {

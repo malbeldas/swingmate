@@ -1,6 +1,7 @@
 // Listing detail (UC-003). Layout and texts from the prototype's detail screen (frontend-migration.md).
 // get_listing returns the public listing with its nights; the fit, the reasons and the 12-week
 // calendar come from one calculation in core/ (BR-FIT-005, AC-003-3).
+import { beforeYouAgree } from '../ui/before-you-agree.js';
 import { initEvents, trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
@@ -245,6 +246,7 @@ async function render() {
     view.editButton && el('a', { class: 'btn btn-primary btn-block', id: 'edit-listing', href: `list.html?id=${encodeURIComponent(l.id)}` }, TEXTS.editListing),
     view.messageBox && messageBox(l), // BR-LST-008: never on the host's own listing
     await hostBlock(view, l),
+    beforeYouAgree({ open: true }), // BR-TRU-008
     !view.editButton && el('button', { type: 'button', class: 'btn-text report-link', id: 'report-listing', onclick: reportListing }, REPORT_TEXTS.reportListing),
   ];
   main.replaceChildren(...[

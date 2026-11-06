@@ -1,6 +1,7 @@
 // Inbox and conversation (UC-023, UC-033). Layout and texts from the prototype's Messages screens
 // (frontend-migration.md). The list comes from my_conversations, the host's card from inquirer_card,
 // the messages straight from the table (P-17) and new ones through Supabase Realtime (AC-033-1).
+import { beforeYouAgree } from '../ui/before-you-agree.js';
 import { initEvents, trackEvent } from '../events.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
@@ -175,6 +176,7 @@ function conversationSection(db) {
     ...tools(db, row),
     head.banner && el('p', { class: 'status-label', id: 'listing-status', role: 'status' }, head.banner),
     row.role === 'host' && cardBlock(inquirerView(state.card)),
+    beforeYouAgree(), // BR-TRU-008, for both people
     thread(),
     composer(head));
 }
