@@ -492,3 +492,66 @@ export function nextPhotoPosition(photos) {
   for (let i = 0; i < PHOTOS_MAX; i++) if (!used.has(i)) return i;
   return -1;
 }
+
+// ---------------------------------------------------------------------------------------------
+// My places (UC-022, #14). Labels from the prototype's host dashboard.
+// ---------------------------------------------------------------------------------------------
+
+export const PLACE_STATUS_LABELS = {
+  active: 'Live',
+  paused: 'Paused',
+  filled: 'Filled',
+  draft: 'Draft',
+  hidden: 'Hidden by SwingMate',
+};
+
+export const PLACES_TEXTS = {
+  title: 'My places',
+  listNew: '+ List a new place',
+  none: 'You haven’t listed a place yet.',
+  edit: 'Edit',
+  finish: 'Finish listing',
+  calendar: 'Calendar',
+  closeCalendar: 'Close calendar',
+  pause: 'Pause',
+  resume: 'Resume',
+  fill: 'Mark as filled',
+  reactivate: 'Reactivate',
+  remove: 'Delete',
+  confirmRemove: 'Delete this listing? People who search won’t see it again. Your conversations stay.',
+  confirmRemoveYes: 'Yes, delete it',
+  keep: 'Keep it',
+  upToDate: 'My calendar is up to date',
+  hidden: (reason) => `SwingMate hid this listing${reason ? `: ${reason}` : ''}. You can’t reactivate it. Write to support if you think it’s a mistake.`,
+  failed: 'That didn’t work. Try again.',
+  draft: 'Not published yet',
+};
+
+// What each status lets the host do (BR-LST-002, P-08, AC-022-3: nothing on a hidden listing).
+export function placeActions(status) {
+  const none = { edit: false, finish: false, calendar: false, pause: false, resume: false, fill: false, reactivate: false, remove: false };
+  switch (status) {
+    case 'active': return { ...none, edit: true, calendar: true, pause: true, fill: true, remove: true };
+    case 'paused': return { ...none, edit: true, calendar: true, resume: true, fill: true, remove: true };
+    case 'filled': return { ...none, edit: true, calendar: true, reactivate: true, remove: true };
+    case 'draft': return { ...none, finish: true, remove: true };
+    default: return none;
+  }
+}
+
+// "Available 41 of the next 84 nights · 2 conversations" (prototype: "Available N of the next 56 days").
+export function placeSummary(row) {
+  if (row.status === 'draft') return PLACES_TEXTS.draft;
+  const n = row.conversations ?? 0;
+  const talks = n === 0 ? 'no messages yet' : n === 1 ? '1 conversation' : `${n} conversations`;
+  if (!row.nights) return talks;
+  const free = [...row.nights].filter((c) => c === '1').length;
+  return `Available ${free} of the next ${row.nights.length} nights · ${talks}`;
+}
+
+// What an exception change means for listing_availability_exceptions: the row to upsert for that
+// night, or null to delete it.
+export function exceptionChange(exceptions, night) {
+  const e = (exceptions ?? []).find((x) => x.night === night);
+  return e ? { night, available: e.available } : null;
+}

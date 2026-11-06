@@ -425,3 +425,23 @@ label.btn { cursor: pointer; }
   .range-row .btn-text { grid-column: auto; }
   .wizard-nav #save-later { order: 0; width: auto; }
 }
+
+/* My places (UC-022, #14) */
+.place-card { border-top: 1px solid var(--line); padding-top: var(--s-4); }
+.place-card:first-child { border-top: 0; padding-top: 0; }
+.place-top { display: flex; gap: var(--s-3); align-items: flex-start; width: 100%; }
+.place-cover { flex: none; width: 96px; height: 72px; border-radius: var(--r-sm); object-fit: cover; background: var(--sand); }
+.place-text { flex: 1; min-width: 0; }
+.place-title-row { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+.place-title-row h3 { margin: 0; font-size: var(--t-body); line-height: var(--t-body-lh); }
+.place-title-row h3 a { color: inherit; }
+.place-status { border-radius: var(--r-pill); padding: 2px var(--s-3); font-size: var(--t-micro); font-weight: 700; background: var(--teal-soft); color: var(--teal-ink); }
+.place-status.paused, .place-status.draft { background: var(--sand); color: var(--muted); }
+.place-status.filled, .place-status.hidden { background: var(--peach-soft); color: var(--peach-ink); }
+.place-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+.place-actions .btn-sm { border: 0; }
+.place-actions .btn-secondary.btn-sm { border: 1.5px solid var(--navy); }
+.place-actions p { width: 100%; margin: 0; }
+.place-remove { color: var(--danger); }
+.place-calendar:empty { display: none; }
+.place-calendar { width: 100%; max-width: 560px; display: grid; gap: var(--s-3); }

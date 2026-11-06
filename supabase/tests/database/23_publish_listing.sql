@@ -91,9 +91,9 @@ select is(public.publish_listing('00000000-0000-0000-0000-0000000013b1', true), 
 update public.listings set status = 'paused' where id = '00000000-0000-0000-0000-0000000013b1';
 select is(public.publish_listing('00000000-0000-0000-0000-0000000013b1', false), '{"ok": true}'::jsonb,
   'BR-LST-003 a paused listing comes back without making the statement again');
-update public.listings set status = 'filled' where id = '00000000-0000-0000-0000-0000000013b1';
+update public.listings set status = 'removed' where id = '00000000-0000-0000-0000-0000000013b1';
 select is(public.publish_listing('00000000-0000-0000-0000-0000000013b1', true) ->> 'reason', 'status',
-  'BR-LST-002 a filled listing does not go live from here');
+  'BR-LST-002 a removed listing does not go live from here');
 reset role;
 
 -- ----- Limit and suspension ---------------------------------------------------------------------

@@ -4,9 +4,9 @@ import { listingNights } from '../../core/availability.js';
 import { makeRoster } from '../../core/roster.js';
 import { REPHRASE_RULES } from '../../core/text-checks.js';
 import {
-  calendarCheckDue, calendarUpdatedText, canPublish, checkPhotoFile, conversationView, exceptionsToRows, extrasLabels,
+  calendarCheckDue, calendarUpdatedText, canPublish, checkPhotoFile, conversationView, exceptionChange, exceptionsToRows, extrasLabels,
   FEATURES, firstIncompleteStep, LISTING_LIMIT, listingFromRow, listingLimitReached, listingPhotoPath, listingToRow,
-  listingView, nextBlockedText, nextPhotoPosition, PERKS, PHOTOS_MAX, publishIssues, publishResultText, rangesToRows,
+  listingView, nextBlockedText, nextPhotoPosition, PERKS, PHOTOS_MAX, PLACE_STATUS_LABELS, placeActions, PLACES_TEXTS, placeSummary, publishIssues, publishResultText, rangesToRows,
   resizeDimensions, saveIssues, STEP_TIPS, STEP_TITLES, stepIssues, stepLabel, TEXTS, toggleNight, TOTAL_STEPS, WIZARD_TEXTS,
 } from '../../core/listing.js';
 
@@ -310,4 +310,28 @@ test('SEC-18 photo paths use the listing id and a uuid, positions 0 to 11', () =
   assert.equal(nextPhotoPosition([]), 0);
   assert.equal(nextPhotoPosition([{ position: 0 }, { position: 2 }]), 1);
   assert.equal(nextPhotoPosition(Array.from({ length: PHOTOS_MAX }, (_, i) => ({ position: i }))), -1);
+});
+
+// ----- My places (#14) ---------------------------------------------------------------------------
+
+test('AC-022-3 BR-LST-002 what each status lets the host do', () => {
+  const on = (s) => Object.entries(placeActions(s)).filter(([, v]) => v).map(([k]) => k).sort();
+  assert.deepEqual(on('active'), ['calendar', 'edit', 'fill', 'pause', 'remove']);
+  assert.deepEqual(on('paused'), ['calendar', 'edit', 'fill', 'remove', 'resume']);
+  assert.deepEqual(on('filled'), ['calendar', 'edit', 'reactivate', 'remove']);
+  assert.deepEqual(on('draft'), ['finish', 'remove']);
+  assert.deepEqual(on('hidden'), [], 'a hidden listing can only be looked at');
+  assert.equal(PLACE_STATUS_LABELS.active, 'Live');
+});
+
+test('UC-022 the summary under each place', () => {
+  assert.equal(placeSummary({ status: 'active', nights: '1101', conversations: 2 }), 'Available 3 of the next 4 nights · 2 conversations');
+  assert.equal(placeSummary({ status: 'paused', nights: '0', conversations: 1 }), 'Available 0 of the next 1 nights · 1 conversation');
+  assert.equal(placeSummary({ status: 'active', nights: null, conversations: 0 }), 'no messages yet');
+  assert.equal(placeSummary({ status: 'draft' }), PLACES_TEXTS.draft);
+});
+
+test('AC-022-1 a tap becomes one row to write or to delete', () => {
+  assert.deepEqual(exceptionChange([{ night: '2026-12-05', available: false }], '2026-12-05'), { night: '2026-12-05', available: false });
+  assert.equal(exceptionChange([], '2026-12-05'), null);
 });
