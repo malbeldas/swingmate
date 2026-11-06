@@ -120,3 +120,15 @@ export function publicCardLine({ workType, baseSuburb, roster, phoneVerified }) 
 export function publicBioText(bio) {
   return String(bio ?? '').trim() || 'No bio yet. A line about you helps hosts say yes.';
 }
+
+// BR-TRU-008: the fixed "Before you agree" guide, in every conversation and on every listing
+// (UC-003, UC-023, UC-033). The final wording is validated by the lawyer before the pilot (Q-01).
+export const BEFORE_YOU_AGREE = {
+  title: 'Before you agree',
+  tips: [
+    'See the place, or do a video call, before you pay anything.',
+    'Show your ID only in person, never in the chat.',
+    'Put what you agree in writing.',
+    'Lodge the bond with the WA Bond Administrator when one applies.',
+  ],
+};

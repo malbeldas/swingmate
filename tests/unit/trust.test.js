@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { makeRoster } from '../../core/roster.js';
 import {
   hostFacts, isNewMember, memberSince, profileIssues, responseTimeText, seekerActivity, toPublicProfile, trustBadges, publicCardLine, publicBioText, WORK_TYPE_LABELS,
+  BEFORE_YOU_AGREE,
 } from '../../core/trust.js';
 
 const ROSTER = makeRoster({ daysOn: 8, daysOff: 6, anchor: '2026-11-02' });
@@ -83,4 +84,13 @@ test('BR-ACC-004 and BR-TRU-003 the line hosts see carries only public facts', (
   assert.equal(publicBioText('  '), 'No bio yet. A line about you helps hosts say yes.');
   assert.equal(publicBioText(' Quiet and tidy '), 'Quiet and tidy');
   assert.deepEqual(Object.keys(WORK_TYPE_LABELS), ['fifo', 'dido', 'bibo', 'other']);
+});
+
+test('BR-TRU-008 "Before you agree" has the four fixed tips, in the order of the rule', () => {
+  assert.equal(BEFORE_YOU_AGREE.title, 'Before you agree');
+  assert.equal(BEFORE_YOU_AGREE.tips.length, 4);
+  assert.match(BEFORE_YOU_AGREE.tips[0], /video call, before you pay/);
+  assert.match(BEFORE_YOU_AGREE.tips[1], /ID only in person, never in the chat/);
+  assert.match(BEFORE_YOU_AGREE.tips[2], /in writing/);
+  assert.match(BEFORE_YOU_AGREE.tips[3], /WA Bond Administrator/);
 });

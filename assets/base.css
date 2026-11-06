@@ -302,6 +302,10 @@ label.btn { cursor: pointer; }
 .conversation-head h2 { font-size: var(--t-h3, 1.125rem); }
 .conversation-head h2 a { color: inherit; }
 .inquirer-card { background: var(--cream); border-radius: var(--r-sm); padding: var(--s-3); }
+/* BR-TRU-008 "Before you agree", on the listing and in each conversation. */
+.before-agree { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s-3) var(--s-4); }
+.before-agree summary { cursor: pointer; font-weight: 600; min-height: 24px; }
+.before-agree ul { margin: var(--s-2) 0 0; padding-left: var(--s-4); display: grid; gap: var(--s-1); }
 .requested-fit { font-weight: 600; font-size: var(--t-small); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); }
 .requested-fit.good { background: var(--good-soft); color: var(--teal-ink); }
 .requested-fit.warn { background: var(--peach-soft); color: var(--peach-ink); }
