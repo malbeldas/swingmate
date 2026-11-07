@@ -1,0 +1,12 @@
+{
+  "con_costo": [
+    "gh workflow run",
+    "supabase db push",
+    "supabase db reset --linked",
+    "supabase functions deploy",
+    "supabase secrets",
+    "api\\.twilio\\.com",
+    "api\\.resend\\.com"
+  ],
+  "secretos": []
+}
