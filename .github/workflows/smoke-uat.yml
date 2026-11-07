@@ -1,0 +1,62 @@
+# Chequeo de humo del ambiente publicado (UAT): solo lectura y solo con valores públicos (la URL y
+# la publishable key de app/config.js). Manual (Actions → "Chequeo del sitio publicado" → Run
+# workflow), al cambiar este archivo y después de cada deploy de la base.
+name: Chequeo del sitio publicado
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy de base y funciones']
+    types: [completed]
+  push:
+    branches-ignore: [main]
+    paths:
+      - .github/workflows/smoke-uat.yml
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Sitio y base responden
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Leer la configuración pública
+        run: |
+          url=$(grep -oE "url: 'https://[a-z0-9]+\.supabase\.co'" app/config.js | cut -d"'" -f2)
+          key=$(grep -oE "anonKey: '[^']+'" app/config.js | cut -d"'" -f2)
+          test -n "$url" && test -n "$key" || { echo "::error::app/config.js no tiene URL o clave de producción"; exit 1; }
+          echo "SB_URL=$url" >> "$GITHUB_ENV"
+          echo "SB_KEY=$key" >> "$GITHUB_ENV"
+
+      - name: swingmate.au sirve la web conectada a la base
+        run: |
+          curl -fsS https://swingmate.au/ -o home.html && grep -q '<title>' home.html
+          curl -fsS https://swingmate.au/app/config.js | grep -q "$SB_URL" \
+            || { echo "::error::swingmate.au todavía no sirve la configuración con la base (¿falta que Pages publique?)"; exit 1; }
+          echo "OK: swingmate.au apunta a $SB_URL"
+
+      - name: La base responde con la clave pública (INT-006, P-01)
+        run: |
+          h=(-H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY")
+          baldivis=$(curl -fsS "${h[@]}" "$SB_URL/rest/v1/suburbs?select=id,name,state&id=eq.50054")
+          echo "$baldivis"
+          echo "$baldivis" | grep -q '"name":"Baldivis","state":"WA"' || { echo "::error::No encontré Baldivis, WA (50054)"; exit 1; }
+          total=$(curl -fsS -o /dev/null -D - "${h[@]}" -H 'Prefer: count=exact' -H 'Range: 0-0' "$SB_URL/rest/v1/suburbs?select=id" | grep -i '^content-range' | sed 's/.*\///' | tr -d '\r')
+          echo "Suburbios: $total"
+          test "$total" -gt 15000 || { echo "::error::Hay $total suburbios, esperaba más de 15.000"; exit 1; }
+
+      - name: Nada privado se lee con la clave pública (P-31, BR-TRU-003)
+        run: |
+          code=$(curl -sS -o body.txt -w '%{http_code}' -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" "$SB_URL/rest/v1/phone_code_events?select=id&limit=1")
+          echo "phone_code_events: HTTP $code $(head -c 200 body.txt)"
+          if [ "$code" = 200 ] && [ "$(cat body.txt)" != "[]" ]; then echo "::error::phone_code_events devolvió filas"; exit 1; fi
+
+      - name: Auth acepta email y celular de prueba
+        run: |
+          curl -fsS -H "apikey: $SB_KEY" "$SB_URL/auth/v1/settings" | tee settings.json | head -c 600; echo
+          grep -q '"email":true' settings.json || echo "::warning::El login con email está apagado en Auth"
+          grep -q '"phone":true' settings.json || echo "::warning::El proveedor Phone está apagado en Auth"
