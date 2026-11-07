@@ -4,12 +4,17 @@ import { test, expect } from '@playwright/test';
 
 const GA_ID = 'G-TEST12345';
 
-// Serves the repo as https://swingmate.au, with a measurement ID in the page.
-async function serveAsSwingmate(page, baseURL) {
+// Serves the repo as https://swingmate.au, with a measurement ID in the page. With database: false,
+// app/config.js has no production values, like the page before the site had a database.
+async function serveAsSwingmate(page, baseURL, { database = true } = {}) {
   const scripts = [];
   await page.route('https://swingmate.au/**', async (route) => {
     const url = new URL(route.request().url());
     const response = await route.fetch({ url: `${baseURL}${url.pathname}` });
+    if (url.pathname === '/app/config.js' && !database) {
+      const js = (await response.text()).replace(/const PRODUCTION = \{[\s\S]*?\};/, "const PRODUCTION = { url: '', anonKey: '', turnstileSiteKey: '' };");
+      return route.fulfill({ response, body: js });
+    }
     if (url.pathname !== '/') return route.fulfill({ response });
     const html = (await response.text()).replace('<meta name="ga-measurement-id" content="">', `<meta name="ga-measurement-id" content="${GA_ID}">`);
     return route.fulfill({ response, body: html });
@@ -34,10 +39,18 @@ test('DEC-019 without the published domain and an ID, Google Analytics never loa
   expect(await page.evaluate(() => window.dataLayer)).toBeUndefined();
 });
 
+test('DEC-019 on swingmate.au with the database configured, GA4 never loads even with an ID', async ({ page, baseURL }) => {
+  const scripts = await serveAsSwingmate(page, baseURL);
+  await page.goto('https://swingmate.au/');
+  await expect(page.locator('#analytics-note')).toBeHidden();
+  expect(scripts).toEqual([]);
+  expect(await page.evaluate(() => window.dataLayer)).toBeUndefined();
+});
+
 test('DEC-019 on swingmate.au GA4 gets a clean address and only the listed events', async ({ page, baseURL }) => {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  const scripts = await serveAsSwingmate(page, baseURL);
+  const scripts = await serveAsSwingmate(page, baseURL, { database: false });
   await page.goto('https://swingmate.au/?utm_source=instagram&utm_campaign=bio&token_hash=secret#faq');
 
   await expect(page.locator('#analytics-note')).toBeVisible();
