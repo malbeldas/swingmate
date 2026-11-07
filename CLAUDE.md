@@ -167,6 +167,26 @@ Si la tarea introduce contexto nuevo (una regla, un caso de error, un AC, una de
 6. Correr `npm test`, `supabase test db` y `npx playwright test` antes del PR.
 7. Abrir el PR con `Closes #<N>` y esperar CI en verde. No mergear: lo hace Maxi.
 
+## 8. Riesgo, revisión y subagentes
+
+> Viene de `malbeldas/prompts` `base/`. Las guardas de `.claude/` bloquean lo prohibido; esta sección dice cuándo usar cada cosa.
+
+**Al empezar cada issue, declarar en el plan el riesgo y el modo.**
+
+| Riesgo | Qué es | Antes de pedir el merge |
+|---|---|---|
+| R0 | Textos, docs, estilos, tests | CI en verde |
+| R1 | Lógica y pantallas comunes | CI en verde; `revisor-riesgo` si el PR pasa de 800 líneas |
+| R2 | Toca un área sensible, aunque sea una línea | CI en verde + `revisor-riesgo` obligatorio |
+
+- **Áreas sensibles de este proyecto:** migraciones y RLS (`supabase/migrations`), Edge Functions (`supabase/functions`), login y sesión, datos personales (roster, ubicación, teléfono, chat), moderación, envíos por email o SMS (Resend, Twilio), `deploy-db.yml` y secretos.
+- **Modo:** por defecto se trabaja sin subagentes. Si el issue toca 2 capas o más y se estima en más de 800 líneas, o en más de 3.000, proponer partirlo antes de empezar. Las líneas generadas por script no cuentan.
+- **Encargo al revisor:** issue, riesgo, `base <sha> · rama · head <sha>` y áreas tocadas. Una pasada completa; si hubo correcciones, otra solo sobre el diff. Sin pasadas de rutina.
+- **Hallazgos [alta]:** se corrigen, o se decide con el humano, antes del merge.
+- **Cupo del plan:** antes de lanzar un subagente, mirar el uso de la cuenta. Si el semanal va más de 10 puntos por encima de lo transcurrido de la semana, o el de 5 horas pasa del 70 %, solo se revisa R2. Por encima del 90 %, no se lanzan subagentes: se deja el trabajo prolijo y lo pendiente anotado en el issue. R2 nunca se saltea por cupo: el PR espera.
+- **Descripción del PR:** una línea `Riesgo: R? · Revisor: <veredicto> o no aplica · Cupo semanal: <inicio> → <fin>`.
+- **Si una guarda bloquea algo,** no se rodea: se reporta.
+
 ---
 
 *Documento vivo. Si encontrás un caso recurrente no cubierto, proponé adición a este archivo antes que improvisar.*
