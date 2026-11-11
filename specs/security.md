@@ -56,13 +56,13 @@
 - **SEC-01:** login con Supabase Auth: Google (OAuth) o email + contraseña con código de 6 dígitos por email (`BR-ACC-002`). Mientras el email no esté confirmado, las políticas de escritura de mensajes y avisos lo rechazan.
 - **SEC-02:** la sesión es el JWT de Supabase con renovación automática. supabase-js la guarda en `localStorage` del dominio; es un token, no un dato personal, y se acepta como riesgo conocido (un XSS podría leerlo, por eso T-08 es crítica).
 - **SEC-03:** duración del access token: 1 hora. Refresh token con rotación activada.
-- **SEC-04:** celular: verificación con `updateUser({ phone })` + `verifyOtp({ type: 'phone_change' })`. El número queda en `auth.users.phone` y nunca se expone (`BR-TRU-003`).
+- **SEC-04:** celular: verificación con `updateUser({ phone })` y la Edge Function `phone-verify`, que cuenta el intento antes de que Auth chequee el código (AC-021-2); un trigger en `auth.users` no confirma un número que `phone-verify` no pidió. El número queda en `auth.users.phone` y nunca se expone (`BR-TRU-003`).
 - **SEC-05:** las URLs de redirección permitidas en Supabase Auth son solo `https://swingmate.au/*`, `https://malbeldas.github.io/swingmate/*` y `http://localhost:*`.
 
 ## 4. Autorización
 
 - Matriz completa en `roles-permissions.md`.
-- **SEC-06:** toda función `security definer` valida `auth.uid()` y el caso de uso antes de leer, y fija `search_path`.
+- **SEC-06:** toda función `security definer` valida `auth.uid()` y el caso de uso antes de leer, y fija `search_path`. Excepciones aceptadas: `analytics_session_recent` (cuenta eventos de un `session_id` al azar) y `listing_is_open` (dice si un aviso es visible, lo mismo que ya muestra `get_listing`).
 - **SEC-07:** la web nunca decide permisos; ocultar un botón es solo UX.
 
 ## 5. Límites y antiabuso
@@ -102,7 +102,7 @@
 
 ## 8. Web: headers, XSS y dependencias
 
-- **SEC-22:** GitHub Pages no permite headers propios, así que cada página lleva una CSP por `<meta http-equiv>`: `default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'`. Excepción de la página Coming Soon (`DEC-019`): suma GA4 con `https://www.googletagmanager.com` en `script-src`, `https://*.google-analytics.com https://*.googletagmanager.com` en `img-src` y `https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com` en `connect-src`. El script de GA4 no carga si la página tiene la base configurada, así que nunca convive con una sesión, un formulario de datos personales ni un link de un solo uso.
+- **SEC-22:** GitHub Pages no permite headers propios, así que cada página lleva una CSP por `<meta http-equiv>`: `default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'`. En `connect-src` e `img-src` se permiten además `127.0.0.1:54321` y `localhost:54321` (http y ws), que solo existen en la máquina local y en CI. Excepción de la página Coming Soon (`DEC-019`): suma GA4 con `https://www.googletagmanager.com` en `script-src`, `https://*.google-analytics.com https://*.googletagmanager.com` en `img-src` y `https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com` en `connect-src`. El script de GA4 no carga si la página tiene la base configurada, así que nunca convive con una sesión, un formulario de datos personales ni un link de un solo uso.
 - **SEC-23:** sin `innerHTML` con datos de usuario; sin `eval`; sin handlers inline.
 - **SEC-24:** las dependencias del navegador están vendorizadas con versión exacta y su hash anotado en `vendor/README.md`. Se actualizan con un PR propio.
 

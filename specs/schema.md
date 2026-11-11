@@ -350,6 +350,19 @@ Registro inmutable: sin permisos de `UPDATE` ni `DELETE` para nadie, incluido ad
 | error | `text` | NULL | Sin datos personales. |
 | created_at | `timestamptz` | | |
 
+### `phone_code_events`
+
+| Campo | Tipo | Constraints | Nota |
+|---|---|---|---|
+| id | `bigint` | PK identity | |
+| phone_hash | `text` | NULL | Hash del número, nunca el número (SEC-09). |
+| user_id | `uuid` | FK ON DELETE SET NULL | Borrar la cuenta no reinicia la cuenta diaria del número. |
+| kind | `text` | NOT NULL, CHECK IN (`sent`,`wrong`,`trying`) | `trying` es un intento en curso de `phone-verify`. |
+| token_hash | `text` | NULL | Hash del código en curso; se borra al terminar el intento. |
+| created_at | `timestamptz` | | |
+
+Nadie la lee ni la escribe desde la web (`P-31`); la limpieza borra las filas de más de 2 días.
+
 ### `analytics_events`
 
 | Campo | Tipo | Constraints | Nota |

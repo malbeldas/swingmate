@@ -499,7 +499,7 @@ Los reportes que lo involucran se conservan según `BR-PRV-003`.
 **Aplica a:** panel de admin.
 **Condición:** un admin resuelve un reporte.
 **Comportamiento:** las acciones son ocultar el aviso, suspender la cuenta, advertir al usuario o descartar el reporte. Cada acción exige una nota y queda en un registro que no se puede editar ni borrar.
-**Excepciones:** ninguna.
+**Excepciones:** la anonimización de `BR-PRV-003` a los 2 años, que solo quita quién actuó, sobre quién y la nota.
 
 ### BR-ADM-002 — Leer mensajes privados
 **Aplica a:** panel de admin.

@@ -54,7 +54,7 @@ No hay staging en el piloto: el plan gratuito permite dos proyectos y GitHub Pag
 | SMTP | Resend (`INT-002`) |
 | Storage | Buckets `listing-photos` y `avatars` (`schema.md` §11) |
 | Extensiones | `pg_cron`, `pg_net`, `pgtap` (solo local y CI) |
-| Edge Functions | `send-email`, `notify-messages`, `reminders`, `outcomes`, `outcome`, `calendar-checks`, `calendar-confirm`, `alerts`, `admin-action`, `delete-account`, `export-data`, `cleanup` |
+| Edge Functions | `send-email`, `notify-messages`, `reminders`, `outcomes`, `outcome`, `calendar-checks`, `calendar-confirm`, `alerts`, `admin-action`, `delete-account`, `phone-verify`, `cleanup` |
 | Secretos | `security.md` SEC-26 |
 
 **Plan gratuito** (supabase.com/pricing, consultado el 29 Oct 2026): 50.000 usuarios activos por mes, 500 MB de base, 1 GB de archivos, 5 GB de transferencia, 500.000 invocaciones de funciones y 2 millones de mensajes de tiempo real. Pausa el proyecto tras 1 semana sin actividad y no incluye backups.
@@ -70,8 +70,8 @@ No hay staging en el piloto: el plan gratuito permite dos proyectos y GitHub Pag
 | `outcomes` | Diaria 10:00 | Pregunta de resultado | UC-052 |
 | `alerts` | Diaria 7:00 | Alertas | UC-053 |
 | `calendar-checks` | Diaria 8:00 | Pedido de confirmar calendario | UC-054 |
-| `cleanup` | Diaria 3:00 | Borra excepciones pasadas, avisos `removed` de más de 90 días y sus fotos; anonimiza reportes de más de 2 años | BR-PRV-003 |
-| `keepalive.yml` | Diaria (GitHub Actions) | Consulta liviana para que el plan gratuito no pause el proyecto | §7 |
+| `cleanup` | Diaria 3:00 | Borra excepciones pasadas, avisos `removed` de más de 90 días sin reportes abiertos, fotos sin dueño y códigos de SMS de más de 2 días; anonimiza reportes y el registro de moderación de más de 2 años | BR-PRV-003, BR-ADM-001 |
+| `smoke-uat.yml` | Diaria 6:30 (GitHub Actions) y después de cada deploy | Chequea la web y la base solo leyendo; también evita que el plan gratuito pause el proyecto | §7 |
 
 ## 5. Costos
 
@@ -95,7 +95,7 @@ Regla: ningún servicio pago nuevo sin decisión de Maxi y Tomás (`engineering-
 | Web | Merge a `main`; GitHub Pages publica solo | Maxi (merge) |
 | Migraciones | Workflow manual `deploy-db.yml`: `supabase db push` contra producción, con confirmación | Maxi |
 | Edge Functions | El mismo workflow: `supabase functions deploy` | Maxi |
-| Configuración de Auth y plantillas | `supabase config push` desde el mismo workflow | Maxi |
+| Configuración de Auth y plantillas | En el dashboard de Supabase; `supabase/config.toml` es solo local y CI | Maxi |
 
 Antes de cada deploy de base: CI verde en `main` y, en Pro, un backup de menos de 24 h.
 

@@ -73,6 +73,8 @@ Leyenda: ✅ permitido · ❌ no permitido · *(cond.)* permitido con la condici
 | P-28 | `notification_log` | leer | ❌ | ❌ | ❌ | — | ✅ | — |
 | P-29 | Storage `listing-photos` | subir / borrar | ❌ | ❌ | ✅ *(carpeta de su aviso)* | — | ✅ | BR-PRV-002 |
 | P-30 | Storage `avatars` | subir / borrar | ❌ | ❌ | ✅ *(su carpeta)* | — | ✅ | — |
+| P-31 | `phone_code_events` | leer / escribir | ❌ | ❌ | ❌ | — | ❌ *(solo las funciones de la base)* | SEC-09 |
+| P-32 | `alert_deliveries` | leer / escribir | ❌ | ❌ | ❌ | — | ❌ *(solo la Edge Function `alerts`)* | UC-053 |
 
 ## 4. Funciones con permisos elevados
 
@@ -88,7 +90,8 @@ Son `security definer` porque leen datos que el usuario no puede leer directo. C
 | Edge `admin-*` | admin | `is_admin()` y nota no vacía | — |
 | Edge `outcome` | anon con token | Token firmado, vigente 60 días, de esa conversación | — |
 | Edge `calendar-confirm` | anon con token | Token firmado del host y aviso | — |
-| Edge `delete-account`, `export-data` | owner | Sesión vigente y reautenticación reciente (5 min) | Datos de otras personas |
+| Edge `delete-account` | owner | Sesión vigente y reautenticación reciente (5 min) | Datos de otras personas |
+| RPC `export_my_data` | owner | Sesión vigente y reautenticación reciente (5 min) | Datos de otras personas |
 
 ## 5. Fuera de scope
 
