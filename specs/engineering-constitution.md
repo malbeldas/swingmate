@@ -61,7 +61,7 @@
 ├── account.html          Mi cuenta (#profile, #roster, #listings, #saved, #alerts, #notifications, #privacy)
 ├── admin.html            Panel de admin
 ├── how-it-works.html, safety.html, terms.html, privacy.html
-├── outcome.html          Respuesta de un toque desde el email (?t=token)
+├── email-action.html     Respuesta de un toque desde el email (#t=token): NTF-005 y NTF-006
 ├── core/                 Lógica pura, sin DOM ni red
 │   ├── dates.js          Noches, rangos, formato de fechas
 │   ├── roster.js         BR-ROS-003

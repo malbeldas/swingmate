@@ -20,7 +20,7 @@
 | `seekerName` | `profiles.display_name` | Alex |
 | `listingTitle` | `listings.title` | Modern room in Baldivis |
 | `hostName` | `profiles.display_name` | Matt |
-| `answerUrl(answer)` | `outcome.html?t=<token>&a=<answer>` | — |
+| `answerUrl(answer)` | `email-action.html?a=outcome&answer=<answer>&src=email&ntf=NTF-005#t=<token>` (el token va después del `#`, así no llega a ningún servidor) | — |
 | `settingsUrl` | `account.html#notifications` | — |
 
 ## Asunto
@@ -57,7 +57,7 @@ Tres botones del mismo tamaño, uno por respuesta.
 
 Se apaga con la opción de recordatorios de la cuenta (`notification_preferences.reminders`): con la opción apagada no sale el email, pero la conversación se marca como preguntada y la pregunta aparece en ella. Lleva el header `List-Unsubscribe` (`BR-MAIL-005`).
 
-Edge Function `outcomes` diaria. Marca `conversations.outcome_asked_at` y crea el mensaje `system` con la pregunta en la conversación. El token es un JWT firmado con `{ conversation_id, purpose: 'outcome' }` y 60 días de vigencia; `outcome.html` lo manda a la Edge Function `outcome`, que guarda en `outcome_responses` (`P-25`).
+Edge Function `outcomes` diaria. Marca `conversations.outcome_asked_at` y crea el mensaje `system` con la pregunta en la conversación. El token es un JWT firmado con `{ conversation_id, purpose: 'outcome' }` y 60 días de vigencia; `email-action.html` lo manda a la Edge Function `outcome`, que guarda en `outcome_responses` (`P-25`).
 
 ## Criterios de aceptación
 
