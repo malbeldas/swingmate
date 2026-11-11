@@ -1,13 +1,14 @@
 // Verify a mobile (UC-021, NTF-008; steps and texts from the prototype, frontend-migration.md).
-// Supabase Auth sends the code with updateUser({ phone }) and checks it with verifyOtp({ type:
-// 'phone_change' }); phone_code_check and phone_code_wrong add the limits of SEC-09 and AC-021-2.
+// Supabase Auth sends the code with updateUser({ phone }), after phone_code_check (SEC-09). The
+// phone-verify Edge Function checks it: it counts each try for AC-021-2 before asking Auth, and Auth
+// confirms no number the function didn't ask for.
 // The number only goes to Auth; nothing here shows it to anyone else (BR-TRU-003).
 // Two ways in: phoneVerifyForm, inline (list your place, step 5), and openPhoneSheet, over the page
 // (the message box when the host asks for a verified phone, BR-TRU-004, and the account page).
 import { getClient } from '../db.js';
 import { el } from './dom.js';
 import {
-  CODE_LENGTH, PHONE_TEXTS, auMobile, checkText, cleanCode, formatAuMobile, isWrongCode, phoneErrorText, resendIn,
+  CODE_LENGTH, PHONE_TEXTS, auMobile, checkText, cleanCode, formatAuMobile, phoneErrorText, resendIn,
 } from '../../core/phone.js';
 
 // onVerified(user) runs once Auth confirms the number, with the updated user.
@@ -97,26 +98,23 @@ export function phoneVerifyForm({ submitLabel = PHONE_TEXTS.verify, onVerified =
     verifyBtn.textContent = PHONE_TEXTS.checking;
     const done = () => { verifyBtn.disabled = false; verifyBtn.textContent = submitLabel; };
     const db = await getClient();
-    const { data: check } = await db.rpc('phone_code_check', { p_phone: null });
-    if (check && !check.ok) {
-      showError(checkText(check));
-      return done();
+    // AC-021-2: a wrong code counts; the fifth locks verification for an hour.
+    const { data, error: fnError } = await db.functions.invoke('phone-verify', { body: { phone: number, code: token } });
+    let result = data;
+    if (fnError) {
+      try { result = await fnError.context?.json?.(); } catch { result = null; }
     }
-    const { data, error: authError } = await db.auth.verifyOtp({ phone: number, token, type: 'phone_change' });
-    if (authError) {
-      // AC-021-2: a wrong code counts; the fifth locks verification for an hour.
-      if (isWrongCode(authError)) {
-        const { data: wrong } = await db.rpc('phone_code_wrong');
-        showError(checkText(wrong) || PHONE_TEXTS.wrongCode);
-      } else {
-        showError(phoneErrorText(authError, 'verify'));
-      }
+    if (!result?.ok) {
+      showError(checkText(result ?? { ok: false }));
       code.select();
       return done();
     }
+    // The number is confirmed; the session picks it up on refresh.
+    await db.auth.refreshSession();
+    const { data: fresh } = await db.auth.getUser();
     if (timer) clearInterval(timer);
     form.replaceChildren(el('span', { class: 'badge verified', id: 'phone-verified' }, PHONE_TEXTS.verified));
-    onVerified(data?.user ?? null);
+    onVerified(fresh?.user ?? null);
   }
 
   sendBtn.addEventListener('click', sendCode);

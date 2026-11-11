@@ -2,7 +2,7 @@
 // [auth.sms.test_otp] in supabase/config.toml: no SMS provider is called (INT-003 AC-1).
 import { test, expect } from '@playwright/test';
 import {
-  PASSWORD, TEST_SMS_CODE, createMember, requireLocalSupabase, sheet, testMobile, uniqueEmail,
+  PASSWORD, TEST_SMS_CODE, authPost, createMember, local, requireLocalSupabase, sheet, testMobile, uniqueEmail,
 } from './auth-helpers.js';
 
 test.beforeAll(requireLocalSupabase);
@@ -133,6 +133,26 @@ test('AC-021-2 five wrong codes lock verification for an hour', async ({ page, r
   await phone.getByRole('button', { name: 'Verify', exact: true }).click();
   await expect(phone.locator('#phone-error')).toHaveText('Too many wrong codes. Try again in an hour.');
   await page.reload();
+  await expect(page.locator('#verification')).toContainText('Phone not verified');
+});
+
+test('AC-021-2 a right code sent straight to Auth, skipping the page, verifies nothing', async ({ page, request }, testInfo) => {
+  const email = uniqueEmail(testInfo, 'mob-direct');
+  const session = await createMember(request, email);
+  const e164 = `+61${testMobile(testInfo, 4).replace(/\D/g, '').slice(1)}`;
+  const user = (path, data) => request.fetch(`${local.url}/auth/v1/${path}`, {
+    method: 'PUT', headers: { apikey: local.anonKey, authorization: `Bearer ${session.access_token}`, 'content-type': 'application/json' }, data,
+  });
+  expect((await user('user', { phone: e164 })).ok()).toBe(true);
+  // Auth accepts the code, but the database keeps the number unconfirmed and spends the code.
+  await authPost(request, 'verify', { type: 'phone_change', phone: e164, token: TEST_SMS_CODE });
+  const me = await (await request.get(`${local.url}/auth/v1/user`, {
+    headers: { apikey: local.anonKey, authorization: `Bearer ${session.access_token}` },
+  })).json();
+  expect(me.phone_confirmed_at ?? null).toBeNull();
+  expect(me.phone ?? '').toBe('');
+
+  await logInOnAccountPage(page, email);
   await expect(page.locator('#verification')).toContainText('Phone not verified');
 });
 
