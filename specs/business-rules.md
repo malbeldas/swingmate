@@ -302,7 +302,7 @@ Son opcionales: estadía mínima, quiénes viven y cuántos en roster, minutos a
 ### BR-ACC-002 — Formas de registrarse
 **Aplica a:** registro y login.
 **Condición:** alguien se registra o inicia sesión.
-**Comportamiento:** hay dos formas. Con Google, o con email y contraseña de al menos 8 caracteres más un código de 6 dígitos enviado al email. Sin el código, la cuenta no puede enviar mensajes ni publicar. No hay login con Apple ni con Facebook en v0.1.
+**Comportamiento:** hay tres formas. Con Google, con Facebook (`INT-007`), o con email y contraseña de al menos 8 caracteres más un código de 6 dígitos enviado al email. Sin el código, la cuenta no puede enviar mensajes ni publicar. Qué botones se muestran lo dice `app/config.js` (`providers`): Facebook está en UAT y su salida a producción se decide en `decision-log.md` Q-28. No hay login con Apple en v0.1.
 **Excepciones:** ninguna.
 
 ### BR-ACC-003 — Perfil mínimo para enviar el primer mensaje

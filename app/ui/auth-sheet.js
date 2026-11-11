@@ -2,9 +2,11 @@
 // Steps: signup, login, verify (6-digit email code), profile (minimum profile, BR-ACC-003),
 // forgot and newPassword (UC-031, NTF-002), roster (offer to save the visitor roster, AC-002-4).
 // The sheet opens over the current page and closes there, so the person stays where they were
-// (AC-030-3). Google returns to the same URL (redirectTo = current page).
+// (AC-030-3). Google and Facebook return to the same URL (redirectTo = current page). Which of them
+// show comes from the config (BR-ACC-002).
 import { trackEvent } from '../events.js';
 import { getClient } from '../db.js';
+import { loadConfig } from '../config.js';
 import { CaptchaBlocked, captchaToken } from '../captcha.js';
 import { TERMS_VERSION, getOwnProfile, getOwnRoster, profileComplete, saveOwnRoster } from '../session.js';
 import { clearVisitorRoster, readVisitorRoster } from '../visitor-roster.js';
@@ -54,13 +56,19 @@ function linkButton(text, onclick) {
   return el('button', { type: 'button', class: 'link-btn', onclick }, text);
 }
 
-function googleButton(text) {
-  return el(
+const PROVIDERS = {
+  google: { name: 'Google', mark: 'G' },
+  facebook: { name: 'Facebook', mark: 'f' },
+};
+
+// One button per sign-in provider in the config, in its order. verb: 'Continue' or 'Log in'.
+function providerButtons(verb) {
+  return state.providers.filter((id) => PROVIDERS[id]).map((id) => el(
     'button',
-    { type: 'button', class: 'btn btn-secondary btn-block', 'data-provider': 'google', onclick: withGoogle },
-    el('span', { class: 'g-mark', 'aria-hidden': 'true' }, 'G'),
-    text,
-  );
+    { type: 'button', class: 'btn btn-secondary btn-block', 'data-provider': id, onclick: () => withProvider(id) },
+    el('span', { class: `${id === 'google' ? 'g' : 'f'}-mark`, 'aria-hidden': 'true' }, PROVIDERS[id].mark),
+    `${verb} with ${PROVIDERS[id].name}`,
+  ));
 }
 
 function go(step, patch = {}) {
@@ -105,7 +113,7 @@ function signupStep() {
   return [
     el('h2', { id: 'auth-title' }, 'Create your SwingMate account'),
     el('p', { class: 'muted' }, 'Hosts share their home, so both sides sign up before talking. It takes under a minute.'),
-    googleButton('Continue with Google'),
+    ...providerButtons('Continue'),
     el('div', { class: 'divider', 'aria-hidden': 'true' }, 'or'),
     form,
     linkButton('Already have an account? Log in', () => go('login')),
@@ -125,7 +133,7 @@ function loginStep() {
   );
   return [
     el('h2', { id: 'auth-title' }, 'Welcome back'),
-    googleButton('Log in with Google'),
+    ...providerButtons('Log in'),
     el('div', { class: 'divider', 'aria-hidden': 'true' }, 'or'),
     form,
     el('div', { class: 'link-row' },
@@ -265,12 +273,12 @@ function trackSignupStarted(method) {
   if (state.source) trackEvent('signup_started', { method, source: state.source });
 }
 
-async function withGoogle() {
-  trackSignupStarted('google');
+async function withProvider(provider) {
+  trackSignupStarted(provider);
   const db = await getClient();
-  // INT-001: back to this same page, so the person keeps their place (AC-030-3).
-  const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
-  if (error) go(state.step, { error: TEXTS.googleDown });
+  // INT-001, INT-007: back to this same page, so the person keeps their place (AC-030-3).
+  const { error } = await db.auth.signInWithOAuth({ provider, options: { redirectTo: location.href } });
+  if (error) go(state.step, { error: provider === 'google' ? TEXTS.googleDown : TEXTS.facebookDown });
 }
 
 async function signUpWithEmail(emailValue, password) {
@@ -429,8 +437,9 @@ function build() {
 export async function openAuthSheet({ step = 'signup', user = null, error = '', source = null, onDone = () => {} } = {}) {
   if (!dialog) build();
   onDoneCallback = onDone;
+  const providers = (await loadConfig())?.providers ?? ['google'];
   state = {
-    step, email: '', error, resent: false, sent: false, intent: source === 'list_place' ? 'hosting' : 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null, source,
+    providers, step, email: '', error, resent: false, sent: false, intent: source === 'list_place' ? 'hosting' : 'seeking', name: '', suburbLabel: '', userId: user?.id ?? null, source,
   };
   if (step === 'signup' && source) trackEvent('auth_gate_opened', { source });
   if (step === 'profile' && user) {

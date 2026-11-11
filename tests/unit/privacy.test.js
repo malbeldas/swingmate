@@ -18,6 +18,13 @@ test('UC-035 the person confirms with their password, or Google for a Google-onl
   assert.equal(reauthMethod({ app_metadata: { provider: 'google', providers: ['google', 'email'] } }), 'password');
 });
 
+test('UC-035 a Facebook-only account confirms with Facebook (BR-ACC-002, INT-007)', () => {
+  assert.equal(reauthMethod({ app_metadata: { provider: 'facebook', providers: ['facebook'] } }), 'facebook');
+  assert.equal(reauthMethod({ app_metadata: { provider: 'facebook', providers: ['facebook', 'google'] } }), 'google');
+  assert.equal(reauthMethod({ app_metadata: { provider: 'facebook', providers: ['facebook', 'email'] } }), 'password');
+  assert.equal(PRIVACY_TEXTS.facebook, 'Continue with Facebook');
+});
+
 test('BR-PRV-004 the file is named by date only, no personal data', () => {
   assert.equal(exportFileName('2026-11-04'), 'swingmate-my-data-2026-11-04.json');
   assert.equal(PRIVACY_TEXTS.deleteHint, 'Your profile, saved homes and alerts are removed. Hosts keep the messages you already sent, shown as “Deleted user”.');

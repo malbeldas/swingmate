@@ -16,6 +16,7 @@ export const TEXTS = {
   rateLimited: 'Wait a minute before asking for another code.',
   notConfirmed: 'Confirm your email first. We can send you a new code.',
   googleDown: "Google sign-in isn't working right now. Use your email instead.",
+  facebookDown: "Facebook sign-in isn't working right now. Use your email instead.",
   termsRequired: 'Accept the Terms of Use and Privacy Policy to continue',
   resetExpired: 'That reset link has expired or was already used. Ask for a new one below.',
   samePassword: 'Choose a password different from your current one.',

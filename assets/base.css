@@ -159,7 +159,7 @@ a { color: var(--navy); }
 .notice { color: var(--teal-ink); font-size: var(--t-small); }
 .divider { display: flex; align-items: center; gap: var(--s-3); color: var(--muted); font-size: var(--t-small); }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-.g-mark { font-weight: 800; font-family: var(--font-display); }
+.g-mark, .f-mark { font-weight: 800; font-family: var(--font-display); }
 .plain { border: 0; margin: 0; padding: 0; }
 .plain legend { padding: 0; margin-bottom: var(--s-1); }
 .segmented { display: flex; flex-wrap: wrap; gap: var(--s-2); }

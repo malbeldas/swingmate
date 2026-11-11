@@ -51,7 +51,7 @@ Propiedades permitidas: solo las de la tabla. Nunca texto de mensajes, nombres, 
 | `message_draft_started` | Primera tecla en la caja de mensaje | `listing_id`, `logged_in` |
 | `send_message_clicked` | Se toca "Send" | `listing_id`, `logged_in`, `dates_conflict` |
 | `auth_gate_opened` | Se abre el registro | `source` (`header`, `message`, `save`, `alert`, `list_place`) |
-| `signup_started` | Se elige método | `method` (`google`, `email`), `source` |
+| `signup_started` | Se elige método | `method` (`google`, `facebook`, `email`), `source` |
 | `signup_completed` | Email verificado o Google OK | `method`, `source` |
 | `profile_completed` | Perfil mínimo completo | `intent` |
 | `phone_verified` | Celular verificado | `as_host` |

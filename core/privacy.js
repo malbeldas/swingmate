@@ -20,6 +20,7 @@ export const PRIVACY_TEXTS = {
   password: 'Password',
   confirm: 'Confirm',
   google: 'Continue with Google',
+  facebook: 'Continue with Facebook',
   wrongPassword: 'That password doesn’t match. Try again.',
 };
 
@@ -35,8 +36,10 @@ export function exportFileName(today) {
   return `swingmate-my-data-${today}.json`;
 }
 
-// How the person proves it is them again: their password, or Google for a Google account.
+// How the person proves it is them again: their password, or the provider they signed up with
+// (Google or Facebook).
 export function reauthMethod(user) {
   const providers = user?.app_metadata?.providers ?? [user?.app_metadata?.provider].filter(Boolean);
-  return providers.includes('email') ? 'password' : 'google';
+  if (providers.includes('email')) return 'password';
+  return providers.includes('facebook') && !providers.includes('google') ? 'facebook' : 'google';
 }
