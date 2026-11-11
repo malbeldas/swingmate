@@ -5,8 +5,9 @@
 export const SIGN_OFF = 'The SwingMate team';
 
 // Product emails people can turn off: "Manage email settings" and a List-Unsubscribe header
-// (notifications.md rule 5, BR-MAIL-005). NTF-001, 002, 008 and 009 cannot be turned off.
-export const UNSUBSCRIBABLE = ['NTF-003', 'NTF-004', 'NTF-006', 'NTF-007'];
+// (notifications.md rule 5, BR-MAIL-005). NTF-001, 002, 008 and 009 cannot be turned off. NTF-005
+// is switched off with the reminders setting.
+export const UNSUBSCRIBABLE = ['NTF-003', 'NTF-004', 'NTF-005', 'NTF-006', 'NTF-007'];
 
 // Brand colours from assets/tokens.css. Email clients ignore CSS variables, so they are copied here.
 const C = {

@@ -297,7 +297,8 @@ function notificationsSection(ctx) {
     el('h2', { id: 'notifications-title' }, NOTIFY_TEXTS.title),
     toggle('new_messages', 'notify-new-messages', NOTIFY_TEXTS.newMessages, NOTIFY_TEXTS.newMessagesHint, 'notify-hint'),
     toggle('alerts', 'notify-alerts', ALERT_TEXTS.notify, ALERT_TEXTS.notifyHint),
-    ctx.hosting && toggle('reminders', 'notify-reminders', NOTIFY_TEXTS.reminders, NOTIFY_TEXTS.remindersHint),
+    toggle('reminders', 'notify-reminders', NOTIFY_TEXTS.reminders,
+      ctx.hosting ? NOTIFY_TEXTS.remindersHint : NOTIFY_TEXTS.remindersHintSeeker),
     status);
 }
 

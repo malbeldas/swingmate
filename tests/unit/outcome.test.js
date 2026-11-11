@@ -42,7 +42,7 @@ test('AC-007-1 each answer in the email is a one-tap link with the signed token 
     assert.equal(claims.conversation_id, CONV);
     assert.equal(claims.exp, Math.floor(NOW.getTime() / 1000) + 60 * 86400, '60 days (NTF-005)');
   }
-  assert.equal(resendBody(sent[0]).headers, undefined, 'NTF-005 cannot be switched off: no List-Unsubscribe');
+  assert.equal(resendBody(sent[0]).headers['List-Unsubscribe'], `<${APP}/account.html#notifications>`, 'BR-MAIL-005');
 });
 
 test('AC-052-1 a sent question marks the conversation as asked; a failed one is tried again until the third failure', async () => {
@@ -55,6 +55,18 @@ test('AC-052-1 a sent question marks the conversation as asked; a failed one is 
   assert.deepEqual(store.calls.log.map((l) => [l.ref_id, l.template, l.status]),
     [[CONV, 'NTF-005', 'sent'], ['c2', 'NTF-005', 'failed'], ['c3', 'NTF-005', 'failed']]);
   assert.deepEqual(store.calls.asked, [CONV, 'c3'], 'after the third failure the question still appears in the conversation, once');
+});
+
+test('BR-MAIL-005 with reminders off no email goes out, but the question still appears in the conversation', async () => {
+  const store = fakeStore([{ ...row, email_on: false }, { ...row, conversation_id: 'c2', email_on: true }]);
+  const sent = [];
+  const out = await runOutcomeQuestions({
+    store, appUrl: APP, secret: SECRET, now: NOW, send: async (args) => { sent.push(args); return { status: 'sent' }; },
+  });
+  assert.deepEqual(out, { sent: 1, failed: 0, skipped: 1 });
+  assert.deepEqual(sent.map((s) => s.to), ['alex@example.com']);
+  assert.deepEqual(store.calls.log.map((l) => l.ref_id), ['c2'], 'nothing logged for an email that was never sent');
+  assert.deepEqual(store.calls.asked, [CONV, 'c2']);
 });
 
 test('UC-052 without the signing key no question goes out', async () => {
