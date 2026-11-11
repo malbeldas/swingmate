@@ -16,7 +16,8 @@ export async function runDeleteAccount({ user, store, now = new Date() }) {
   const result = await store.deleteAccount(user.id);
   if (!result?.ok) return { status: 500, body: { ok: false, reason: result?.reason ?? 'failed' } };
 
-  // The account is gone either way; a file that couldn't be removed is reported, not retried here.
+  // The account is gone either way; a file that couldn't be removed is reported, and the daily
+  // cleanup removes it, since no row points to it any more (cleanup_orphan_files).
   const leftovers = [];
   for (const [bucket, list] of [['avatars', paths?.avatars ?? []], ['listing-photos', paths?.listing_photos ?? []]]) {
     if (!list.length) continue;
