@@ -2,7 +2,7 @@
 -- missing until the retroactive risk review of 11/11. Every day at 3:00 Perth the cleanup Edge
 -- Function calls cleanup_run, then removes from Storage the files cleanup_orphan_files lists.
 --   * Removed listings are deleted 90 days after removal, with what hangs from them (photos rows,
---     availability, conversations about them, saved homes).
+--     availability, conversations about them, saved homes), unless a report about them is open.
 --   * Availability exceptions for nights already past are deleted.
 --   * Reports closed over 2 years ago, and moderation entries over 2 years old, are anonymised: the
 --     people (reporter, target, admin) and the free text go; what happened and when stays.
@@ -39,6 +39,30 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- Editing the availability marks the calendar as updated (BR-AVL-006). Deleting past nights in the
+-- cleanup is not the host updating it, so it must not move calendar_confirmed_at, or NTF-006 would
+-- never ask (UC-054). cleanup_run raises the transaction-local flag swingmate.cleanup for that.
+-- ---------------------------------------------------------------------------
+create or replace function public.availability_touch()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if current_setting('swingmate.cleanup', true) = 'on' then
+    return null;
+  end if;
+  update public.listings
+    set calendar_confirmed_at = now()
+    where id = coalesce(new.listing_id, old.listing_id);
+  return null;
+end;
+$$;
+
+revoke execute on function public.availability_touch() from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
 -- cleanup_run: everything the database does by itself. Returns the counts.
 -- ---------------------------------------------------------------------------
 create or replace function public.cleanup_run(p_now timestamptz default now())
@@ -56,12 +80,19 @@ declare
   actions_done int;
   phone_gone int;
 begin
-  delete from public.listings where status = 'removed' and removed_at <= p_now - interval '90 days';
+  -- A listing with an open report about it or about one of its conversations waits until the
+  -- report is closed, so the admin can still read what was reported (BR-ACC-007, BR-ADM-002).
+  delete from public.listings l where l.status = 'removed' and l.removed_at <= p_now - interval '90 days'
+    and not exists (select 1 from public.reports r where r.status = 'open'
+      and ((r.target_type = 'listing' and r.target_id = l.id)
+        or (r.target_type = 'conversation' and r.target_id in (select c.id from public.conversations c where c.listing_id = l.id))));
   get diagnostics listings_gone = row_count;
 
+  perform set_config('swingmate.cleanup', 'on', true);
   delete from public.listing_availability_exceptions e
     where e.night < public.listing_today(e.listing_id) - 1;
   get diagnostics exceptions_gone = row_count;
+  perform set_config('swingmate.cleanup', 'off', true);
 
   update public.reports set reporter_id = null, target_id = nil, details = null
     where status = 'closed' and closed_at is not null and closed_at <= p_now - interval '2 years'
