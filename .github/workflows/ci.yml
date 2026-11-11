@@ -43,7 +43,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      # The runner image already has Chromium's system libraries. Extra packages
+      # (fonts) come from security.ubuntu.com; if that host is down, carry on
+      # with a warning instead of failing before any test runs.
+      - run: npx playwright install chromium
+      - run: timeout 300 npx playwright install-deps chromium || echo "::warning::playwright install-deps failed; using the runner's own libraries"
       - uses: supabase/setup-cli@v1
         with:
           version: 2.122.1
