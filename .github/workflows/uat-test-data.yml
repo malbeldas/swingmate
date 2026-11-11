@@ -48,6 +48,12 @@ jobs:
         run: |
           echo "::error::Lo dispara solo el dueño del repo."
           exit 1
+      # BR-TRU-006: con la variable del repo PRODUCCION=abierta (infrastructure.md §8) ya no carga nada.
+      - name: Producción abierta
+        if: inputs.accion == 'cargar' && vars.PRODUCCION == 'abierta'
+        run: |
+          echo "::error::Producción abierta (variable PRODUCCION): no se cargan datos de prueba."
+          exit 1
       - name: Confirmación
         if: inputs.confirmar != 'uat'
         run: |
@@ -85,7 +91,8 @@ jobs:
 
           if [ "$ACCION" = cargar ]; then
             sql < scripts/uat/load.sql | jq .
-            for id in $(ids); do
+            list=$(ids)
+            for id in $list; do
               for i in 0 1 2; do
                 curl -sS --fail-with-body -o /dev/null -X POST "$URL/storage/v1/object/listing-photos/$id/uat-$i.jpg" \
                   -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H 'x-upsert: true' -H 'Content-Type: image/jpeg' \
@@ -94,7 +101,8 @@ jobs:
               echo "Fotos subidas: $id"
             done
           else
-            paths=$(for id in $(ids); do for i in 0 1 2; do echo "$id/uat-$i.jpg"; done; done | jq -Rsc 'split("\n") | map(select(length > 0)) | {prefixes: .}')
+            list=$(ids)
+            paths=$(for id in $list; do for i in 0 1 2; do echo "$id/uat-$i.jpg"; done; done | jq -Rsc 'split("\n") | map(select(length > 0)) | {prefixes: .}')
             if [ "$paths" != '{"prefixes":[]}' ]; then
               curl -sS --fail-with-body -o /dev/null -X DELETE "$URL/storage/v1/object/listing-photos" \
                 -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H 'Content-Type: application/json' --data "$paths"

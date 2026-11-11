@@ -27,8 +27,10 @@ begin
     raise exception 'The admin account needs a verified email and mobile before it can host (BR-LST-003). In UAT verify 0400 000 001 with code 123456.';
   end if;
 
-  -- Room for the 15 test listings on top of the owner's own (BR-LST-007).
-  select count(*) into open_now from public.listings where owner_id = owner and status in ('active', 'paused');
+  -- Room for the 15 test listings on top of the owner's own (BR-LST-007). Nothing else in the app
+  -- changes listing_limit, so remove.sql puts back the default of 5.
+  select count(*) into open_now from public.listings where owner_id = owner and status in ('active', 'paused')
+    and id::text not like '00000000-0000-4000-8000-0000001%';
   update public.profiles set listing_limit = greatest(listing_limit, open_now + 15) where id = owner;
 
   -- n, suburb, state, title, type, bathroom, weekly price, availability, airport minutes, description
