@@ -12,24 +12,33 @@ export const LINK_DAYS = 60;
 const LAST_TRY = 3; // notifications.md rule 6
 
 // store: { pending() -> rows of pending_outcome_questions, log(row), markAsked(conversationId) }
-// send({ to, mail, template }) -> { status, providerMessageId, error }
+// send({ to, mail, template, settingsUrl }) -> { status, providerMessageId, error }
 // The conversation is marked as asked once the email went out, or after its third failure, so the
 // question still appears in the conversation and is never asked twice (AC-052-1). Without the
-// signing key nothing happens: the answers would be links that can't work.
+// signing key nothing happens: the answers would be links that can't work. Someone who switched off
+// reminders (BR-MAIL-005) gets no email, but the question still appears in the conversation.
 export async function runOutcomeQuestions({ store, send, appUrl, secret, now = new Date() }) {
   if (!secret || String(secret).length < 32) return { sent: 0, failed: 0, error: 'no_secret' };
   const app = String(appUrl).replace(/\/+$/, '');
+  const settingsUrl = `${app}/account.html#notifications`;
   let sent = 0;
   let failed = 0;
+  let skipped = 0;
   for (const row of await store.pending()) {
+    if (row.email_on === false) {
+      await store.markAsked(row.conversation_id);
+      skipped += 1;
+      continue;
+    }
     const token = await signLinkToken({ purpose: 'outcome', conversation_id: row.conversation_id }, secret, { days: LINK_DAYS, now });
     const mail = outcomeQuestionEmail({
       seekerName: row.seeker_name,
       hostName: row.host_name ?? 'the host',
       listingTitle: row.listing_title,
       answerUrl: (answer) => emailActionUrl(app, 'outcome', token, TEMPLATE, { answer }),
+      settingsUrl,
     });
-    const result = await send({ to: row.seeker_email, mail, template: TEMPLATE });
+    const result = await send({ to: row.seeker_email, mail, template: TEMPLATE, settingsUrl });
     await store.log({
       user_id: row.seeker_id, template: TEMPLATE, ref_id: row.conversation_id, status: result.status,
       provider_message_id: result.providerMessageId, error: result.error,
@@ -38,5 +47,5 @@ export async function runOutcomeQuestions({ store, send, appUrl, secret, now = n
     else failed += 1;
     if (result.status === 'sent' || Number(row.failures ?? 0) + 1 >= LAST_TRY) await store.markAsked(row.conversation_id);
   }
-  return { sent, failed };
+  return skipped ? { sent, failed, skipped } : { sent, failed };
 }

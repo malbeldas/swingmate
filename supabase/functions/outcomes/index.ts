@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       await db.rpc('mark_outcome_asked', { p_conversation_id: conversationId });
     },
   };
-  const send = (args: { to: string; mail: { subject: string; text: string; html: string }; template: string }) =>
+  const send = (args: { to: string; mail: { subject: string; text: string; html: string }; template: string; settingsUrl: string }) =>
     deliver({ provider: env('EMAIL_PROVIDER') || 'log', apiKey: env('RESEND_API_KEY'), ...args });
 
   return json(200, await runOutcomeQuestions({ store, send, appUrl: env('APP_URL') || 'https://swingmate.au', secret: env('EMAIL_LINK_SECRET') }));

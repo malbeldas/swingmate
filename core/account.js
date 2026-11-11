@@ -104,8 +104,9 @@ export const NOTIFY_TEXTS = {
   title: 'Notifications',
   newMessages: 'Email me when I get a new message',
   newMessagesHint: 'We always email you about a new enquiry, even with this off.',
-  reminders: 'Remind me about my listings',
-  remindersHint: 'An enquiry you haven’t answered in 2 days, and a calendar check every 30 days.',
+  reminders: 'Send me reminders and follow-ups',
+  remindersHint: 'An enquiry you haven’t answered in 2 days, a calendar check every 30 days, and one email asking if you found a place.',
+  remindersHintSeeker: 'Two weeks after you message a host, one email asking if you found a place.',
   saved: 'Saved.',
   failed: 'We couldn’t save that. Try again.',
 };

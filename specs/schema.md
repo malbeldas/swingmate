@@ -335,7 +335,7 @@ Registro inmutable: sin permisos de `UPDATE` ni `DELETE` para nadie, incluido ad
 | user_id | `uuid` | PK, FK ON DELETE CASCADE |
 | new_messages | `boolean` | NOT NULL DEFAULT true |
 | alerts | `boolean` | NOT NULL DEFAULT true |
-| reminders | `boolean` | NOT NULL DEFAULT true |
+| reminders | `boolean` | NOT NULL DEFAULT true; apaga NTF-004, NTF-006 y el email de NTF-005 |
 
 ### `notification_log`
 
