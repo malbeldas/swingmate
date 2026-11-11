@@ -187,6 +187,33 @@ Si la tarea introduce contexto nuevo (una regla, un caso de error, un AC, una de
 - **Descripción del PR:** una línea `Riesgo: R? · Revisor: <veredicto> o no aplica · Cupo semanal: <inicio> → <fin>`.
 - **Si una guarda bloquea algo,** no se rodea: se reporta.
 
+## 9. Modelos
+
+> Viene de la estrategia de subagentes consolidada (versión 11/11/2026, sección 13).
+
+- **Qué no cambia con un modelo nuevo:** el costo es contexto (relectura de caché), delegar y revisar se deciden por separado, y siguen valiendo las guardas y la sección 8.
+- **Alias, no versiones:** los agentes de `.claude/agents/` usan `opus`, `sonnet` o `haiku`. Una versión nueva de una familia entra sola; no se fija una versión en el frontmatter ni en el prompt.
+- **Roles actuales:** principal en el modelo de la sesión; `revisor-riesgo` en `opus` / `medium`; búsqueda (`Explore`) en `haiku`. Es una hipótesis calibrada con una generación de modelos.
+
+**Precios por versión** (US$ por millón de tokens; fuente: estrategia consolidada, 11/11/2026):
+
+| Modelo | Entrada | Salida | Lectura de caché | Rol |
+|---|---|---|---|---|
+| Fable 5.1 | 10 | 50 | 0,25 | Sin rol asignado |
+| Opus 5.5 | 4 | 20 | 0,20 | Principal, `revisor-riesgo` |
+| Sonnet 5.5 | 2 | 10 | 0,20 | Implementación delegada, si se usa |
+| Haiku 5.5 | 0,10 | 0,50 | n/d | Búsqueda |
+
+**Protocolo ante un modelo nuevo:**
+
+1. **Precio:** agregarlo a la tabla con fecha y fuente. Un modelo sin precio no se suma a ningún costo: se anota "n/d" y se avisa.
+2. **Modelo efectivo:** confirmar qué versión corrió en cada rol (una variable global puede pisar el frontmatter).
+3. **Corte:** anotar en el issue o en el PR qué trabajo corrió con la versión nueva, para no mezclar su efecto con el de la estrategia.
+4. **Prueba, solo si promete:** usarlo en un rol concreto durante 2 o 3 issues, con el OK explícito del humano si cuesta más, y compararlo con la misma unidad y las mismas barandas.
+5. **Decisión:** cambiar la tabla de roles con fecha y evidencia, o dejarla y anotar por qué.
+
+- **Fable 5.1:** candidato a probar (paso 4) en el revisor de riesgo de áreas sensibles o en diagnósticos complejos del principal; nunca en búsqueda ni en implementación de volumen. Con Fable, el encargo se escribe corto y con el objetivo, no con cada paso.
+
 ---
 
 *Documento vivo. Si encontrás un caso recurrente no cubierto, proponé adición a este archivo antes que improvisar.*
