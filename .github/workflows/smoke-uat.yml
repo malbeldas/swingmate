@@ -1,10 +1,14 @@
 # Chequeo de humo del ambiente publicado (UAT): solo lectura y solo con valores públicos (la URL y
 # la publishable key de app/config.js). Manual (Actions → "Chequeo del sitio publicado" → Run
-# workflow), al cambiar este archivo y después de cada deploy de la base.
+# workflow), al cambiar este archivo, después de cada deploy de la base que terminó bien y todos los
+# días. La corrida diaria es también el keepalive de infrastructure.md §4: una consulta a la base
+# para que el plan gratuito no pause el proyecto tras una semana sin actividad.
 name: Chequeo del sitio publicado
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '30 22 * * *' # 6:30 Perth
   workflow_run:
     workflows: ['Deploy de base y funciones']
     types: [completed]
@@ -19,6 +23,8 @@ permissions:
 jobs:
   smoke:
     name: Sitio y base responden
+    # Después de un deploy, solo si terminó bien.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
