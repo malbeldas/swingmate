@@ -24,7 +24,7 @@ No se usa Twilio Verify (US$0,05 extra por verificación más el SMS): Supabase 
 
 1. La web llama `updateUser({ phone: '+614…' }, { captchaToken })`.
 2. Supabase genera el código y lo manda por Twilio con remitente alfanumérico "SwingMate".
-3. La web llama `verifyOtp({ phone, token, type: 'phone_change' })`.
+3. La web llama a la Edge Function `phone-verify` con el número y el código; la función cuenta el intento y llama a `verify` de Auth con `type: 'phone_change'`.
 4. `auth.users.phone_confirmed_at` queda con fecha.
 
 ## Configuración

@@ -29,7 +29,7 @@
 3. **Datos personales mínimos.** Un email nunca incluye el email ni el teléfono de la otra persona, ni la dirección del aviso. Puede incluir el nombre visible y el suburbio.
 4. **Links con token.** Los botones de un toque (NTF-005, NTF-006) llevan un token firmado de un solo propósito, vigente 60 días. El resto de los links lleva a la web y pide sesión.
 5. **Darse de baja.** Todos los emails de producto (NTF-003, 004, 005, 006, 007) llevan "Manage email settings" a `account.html#notifications` y un header `List-Unsubscribe` (`BR-MAIL-005`). NTF-001, 002, 008 y 009 no se pueden apagar.
-6. **Reintentos.** Ante un error del proveedor se reintenta 3 veces (1, 5 y 30 minutos). Cada intento final queda en `notification_log` con `status` y sin datos personales en `error`.
+6. **Reintentos.** Ante un error del proveedor se reintenta hasta 3 intentos, uno por corrida de la tarea que lo manda. Cada intento final queda en `notification_log` con `status` y sin datos personales en `error`.
 7. **Idempotencia.** Antes de enviar se chequea `notification_log` (o la columna de la tabla, como `reminder_sent_at`) para no mandar dos veces lo mismo.
 8. **Formato.** Cada email tiene versión texto y HTML. El HTML usa una sola columna de 600 px, colores de marca y el logo existente; funciona sin imágenes.
 9. **Analytics.** Los clicks en emails llevan `?src=email&ntf=NTF-00X` y la página registra `email_clicked` (`observability.md`).
