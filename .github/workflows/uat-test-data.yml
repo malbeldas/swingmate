@@ -1,0 +1,103 @@
+# Datos de prueba de UAT (DEC-017): carga o borra 15 avisos de prueba en el proyecto de Supabase,
+# para probar búsqueda, detalle y mensajes en el sitio publicado. Manual: Actions → "Datos de prueba
+# UAT" → Run workflow. Nunca en producción (BR-TRU-006): antes de salir se corre con "borrar"
+# (infrastructure.md §8).
+#
+# Los avisos son del primer admin (BR-ADM-004), que necesita email y celular verificados. El SQL está
+# en scripts/uat/ y las fotos de prueba en scripts/uat/photos/. Usa los mismos secrets que el deploy:
+# SUPABASE_ACCESS_TOKEN y SUPABASE_PROJECT_REF. La key de servicio se pide a la API de Supabase en el
+# momento, solo para subir o borrar las fotos, y no se imprime.
+name: Datos de prueba UAT
+
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: 'cargar o borrar los avisos de prueba'
+        type: choice
+        options: [cargar, borrar]
+        default: cargar
+      confirmar:
+        description: 'Escribí uat para confirmar'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-db
+  cancel-in-progress: false
+
+jobs:
+  datos:
+    name: Avisos de prueba (${{ inputs.accion }})
+    runs-on: ubuntu-24.04
+    env:
+      API: https://api.supabase.com/v1/projects
+      PREFIX: 00000000-0000-4000-8000-0000001
+    steps:
+      - name: Solo desde main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Corre solo desde main."
+          exit 1
+      # Como el deploy: lo dispara solo el dueño del repo, también al re-correrlo.
+      - name: Solo el dueño del repo
+        if: github.actor != github.repository_owner || github.triggering_actor != github.repository_owner
+        run: |
+          echo "::error::Lo dispara solo el dueño del repo."
+          exit 1
+      - name: Confirmación
+        if: inputs.confirmar != 'uat'
+        run: |
+          echo "::error::Escribí uat en 'confirmar'."
+          exit 1
+      - name: Faltan secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$PROJECT_REF" ]; then
+            echo "::error::Faltan SUPABASE_ACCESS_TOKEN o SUPABASE_PROJECT_REF en los secrets del repo."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+
+      - name: Cargar o borrar
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          ACCION: ${{ inputs.accion }}
+        run: |
+          set -euo pipefail
+          # SQL contra la base con la API de Supabase; devuelve las filas de la última consulta.
+          sql() {
+            jq -Rs '{query: .}' | curl -sS --fail-with-body -X POST "$API/$PROJECT_REF/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' --data @-
+          }
+          KEY=$(curl -sS --fail-with-body "$API/$PROJECT_REF/api-keys?reveal=true" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            | jq -r '[.[] | select(.name == "service_role")][0].api_key // empty')
+          if [ -z "$KEY" ]; then echo "::error::No pude leer la key de servicio del proyecto."; exit 1; fi
+          echo "::add-mask::$KEY"
+          URL="https://$PROJECT_REF.supabase.co"
+          ids() { echo "select id from public.listings where id::text like '$PREFIX%' order by id" | sql | jq -r '.[].id'; }
+
+          if [ "$ACCION" = cargar ]; then
+            sql < scripts/uat/load.sql | jq .
+            for id in $(ids); do
+              for i in 0 1 2; do
+                curl -sS --fail-with-body -o /dev/null -X POST "$URL/storage/v1/object/listing-photos/$id/uat-$i.jpg" \
+                  -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H 'x-upsert: true' -H 'Content-Type: image/jpeg' \
+                  --data-binary "@scripts/uat/photos/uat-$i.jpg"
+              done
+              echo "Fotos subidas: $id"
+            done
+          else
+            paths=$(for id in $(ids); do for i in 0 1 2; do echo "$id/uat-$i.jpg"; done; done | jq -Rsc 'split("\n") | map(select(length > 0)) | {prefixes: .}')
+            if [ "$paths" != '{"prefixes":[]}' ]; then
+              curl -sS --fail-with-body -o /dev/null -X DELETE "$URL/storage/v1/object/listing-photos" \
+                -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H 'Content-Type: application/json' --data "$paths"
+            fi
+            sql < scripts/uat/remove.sql | jq .
+          fi

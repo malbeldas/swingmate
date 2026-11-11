@@ -52,6 +52,26 @@ test('BR-TRU-006 seed.sql is only used by local and CI, never by a deploy workfl
   assert.deepEqual(offenders, []);
 });
 
+// DEC-017: UAT test listings live outside the migrations, only touch their own ids and are loaded by
+// one manual workflow that the repo owner runs; deploy-db never loads them.
+test('DEC-017 the UAT test data only touches its own listings and only its workflow loads it', () => {
+  const load = read('scripts/uat/load.sql');
+  const remove = read('scripts/uat/remove.sql');
+  const prefix = '00000000-0000-4000-8000-0000001';
+  assert.ok(load.includes(`'${prefix}' || lpad(`), 'listing ids carry the UAT prefix');
+  assert.match(remove, new RegExp(`^delete from public\\.listings where id::text like '${prefix}%';$`, 'm'));
+  assert.equal((remove.match(/\bdelete\b/gi) ?? []).length, 1, 'remove.sql deletes nothing else');
+  assert.doesNotMatch(load, /\b(delete|truncate|drop)\b/i);
+  assert.match(load, /UAT test: /, 'every title says it is a test');
+  assert.doesNotMatch(read('.github/workflows/deploy-db.yml'), /scripts\/uat/);
+  const wf = read('.github/workflows/uat-test-data.yml');
+  assert.match(wf, /workflow_dispatch/);
+  assert.doesNotMatch(wf, /^\s+(push|pull_request|schedule):/m, 'only by hand');
+  assert.match(wf, /github\.actor != github\.repository_owner \|\| github\.triggering_actor != github\.repository_owner/);
+  assert.match(wf, /inputs\.confirmar != 'uat'/);
+  assert.ok(wf.includes(`PREFIX: ${prefix}`), 'the workflow uses the same prefix');
+});
+
 test('migrations are named <timestamp>_<name>.sql and never share a timestamp', () => {
   const stamps = migrationFiles.map((f) => {
     assert.match(f, /^\d{14}_[a-z0-9_]+\.sql$/);
