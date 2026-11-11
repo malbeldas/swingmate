@@ -90,8 +90,9 @@ begin
 end;
 $$;
 
--- After Auth answered (phone-verify only). p_wrong: Auth said the code is wrong or expired, and the
--- try stays as a wrong code; otherwise (confirmed, or Auth failed) it doesn't count. Answers
+-- After Auth answered (phone-verify only). p_wrong: the try stays as a wrong code, because Auth said
+-- the code is wrong or expired, or didn't give a clear answer (a rate limit or an outage could
+-- otherwise be used to try codes for free). False only when Auth confirmed the number. Answers
 -- { ok: true } or { ok: false, reason: 'locked', until }.
 create or replace function public.phone_verify_end(p_user_id uuid, p_try_id bigint, p_wrong boolean)
 returns jsonb
@@ -116,13 +117,29 @@ begin
 end;
 $$;
 
+-- After Auth said yes (phone-verify only): whether the number really is this person's verified one
+-- now. False when phone_verify_guard kept it unconfirmed, so the page never shows "Verified" for a
+-- number the database didn't take.
+create or replace function public.phone_verified(p_user_id uuid, p_phone text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from auth.users where id = p_user_id and phone_confirmed_at is not null
+    and phone = regexp_replace(coalesce(p_phone, ''), '\D', '', 'g'));
+$$;
+
 revoke all on function public.phone_verify_begin(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.phone_verified(uuid, text) from public, anon, authenticated;
 revoke all on function public.phone_verify_end(uuid, bigint, boolean) from public, anon, authenticated;
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
     grant execute on function public.phone_verify_begin(uuid, text, text) to service_role;
     grant execute on function public.phone_verify_end(uuid, bigint, boolean) to service_role;
+    grant execute on function public.phone_verified(uuid, text) to service_role;
   end if;
 end
 $$;

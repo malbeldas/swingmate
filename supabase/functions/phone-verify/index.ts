@@ -32,6 +32,10 @@ Deno.serve(async (req) => {
       const { data: result, error } = await db.rpc('phone_verify_end', { p_user_id: userId, p_try_id: tryId, p_wrong: wrong });
       return error ? { ok: true } : result;
     },
+    async verified(userId: string, e164: string) {
+      const { data: result, error } = await db.rpc('phone_verified', { p_user_id: userId, p_phone: e164 });
+      return !error && result === true;
+    },
   };
 
   const auth = {

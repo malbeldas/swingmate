@@ -6,7 +6,8 @@ import { CODE_LENGTH, auMobile, cleanCode } from '../../../core/phone.js';
 
 // user: the auth user of the caller's token (null when it is not valid).
 // store: { begin(userId, phone, code) -> { ok, try_id } | { ok: false, reason, until? },
-//          end(userId, tryId, wrong) -> { ok } | { ok: false, reason: 'locked', until } }
+//          end(userId, tryId, wrong) -> { ok } | { ok: false, reason: 'locked', until },
+//          verified(userId, phone) -> whether the database took the number }
 // auth:  { verify(phone, code) -> { ok: true } | { ok: false, status, code } }, Auth's
 //        POST /verify with type phone_change.
 // Returns { status, body }; body is { ok } or { ok: false, reason } with a key of PHONE_TEXTS.
@@ -28,14 +29,15 @@ export async function runPhoneVerify({ user, phone, code, store, auth }) {
   }
   if (answer.ok) {
     await store.end(user.id, begin.try_id, false);
-    return { status: 200, body: { ok: true } };
+    // Auth said yes, but the database may have kept the number unconfirmed (phone_verify_guard).
+    if (await store.verified(user.id, e164)) return { status: 200, body: { ok: true } };
+    return { status: 502, body: { ok: false, reason: 'generic' } };
   }
-  if (isWrong(answer)) {
-    const end = await store.end(user.id, begin.try_id, true);
-    return { status: 200, body: end?.ok ? { ok: false, reason: 'wrongCode' } : refusal(end) };
-  }
-  // Auth failed for another reason (rate limit, outage): the try doesn't count.
-  await store.end(user.id, begin.try_id, false);
+  // A wrong code counts, and so does a try Auth didn't answer clearly (rate limit, outage):
+  // otherwise forcing a 429 would let codes be tried for free while sending them to Auth directly.
+  const end = await store.end(user.id, begin.try_id, true);
+  if (!end?.ok) return { status: 200, body: refusal(end) };
+  if (isWrong(answer)) return { status: 200, body: { ok: false, reason: 'wrongCode' } };
   return { status: 502, body: { ok: false, reason: 'generic' } };
 }
 

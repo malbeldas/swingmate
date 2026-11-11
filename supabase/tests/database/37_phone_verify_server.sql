@@ -4,7 +4,7 @@
 -- phone_change to phone and sets phone_confirmed_at in one update.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(21);
+select plan(25);
 
 insert into auth.users (id, email, email_confirmed_at, created_at)
   select ('00000000-0000-0000-0000-0000000037a' || i)::uuid, 'verify' || i || '@example.com', now(), now()
@@ -66,6 +66,17 @@ select is(public.phone_verify_end('00000000-0000-0000-0000-0000000037a1', (selec
   '{"ok": true}'::jsonb, 'the try ends');
 select is((select count(*)::int from public.phone_code_events where user_id = '00000000-0000-0000-0000-0000000037a1' and kind = 'trying' and token_hash = encode(extensions.digest('61400037001909090', 'sha224'), 'hex')), 0,
   'a right code doesn''t count');
+
+select ok(public.phone_verified('00000000-0000-0000-0000-0000000037a1', '+61400037001'), 'phone_verified sees the confirmed number');
+select ok(not public.phone_verified('00000000-0000-0000-0000-0000000037a1', '+61400037002'), 'and not another one');
+
+-- Updates that are not Auth confirming a new number pass untouched: an admin setting a confirmed
+-- number (phone_confirm, which doesn't use phone_change) and an email change.
+update auth.users set phone = '61400037005', phone_confirmed_at = now() where id = '00000000-0000-0000-0000-0000000037a3';
+select is((select phone from auth.users where id = '00000000-0000-0000-0000-0000000037a3' and phone_confirmed_at is not null), '61400037005',
+  'an admin confirming a number directly is not undone');
+update auth.users set email = 'verify3b@example.com' where id = '00000000-0000-0000-0000-0000000037a3';
+select is((select phone from auth.users where id = '00000000-0000-0000-0000-0000000037a3'), '61400037005', 'other updates keep the number');
 
 -- An old try (over a minute) lets nothing through.
 select pg_temp.code_sent('00000000-0000-0000-0000-0000000037a2', '61400037002', '313131');

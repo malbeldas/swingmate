@@ -5,7 +5,7 @@ import { runPhoneVerify } from '../../supabase/functions/_shared/phone-verify-jo
 const USER = { id: 'u1' };
 
 // A database with a lock after 5 wrong tries, and an Auth that knows one right code.
-function fakes({ right = '123456', wrongsBefore = 0, authFails = null } = {}) {
+function fakes({ right = '123456', wrongsBefore = 0, authFails = null, taken = true } = {}) {
   const calls = { begin: [], end: [], verify: [] };
   let wrongs = wrongsBefore;
   let tries = 0;
@@ -21,6 +21,9 @@ function fakes({ right = '123456', wrongsBefore = 0, authFails = null } = {}) {
       tries -= 1;
       if (wrong) wrongs += 1;
       return wrongs >= 5 ? { ok: false, reason: 'locked', until: '2026-11-11T14:00:00Z' } : { ok: true };
+    },
+    async verified() {
+      return taken;
     },
   };
   const auth = {
@@ -86,20 +89,26 @@ test('AC-021-2 a try is counted before Auth answers, so tries sent at once stop 
   assert.equal(results.filter((r) => r.body.reason === 'locked').length, 4, 'three refused at once, and the fifth wrong one locks');
 });
 
-test('UC-021 when Auth fails for another reason, the try does not count', async () => {
+test('AC-021-2 when Auth answers with a rate limit, the try still counts, so a forced 429 tries nothing for free', async () => {
   const { store, auth, calls } = fakes({ authFails: { ok: false, status: 429, code: 'over_request_rate_limit' } });
   const r = await runPhoneVerify({ user: USER, phone: '0412 345 678', code: '123456', store, auth });
   assert.deepEqual(r, { status: 502, body: { ok: false, reason: 'generic' } });
-  assert.deepEqual(calls.end, [['u1', 1, false]]);
+  assert.deepEqual(calls.end, [['u1', 1, true]]);
 });
 
-test('UC-021 an Auth that cannot be reached reads as a generic error', async () => {
+test('UC-021 an Auth that cannot be reached reads as a generic error and the try counts', async () => {
   const { store, calls } = fakes();
   const r = await runPhoneVerify({
     user: USER, phone: '0412 345 678', code: '123456', store, auth: { verify: async () => { throw new Error('down'); } },
   });
   assert.equal(r.status, 502);
-  assert.deepEqual(calls.end, [['u1', 1, false]]);
+  assert.deepEqual(calls.end, [['u1', 1, true]]);
+});
+
+test('UC-021 if Auth says yes but the database kept the number unconfirmed, the page is not told it is verified', async () => {
+  const { store, auth } = fakes({ taken: false });
+  const r = await runPhoneVerify({ user: USER, phone: '0412 345 678', code: '123456', store, auth });
+  assert.deepEqual(r, { status: 502, body: { ok: false, reason: 'generic' } });
 });
 
 test('UC-021 a number other than the one the code went to reads as a wrong code', async () => {
