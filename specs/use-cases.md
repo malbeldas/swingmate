@@ -769,7 +769,8 @@ Cada paso muestra "Step N of 5" y un consejo corto que se puede cerrar (`DEC-016
 **Flujo principal:**
 1. El sistema envía el email (`NTF-005`) y muestra la pregunta en la conversación.
 
-**Flujos alternativos:** ninguno.
+**Flujos alternativos:**
+- **A1 — Quien buscó apagó los recordatorios:** no se envía el email, pero la pregunta aparece igual en la conversación (`BR-MAIL-005`).
 
 **Casos de error:**
 - **E1 — Quien buscó eliminó su cuenta:** no se envía.
@@ -780,7 +781,7 @@ Cada paso muestra "Step N of 5" y un consejo corto que se puede cerrar (`DEC-016
 **Criterios de aceptación:**
 - AC-052-1: el email sale el día 14 y una sola vez por conversación.
 
-**Reglas referenciadas:** BR-MAIL-003.
+**Reglas referenciadas:** BR-MAIL-003, BR-MAIL-005.
 
 ---
 

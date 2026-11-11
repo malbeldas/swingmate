@@ -48,10 +48,10 @@ async function logInOnAccountPage(page, email, password) {
   await expect(page.locator('#notifications')).toBeVisible();
 }
 
-test('BR-MAIL-005 hosts can switch off reminders; seekers never see that switch', async ({ page, browser, request }, testInfo) => {
+test('BR-MAIL-005 hosts and seekers can switch off reminders and the outcome question (NTF-005)', async ({ page, browser, request }, testInfo) => {
   await logInOnAccountPage(page, SEED_HOST.email, SEED_HOST.password);
-  await expect(page.getByLabel('Remind me about my listings')).toBeVisible();
-  await expect(page.locator('#notify-reminders-hint')).toHaveText('An enquiry you haven’t answered in 2 days, and a calendar check every 30 days.');
+  await expect(page.getByLabel('Send me reminders and follow-ups')).toBeVisible();
+  await expect(page.locator('#notify-reminders-hint')).toHaveText('An enquiry you haven’t answered in 2 days, a calendar check every 30 days, and one email asking if you found a place.');
 
   const email = uniqueEmail(testInfo, 'noremind');
   await createMember(request, email, 'Ola');
@@ -59,6 +59,11 @@ test('BR-MAIL-005 hosts can switch off reminders; seekers never see that switch'
   const seeker = await other.newPage();
   await logInOnAccountPage(seeker, email, PASSWORD);
   await expect(seeker.getByLabel('Email me when I get a new message')).toBeVisible();
-  await expect(seeker.getByLabel('Remind me about my listings')).toHaveCount(0);
+  await expect(seeker.getByLabel('Send me reminders and follow-ups')).toBeVisible();
+  await expect(seeker.locator('#notify-reminders-hint')).toHaveText('Two weeks after you message a host, one email asking if you found a place.');
+  await seeker.getByLabel('Send me reminders and follow-ups').uncheck();
+  await expect(seeker.locator('#notify-status')).toHaveText('Saved.');
+  await seeker.reload();
+  await expect(seeker.getByLabel('Send me reminders and follow-ups')).not.toBeChecked();
   await other.close();
 });

@@ -11,7 +11,7 @@
 - **ID:** NTF-005
 - **Trigger:** 14 días desde la primera consulta de la conversación (UC-052).
 - **Destinatario:** quien buscó.
-- **Reglas referenciadas:** BR-MAIL-003.
+- **Reglas referenciadas:** BR-MAIL-003, BR-MAIL-005.
 
 ## Variables del template
 
@@ -20,7 +20,8 @@
 | `seekerName` | `profiles.display_name` | Alex |
 | `listingTitle` | `listings.title` | Modern room in Baldivis |
 | `hostName` | `profiles.display_name` | Matt |
-| `answerUrl(answer)` | `outcome.html?t=<token>&a=<answer>` | — |
+| `answerUrl(answer)` | `email-action.html?a=outcome&answer=<answer>&src=email&ntf=NTF-005#t=<token>` (el token va después del `#`, así no llega a ningún servidor) | — |
+| `settingsUrl` | `account.html#notifications` | — |
 
 ## Asunto
 
@@ -44,6 +45,7 @@ Not yet: {{answerUrl(not_yet)}}
 One tap is enough. It helps us make SwingMate better for people on rosters.
 If you want to tell us more, just reply to this email.
 
+Manage email settings: {{settingsUrl}}
 The SwingMate team
 ```
 
@@ -53,7 +55,9 @@ Tres botones del mismo tamaño, uno por respuesta.
 
 ## Implementación
 
-Edge Function `outcomes` diaria. Marca `conversations.outcome_asked_at` y crea el mensaje `system` con la pregunta en la conversación. El token es un JWT firmado con `{ conversation_id, purpose: 'outcome' }` y 60 días de vigencia; `outcome.html` lo manda a la Edge Function `outcome`, que guarda en `outcome_responses` (`P-25`).
+Se apaga con la opción de recordatorios de la cuenta (`notification_preferences.reminders`): con la opción apagada no sale el email, pero la conversación se marca como preguntada y la pregunta aparece en ella. Lleva el header `List-Unsubscribe` (`BR-MAIL-005`).
+
+Edge Function `outcomes` diaria. Marca `conversations.outcome_asked_at` y crea el mensaje `system` con la pregunta en la conversación. El token es un JWT firmado con `{ conversation_id, purpose: 'outcome' }` y 60 días de vigencia; `email-action.html` lo manda a la Edge Function `outcome`, que guarda en `outcome_responses` (`P-25`).
 
 ## Criterios de aceptación
 

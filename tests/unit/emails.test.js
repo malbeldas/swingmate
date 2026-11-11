@@ -78,16 +78,18 @@ test('AC-051-1 NTF-004 host reminder text and links', () => {
   assert.match(mail.html, />Mark as filled</);
 });
 
-test('AC-007-1 NTF-005 three one-tap answers with their own links and no settings link', () => {
+test('AC-007-1 NTF-005 three one-tap answers with their own links, and BR-MAIL-005 the settings link', () => {
   const mail = outcomeQuestionEmail({
     seekerName: 'Alex', listingTitle: 'Modern room in Baldivis', hostName: 'Matt',
     answerUrl: (a) => `${APP}/email-action.html?a=outcome&answer=${a}#t=TOKEN`,
+    settingsUrl: `${APP}/account.html#notifications`,
   });
   assertShape(mail);
   assert.equal(mail.subject, 'Did you find a place, Alex?');
   for (const a of ['found_here', 'found_elsewhere', 'not_yet']) assert.ok(mail.html.includes(`a=outcome&amp;answer=${a}#t=TOKEN`), a);
   assert.match(mail.text, /Yes, through SwingMate: .*answer=found_here#t=TOKEN\nYes, somewhere else: .*answer=found_elsewhere#t=TOKEN\nNot yet: .*answer=not_yet#t=TOKEN/);
-  assert.doesNotMatch(mail.text, /Manage email settings/);
+  assert.match(mail.text, /Manage email settings: https:\/\/swingmate\.au\/account\.html#notifications\nThe SwingMate team\n$/);
+  assert.ok(mail.html.includes('href="https://swingmate.au/account.html#notifications"'));
 });
 
 test('AC-054-1 NTF-006 calendar check shows what the listing has free and both buttons', () => {
@@ -133,7 +135,7 @@ test('NTF-009 AC-2 the admin email has no report text and no contact details to 
 });
 
 test('BR-MAIL-005 only product emails carry the unsubscribe link', () => {
-  assert.deepEqual(UNSUBSCRIBABLE, ['NTF-003', 'NTF-004', 'NTF-006', 'NTF-007']);
+  assert.deepEqual(UNSUBSCRIBABLE, ['NTF-003', 'NTF-004', 'NTF-005', 'NTF-006', 'NTF-007']);
 });
 
 test('notifications.md rule 3: emails escape every value and only link to http(s)', () => {
