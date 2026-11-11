@@ -325,7 +325,7 @@ Son opcionales: estadía mínima, quiénes viven y cuántos en roster, minutos a
 
 ### BR-ACC-006 — Misma persona, dos métodos
 **Aplica a:** login.
-**Condición:** alguien entra con Google usando un email que ya tiene cuenta con contraseña.
+**Condición:** alguien entra con Google o con Facebook usando un email que ya tiene cuenta con otro método.
 **Comportamiento:** se vincula a la misma cuenta. No se crean cuentas duplicadas.
 **Excepciones:** ninguna.
 

@@ -53,7 +53,7 @@
 
 ## 3. Autenticación y sesión
 
-- **SEC-01:** login con Supabase Auth: Google (OAuth) o email + contraseña con código de 6 dígitos por email (`BR-ACC-002`). Mientras el email no esté confirmado, las políticas de escritura de mensajes y avisos lo rechazan.
+- **SEC-01:** login con Supabase Auth: Google (OAuth), Facebook (OAuth, solo si está en `providers` de `app/config.js`, `INT-007`, Q-28) o email + contraseña con código de 6 dígitos por email (`BR-ACC-002`). Mientras el email no esté confirmado, las políticas de escritura de mensajes y avisos lo rechazan.
 - **SEC-02:** la sesión es el JWT de Supabase con renovación automática. supabase-js la guarda en `localStorage` del dominio; es un token, no un dato personal, y se acepta como riesgo conocido (un XSS podría leerlo, por eso T-08 es crítica).
 - **SEC-03:** duración del access token: 1 hora. Refresh token con rotación activada.
 - **SEC-04:** celular: verificación con `updateUser({ phone })` y la Edge Function `phone-verify`, que cuenta el intento antes de que Auth chequee el código (AC-021-2); un trigger en `auth.users` no confirma un número que `phone-verify` no pidió. El número queda en `auth.users.phone` y nunca se expone (`BR-TRU-003`).
