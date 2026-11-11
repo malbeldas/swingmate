@@ -34,7 +34,7 @@ Un usuario suspendido (`profiles.status = 'suspended'`) mantiene el rol `user` p
 ## 2. Cómo viaja el rol
 
 - El rol admin vive en `app_metadata`, que el usuario **no** puede modificar desde el navegador.
-- Solo la Edge Function `admin-grant` (llamada por un admin) lo asigna o lo quita, y escribe `grant_admin` / `revoke_admin` en `moderation_actions` (`BR-ADM-004`).
+- Solo un admin lo asigna o lo quita, con la RPC `admin_moderate` (`security definer`, chequea `is_admin()` y no deja quitarse el rol a uno mismo), que escribe `grant_admin` / `revoke_admin` en `moderation_actions` (`BR-ADM-004`). El cambio rige desde el próximo login o refresh del token.
 - La función SQL `is_admin()` lee el claim del JWT. Si se le quita el rol a alguien, el cambio aplica cuando su token se renueva (como máximo 1 hora); para un retiro urgente se cierra su sesión desde el panel de Supabase.
 
 ## 3. Matriz de permisos

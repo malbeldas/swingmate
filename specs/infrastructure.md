@@ -54,7 +54,7 @@ No hay staging en el piloto: el plan gratuito permite dos proyectos y GitHub Pag
 | SMTP | Resend (`INT-002`) |
 | Storage | Buckets `listing-photos` y `avatars` (`schema.md` §11) |
 | Extensiones | `pg_cron`, `pg_net`, `pgtap` (solo local y CI) |
-| Edge Functions | `send-email`, `notify-messages`, `reminders`, `outcomes`, `outcome`, `calendar-checks`, `calendar-confirm`, `alerts`, `admin-grant`, `admin-action`, `delete-account`, `export-data`, `cleanup` |
+| Edge Functions | `send-email`, `notify-messages`, `reminders`, `outcomes`, `outcome`, `calendar-checks`, `calendar-confirm`, `alerts`, `admin-action`, `delete-account`, `export-data`, `cleanup` |
 | Secretos | `security.md` SEC-26 |
 
 **Plan gratuito** (supabase.com/pricing, consultado el 29 Oct 2026): 50.000 usuarios activos por mes, 500 MB de base, 1 GB de archivos, 5 GB de transferencia, 500.000 invocaciones de funciones y 2 millones de mensajes de tiempo real. Pausa el proyecto tras 1 semana sin actividad y no incluye backups.

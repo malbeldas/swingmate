@@ -2,7 +2,7 @@
 -- BR-ADM-004, P-23).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(33);
+select plan(36);
 
 insert into public.suburbs (id, name, state, lat, lng, timezone) values
   (978101, 'Swansea', 'TAS', -42.1240, 148.0750, 'Australia/Hobart');
@@ -41,6 +41,8 @@ insert into public.reports (target_type, target_id, reason) values ('user', '000
 -- Members can't use any of it.
 select throws_ok($$select public.admin_search('Oyster')$$, '42501', 'admins only', 'BR-ADM-004 a member cannot search');
 select throws_ok($$select public.admin_person('00000000-0000-0000-0000-000000000061')$$, '42501', 'admins only', 'BR-ADM-004 a member cannot open a record');
+select throws_ok($$select public.admin_listing('00000000-0000-0000-0000-000000006101')$$, '42501', 'admins only',
+  'BR-ADM-004 a member cannot open a listing record');
 select throws_ok($$select public.admin_moderate('user', '00000000-0000-0000-0000-000000000062', 'grant_admin', 'Make me admin')$$,
   '42501', 'admins only', 'BR-ADM-004 a member cannot give themselves the admin role');
 reset role;
@@ -75,6 +77,10 @@ select ok((select position('61400000061' in v::text) = 0 and position('Esplanade
 select ok((select position('Secret plan' in v::text) = 0 from t where k = 'odile'), 'AC-041-1 the record never carries message content');
 select is((select v -> 'listings' -> 0 ->> 'title' from t where k = 'odile'), 'Oyster Bay cottage room', 'UC-041 the record lists her listings');
 select is((select v -> 'reports' -> 0 ->> 'reason' from t where k = 'odile'), 'unsafe', 'UC-041 the record lists reports about her');
+insert into t values ('cottage', public.admin_listing('00000000-0000-0000-0000-000000006101'));
+select is((select v ->> 'owner_name' from t where k = 'cottage'), 'Odile', 'UC-041 the listing record shows its host');
+select ok((select position('Esplanade' in v::text) = 0 and position('Secret plan' in v::text) = 0 from t where k = 'cottage'),
+  'AC-041-1 BR-TRU-003 the listing record carries neither the exact address nor message content');
 
 -- Actions outside a report (UC-041 step 3).
 select is(public.admin_moderate('user', '00000000-0000-0000-0000-000000000061', 'warn_user', ' '), '{"ok": false, "reason": "note"}'::jsonb,
