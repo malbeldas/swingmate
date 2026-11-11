@@ -46,9 +46,10 @@ jobs:
         run: |
           echo "::error::El deploy corre solo desde main."
           exit 1
-      # engineering-constitution.md §8: el deploy lo dispara Maxi, el dueño del repo.
+      # engineering-constitution.md §8: el deploy lo dispara Maxi, el dueño del repo, también al
+      # re-correrlo (triggering_actor). Si el repo pasa a una organización (Q-05), hay que cambiarlo.
       - name: Solo el dueño del repo
-        if: github.actor != github.repository_owner
+        if: github.actor != github.repository_owner || github.triggering_actor != github.repository_owner
         run: |
           echo "::error::El deploy lo dispara solo el dueño del repo."
           exit 1
