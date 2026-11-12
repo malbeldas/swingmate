@@ -45,6 +45,10 @@ No se usa Twilio Verify (US$0,05 extra por verificación más el SMS): Supabase 
 
 `[auth.sms.test_otp]` en `supabase/config.toml` con números de prueba y código fijo. Nunca se llama a Twilio desde CI.
 
+## UAT
+
+El sitio publicado usa los mismos números de prueba (61400000001-010, código fijo). Para recibir un SMS real se puede sumar una cuenta de prueba de Twilio (en pausa desde el 12 Nov): sin tarjeta y con crédito de regalo, solo manda a números verificados en Twilio y con el prefijo "Sent from your Twilio trial account". No genera costo; pasar a cuenta paga espera a `Q-03`.
+
 ## Criterios de aceptación
 
 - AC-1: en CI ningún test usa credenciales de Twilio.

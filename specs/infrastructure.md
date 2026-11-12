@@ -112,8 +112,9 @@ Lo que tiene que estar listo para pasar de prueba a usuarios reales. Cada punto 
 | # | Qué | Por qué |
 |---|---|---|
 | 1 | Términos, Privacy Policy y "Before you agree" escritos o revisados por el abogado y publicados | `SEC-20`, `Q-01` |
-| 2 | Borrar todos los datos de prueba de `swingmate-prod`: cuentas, avisos, fotos de Storage, conversaciones y eventos | `BR-TRU-006`, DEC-017 |
-| 3 | Twilio con tarjeta de SwingMate, límite de gasto, permisos geográficos solo para Australia y remitente registrado ante ACMA (o aceptar "Unverified") | `Q-03`, `INT-003`, `T-07`, `SEC-09` |
+| 2 | Borrar todos los datos de prueba de `swingmate-prod`: cuentas, avisos, fotos de Storage, conversaciones y eventos. Los avisos de prueba se sacan corriendo "Datos de prueba UAT" con "borrar"; las denuncias y la moderación sobre ellos (sin FK) se borran aparte | `BR-TRU-006`, DEC-017 |
+| 2b | Crear la variable del repo `PRODUCCION=abierta`: "Datos de prueba UAT" deja de cargar | `BR-TRU-006`, DEC-017 |
+| 3 | Twilio con tarjeta de SwingMate (la cuenta de prueba de UAT solo manda a números verificados y con el prefijo de trial), límite de gasto, permisos geográficos solo para Australia y remitente registrado ante ACMA (o aceptar "Unverified") | `Q-03`, `INT-003`, `T-07`, `SEC-09` |
 | 4 | Sin números de prueba de SMS en la configuración de Auth de producción | `integrations-sms.md` |
 | 5 | Dominio verificado en Resend, con SPF, DKIM y DMARC | `INT-002` |
 | 6 | Google sign-in publicado (fuera del modo de prueba) con `swingmate.au` en las redirecciones | `INT-001`, `SEC-05` |
