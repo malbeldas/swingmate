@@ -211,10 +211,26 @@ def guarda_proyecto(evento):
         preguntar(f"Guarda: acción con costo o sobre un servicio real: {costo[:120]}. Necesita tu OK.")
 
 
+FETCH_OPCIONES = {"-q", "--quiet", "--prune", "-p", "--no-tags", "--all"}
+
+
+def fetch_inocuo(argumentos):
+    """I1: git fetch solo con opciones inocuas y sin refspecs que muevan ramas locales."""
+    for a in argumentos:
+        if a.startswith("-"):
+            if a not in FETCH_OPCIONES:
+                return False
+        elif ":" in a or a.startswith("+"):
+            return False
+    return True
+
+
 def tramo_de_lectura(tramo):
     nombre = tramo[0]
     if nombre == "git":
         git = subcomando_git(tramo)
+        if git and git[0] == "fetch":
+            return fetch_inocuo(git[1])
         if not git or git[0] not in GIT_LECTURA:
             return False
         return not any(a.startswith(("--output", "--ext-diff")) for a in git[1])

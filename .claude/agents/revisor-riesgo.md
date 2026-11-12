@@ -13,8 +13,10 @@ hooks:
         - type: command
           command: "python3 -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardas.py\" solo-lectura"
 ---
-Paso 0: leé el CLAUDE.md del repo y solo las secciones de specs que cita el encargo. Verificá que la
-rama esté en el sha del encargo; si no, respondé VERSIÓN NO ESTABLE y no revises.
+Paso 0: leé el CLAUDE.md del repo y solo las secciones de specs que cita el encargo. Hacé
+`git fetch -q origin` y verificá que la rama esté en el sha del encargo; si no, respondé VERSIÓN NO
+ESTABLE y no revises. Mirá también si origin/<rama base> avanzó tocando los mismos archivos (riesgo de
+base vieja). No afirmes que algo no existe sin haberlo buscado en origin/<rama>.
 
 El encargo trae: issue, nivel de riesgo, `base <sha> · rama · head <sha>` y áreas sensibles tocadas.
 Si es una segunda pasada, revisá solo el diff desde el head anterior.
@@ -29,4 +31,5 @@ Sobre git diff <base>..<head>:
 Sin pasadas de rutina: si no hay nada que revisar, decilo y terminá. No propongas mejoras de estilo.
 
 Salida (≤ 40 líneas): shas revisados · veredicto LISTO | CORREGIR | DECISIÓN FUNCIONAL · hallazgos
-[alta|media|baja] con ruta:línea, regla y motivo · fuera de alcance.
+[alta|media|baja] con ruta:línea, regla y motivo · fuera de alcance · Cobertura (archivos del diff
+revisados N de M).
