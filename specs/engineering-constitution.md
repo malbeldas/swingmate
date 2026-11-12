@@ -104,7 +104,7 @@
 
 ## 5. Acceso a datos y seguridad
 
-- La web usa solo la **anon key** y la sesión del usuario. La `service_role` vive únicamente en los secretos de las Edge Functions.
+- La web usa solo la **anon key** y la sesión del usuario. La `service_role` vive únicamente en los secretos de las Edge Functions. Única excepción: el workflow manual "Datos de prueba UAT" (`uat-test-data.yml`, DEC-017) la pide a la API de Supabase en el momento, enmascarada, solo para subir y borrar sus fotos de prueba.
 - Toda tabla de `public` tiene RLS activado y al menos una política. Una tabla sin políticas no pasa CI (test pgTAP que recorre el catálogo).
 - Las lecturas públicas de avisos pasan por `search_listings` y `get_listing`; nunca un `select` directo de la web sobre `listings` de otro usuario.
 - Toda función `security definer` empieza validando `auth.uid()` y fija `search_path = public`.
@@ -150,7 +150,7 @@ Reglas:
 ## 9. Reglas hard
 
 1. **Costo cero** salvo lo aprobado en `infrastructure.md` §5. Ningún servicio pago nuevo sin decisión de Maxi y Tomás.
-2. **RLS en todo.** Ninguna tabla sin políticas y ninguna `service_role` fuera de Edge Functions.
+2. **RLS en todo.** Ninguna tabla sin políticas y ninguna `service_role` fuera de Edge Functions, salvo el workflow de datos de prueba de UAT (§5).
 3. **Datos privados no salen de la base hacia otra persona:** dirección exacta, email, teléfono, empleador (`BR-TRU-003`). Hay tests que lo prueban mirando las respuestas de red.
 4. **Lógica pura en `core/`** con test unitario, compartida entre web y Edge Functions.
 5. **Sin inventario falso en producción** (`BR-TRU-006`).
