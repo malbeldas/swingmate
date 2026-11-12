@@ -5,6 +5,8 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Para volver a correrlo a mano en una rama si una corrida queda trabada (incidente de GitHub del 11/11).
+  workflow_dispatch:
 
 permissions:
   contents: read
