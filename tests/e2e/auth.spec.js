@@ -13,7 +13,7 @@ async function signUpWithEmail(page, email) {
   await expect(sheet(page).getByRole('heading', { name: 'Check your email' })).toBeVisible();
 }
 
-test('AC-030-2 sign up offers Google and email, and no Apple or Facebook', async ({ page }) => {
+test('AC-030-2 sign up offers Google and email, and no Apple; Facebook only when the config lists it', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Sign up', exact: true }).click();
   await expect(sheet(page)).toBeVisible();
@@ -21,6 +21,31 @@ test('AC-030-2 sign up offers Google and email, and no Apple or Facebook', async
   await expect(sheet(page).getByLabel('Email')).toBeVisible();
   await expect(sheet(page).getByLabel('Create a password')).toBeVisible();
   await expect(sheet(page)).not.toContainText(/apple|facebook/i);
+});
+
+// BR-ACC-002, INT-007: the config turns Facebook on (UAT); it returns to the same page like Google.
+test('AC-030-2 with Facebook in the config, sign up and log in offer it and it returns to the same page', async ({ page }) => {
+  await page.route('**/app/config.local.json', async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, json: { ...(await res.json()), providers: ['google', 'facebook'] } });
+  });
+  await page.goto('/?from=listing');
+  const startUrl = page.url();
+  await page.getByRole('button', { name: 'Sign up', exact: true }).click();
+  await expect(sheet(page).getByRole('button', { name: 'Continue with Google' })).toBeVisible();
+  await expect(sheet(page).getByRole('button', { name: 'Continue with Facebook' })).toBeVisible();
+  await expect(sheet(page)).not.toContainText(/apple/i);
+  await sheet(page).getByRole('button', { name: 'Already have an account? Log in' }).click();
+  await expect(sheet(page).getByRole('button', { name: 'Log in with Facebook' })).toBeVisible();
+  // Facebook is off in local Supabase: stop at the redirect and check where it goes back to.
+  await page.route('**/auth/v1/authorize**', (route) => route.abort());
+  const [request] = await Promise.all([
+    page.waitForRequest('**/auth/v1/authorize**'),
+    sheet(page).getByRole('button', { name: 'Log in with Facebook' }).click(),
+  ]);
+  const url = new URL(request.url());
+  expect(url.searchParams.get('provider')).toBe('facebook');
+  expect(url.searchParams.get('redirect_to')).toBe(startUrl);
 });
 
 test('AC-030-3 after signing up with email the person is back on the same page, signed in', async ({ page, request }, testInfo) => {

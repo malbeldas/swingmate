@@ -493,7 +493,7 @@ Cada paso muestra "Step N of 5" y un consejo corto que se puede cerrar (`DEC-016
 
 **Criterios de aceptación:**
 - AC-030-1: una cuenta con email sin verificar no puede enviar mensajes ni publicar.
-- AC-030-2: no hay botón de Apple ni de Facebook.
+- AC-030-2: no hay botón de Apple; el de Facebook aparece solo si la configuración lo incluye (`BR-ACC-002`).
 - AC-030-3: después del registro la persona vuelve a la misma pantalla en la que estaba.
 - AC-030-4: con un email de dominio descartable no se puede registrar.
 
@@ -841,7 +841,7 @@ Cada paso muestra "Step N of 5" y un consejo corto que se puede cerrar (`DEC-016
 - Que el host busque perfiles de quien busca y le escriba (v0.2).
 - Adjuntos en el chat.
 - Notificaciones push o por SMS de mensajes nuevos.
-- Login con Apple o Facebook.
+- Login con Apple.
 - Verificación de identidad con documento.
 - Perfil público independiente del host (P09 del MVP). El bloque del host en el detalle lo reemplaza en v0.1.
 

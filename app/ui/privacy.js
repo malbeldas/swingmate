@@ -44,16 +44,16 @@ export function privacySection(ctx) {
   function askReauth(action, run) {
     const method = reauthMethod(ctx.user);
     const error = el('p', { class: 'form-error', role: 'alert', id: 'reauth-error', hidden: true });
-    if (method === 'google') {
+    if (method !== 'password') {
       reauthBox.replaceChildren(
         el('span', { class: 'small' }, T.reauth),
         el('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: async () => {
           savePending(action);
           const db = await getClient();
           const redirectTo = new URL('account.html#privacy', location.href).href;
-          const { error: oauthError } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+          const { error: oauthError } = await db.auth.signInWithOAuth({ provider: method, options: { redirectTo } });
           if (oauthError) show(error, ACCOUNT_TEXTS.generic);
-        } }, T.google),
+        } }, T[method]),
         error);
     } else {
       const password = el('input', { type: 'password', name: 'reauth-password', autocomplete: 'current-password', required: true });

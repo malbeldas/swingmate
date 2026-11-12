@@ -202,6 +202,11 @@ En features y extras FIFO el "+" va tal cual (`BR-LST-006`).
 **Lo que haríamos nosotros:** los escribimos desde `glossary.md` y Tomás los revisa en cada demo; los legales esperan a `Q-01`.
 **Por qué:** Tomás conoce el tono local y revisar es más rápido que redactar..
 
+### Q-28 — Login con Facebook en producción
+**Pregunta:** ¿dejamos "Continue with Facebook" en producción o queda solo en UAT?
+**Lo que haríamos nosotros:** probarlo en UAT y decidir con lo que se vea ahí; si sale a producción, publicar antes la app de Meta con Privacy y la URL de borrado de datos, que esperan a `Q-01`.
+**Por qué:** la gente llega desde grupos de Facebook, pero eso no prueba que quiera entrar con esa cuenta, y Meta no deja salir de modo desarrollo sin esos textos. Mientras tanto se construye y queda prendido en UAT (`BR-ACC-002`); apagarlo es sacar `facebook` de `providers` en `app/config.js`. Las cuentas creadas solo con Facebook siguen entrando con "Forgot password" (crean una contraseña sobre el mismo email) y confirman su identidad con Facebook en UC-035 mientras el proveedor siga prendido en Supabase; si se apaga también ahí, confirman con la contraseña que crearon.
+
 ## 2. Decisiones de producto
 
 | ID | Fecha | Decisión | Alternativas descartadas | Reglas |

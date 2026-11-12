@@ -18,6 +18,7 @@
 | INT-004 | Cloudflare Turnstile | Captcha invisible | Señales del navegador | Gratis | [integrations-captcha.md](./integrations-captcha.md) |
 | INT-005 | OpenStreetMap + Leaflet | Mapa de zona aproximada | Coordenadas del círculo (ya desplazado) en la URL de los tiles | Gratis | [integrations-map.md](./integrations-map.md) |
 | INT-006 | ABS, Suburbs and Localities | Lista de suburbios de Australia con su centro | Nada (importación única) | Gratis | [integrations-suburbs.md](./integrations-suburbs.md) |
+| INT-007 | Facebook (OAuth) | "Continue with Facebook" (UAT, Q-28) | Nada nuestro; nos devuelve nombre, email y foto | Gratis | [integrations-facebook-signin.md](./integrations-facebook-signin.md) |
 
 ## Reglas transversales
 
@@ -38,6 +39,7 @@
 | `TURNSTILE_SECRET` | Configuración de Auth en Supabase | INT-004 |
 | `TURNSTILE_SITE_KEY` | `app/config.js` (público) | INT-004 |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Configuración de Auth en Supabase | INT-001 |
+| App ID y App Secret de Facebook | Configuración de Auth en Supabase | INT-007 |
 | `EMAIL_TOKEN_SECRET` | Secretos de Supabase | Tokens de NTF-005 y NTF-006 |
 
 ## Items descartados (fase 2)
