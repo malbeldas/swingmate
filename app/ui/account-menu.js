@@ -1,4 +1,6 @@
-// Header account area: "Log in" and "Sign up" without a session, the name and "Log out" with one.
+// Header account area: "Log in" and "Sign up" without a session; with one, "Search homes", "List your
+// place", the name, "Messages" and "Log out". The links are how people reach the product from the coming
+// soon home (DEC-018), which itself links nowhere else.
 // Hidden when the host has no database (the coming soon page in production).
 import { getClient } from '../db.js';
 import { getOwnProfile, getSessionUser, onAuthChange, profileComplete, signOut } from '../session.js';
@@ -29,6 +31,15 @@ async function render(container, user, { askProfile = true } = {}) {
   name.className = 'account-name';
   name.href = new URL('../../account.html', import.meta.url).pathname;
   name.textContent = profile?.display_name ? `Hi, ${profile.display_name}` : 'Your account';
+  // UC-001 and UC-020: search and listing a place, from every page.
+  const search = document.createElement('a');
+  search.className = 'btn-text account-search';
+  search.href = new URL('../../search.html', import.meta.url).pathname;
+  search.textContent = 'Search homes';
+  const list = document.createElement('a');
+  list.className = 'btn-text account-list';
+  list.href = new URL('../../list.html', import.meta.url).pathname;
+  list.textContent = 'List your place';
   // UC-033: the inbox, from every page.
   const inbox = document.createElement('a');
   inbox.className = 'btn-text account-messages';
@@ -41,7 +52,7 @@ async function render(container, user, { askProfile = true } = {}) {
     admin.href = new URL('../../admin.html', import.meta.url).pathname;
     admin.textContent = 'Reports';
   }
-  container.replaceChildren(...[name, inbox, admin].filter(Boolean), button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
+  container.replaceChildren(...[search, list, name, inbox, admin].filter(Boolean), button('Log out', 'btn-text', async () => { await signOut(); render(container, null); }));
   // Back from Google (or a half-finished sign-up): finish the minimum profile here (BR-ACC-003).
   if (askProfile && !profileComplete(profile)) openAuthSheet({ step: 'profile', user, onDone: (u) => render(container, u) });
 }

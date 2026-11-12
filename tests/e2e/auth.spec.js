@@ -46,6 +46,10 @@ test('AC-030-3 after signing up with email the person is back on the same page, 
   await expect(sheet(page)).toBeHidden();
   expect(page.url()).toBe(startUrl);
   await expect(page.locator('#account')).toContainText('Hi, Ana');
+  // DEC-018: with a session, the header leads to the product from any page, without scrolling sideways.
+  await expect(page.locator('#account').getByRole('link', { name: 'Search homes' })).toHaveAttribute('href', /\/search\.html$/);
+  await expect(page.locator('#account').getByRole('link', { name: 'List your place' })).toHaveAttribute('href', /\/list\.html$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 
   // UC-030 A1: log out and back in with the same email and password.
   await page.getByRole('button', { name: 'Log out', exact: true }).click();
