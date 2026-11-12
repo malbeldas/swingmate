@@ -189,7 +189,7 @@ Si la tarea introduce contexto nuevo (una regla, un caso de error, un AC, una de
 
 ## 9. Modelos
 
-> Viene de la estrategia de subagentes consolidada (versión 11/11/2026, sección 13).
+> Viene de la estrategia de subagentes consolidada (versión 12/11/2026, secciones 4 y 13). La capa global de la máquina (`~/.claude/CLAUDE.md`) cede ante esta sección.
 
 - **Qué no cambia con un modelo nuevo:** el costo es contexto (relectura de caché), delegar y revisar se deciden por separado, y siguen valiendo las guardas y la sección 8.
 - **Alias, no versiones:** los agentes de `.claude/agents/` usan `opus`, `sonnet` o `haiku`. Una versión nueva de una familia entra sola; no se fija una versión en el frontmatter ni en el prompt.
@@ -212,6 +212,8 @@ Si la tarea introduce contexto nuevo (una regla, un caso de error, un AC, una de
 4. **Prueba, solo si promete:** usarlo en un rol concreto durante 2 o 3 issues, con el OK explícito del humano si cuesta más, y compararlo con la misma unidad y las mismas barandas.
 5. **Decisión:** cambiar la tabla de roles con fecha y evidencia, o dejarla y anotar por qué.
 
+- **Esfuerzo del principal:** el valor por defecto del modelo (medium en Opus 5.5). Se sube por sesión (`/effort high`) solo en áreas sensibles, diagnósticos difíciles o decisiones complicadas. Un cambio del valor por defecto se prueba con el protocolo de abajo y nunca junto con otra prueba de costo.
+- **Fable 5.2** (12/11): el alias `fable` ya apunta a esa versión. Su precio no está cargado: no se usa hasta cargarlo (paso 1). Sigue sin rol asignado.
 - **Fable 5.1:** candidato a probar (paso 4) en el revisor de riesgo de áreas sensibles o en diagnósticos complejos del principal; nunca en búsqueda ni en implementación de volumen. Con Fable, el encargo se escribe corto y con el objetivo, no con cada paso.
 
 ---
