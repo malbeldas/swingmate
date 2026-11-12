@@ -47,7 +47,7 @@ No se usa Twilio Verify (US$0,05 extra por verificación más el SMS): Supabase 
 
 ## UAT
 
-El sitio publicado usa los mismos números de prueba (61400000001-010, código fijo) y, para recibir un SMS real, una cuenta de prueba de Twilio: sin tarjeta y con crédito de regalo, solo manda a números verificados en Twilio y con el prefijo "Sent from your Twilio trial account". No genera costo; pasar a cuenta paga espera a `Q-03`.
+El sitio publicado usa los mismos números de prueba (61400000001-010, código fijo). Para recibir un SMS real se puede sumar una cuenta de prueba de Twilio (en pausa desde el 12 Nov): sin tarjeta y con crédito de regalo, solo manda a números verificados en Twilio y con el prefijo "Sent from your Twilio trial account". No genera costo; pasar a cuenta paga espera a `Q-03`.
 
 ## Criterios de aceptación
 
