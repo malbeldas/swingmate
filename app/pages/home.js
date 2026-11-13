@@ -4,6 +4,12 @@ import { HORIZON_NIGHTS, cardLine, computeFit, fitLabel } from '../../core/fit.j
 import { writeVisitorRoster } from '../visitor-roster.js';
 import { initAnalytics, track } from '../analytics.js';
 import { initAccountMenu } from '../ui/account-menu.js';
+import { getClient } from '../db.js';
+import { el } from '../ui/dom.js';
+import { attachSuburbList, getPlace, resolveSuburb } from '../suburbs.js';
+import {
+  BATHROOM_LABELS, PLACE_TYPE_LABELS, TEXTS, chosenRadius, searchIssues, searchParamsFor,
+} from '../../core/search.js';
 
 const WEEKS = 4;
 const KIND_LABEL = { away: 'away on site', travel: 'flying home, sleeping in town', home: 'in town' };
@@ -141,7 +147,78 @@ function initTracking() {
   });
 }
 
+// ---------------------------------------------------------------------------------------------
+// Search and the newest homes (UC-001, DEC-018). Only with the base configured; without it the
+// page stays the explainer it was.
+// ---------------------------------------------------------------------------------------------
+
+// The pilot city, by its ABS SAL code (INT-006). Only picks which homes the home page shows first.
+const FEATURED_PLACE_ID = 51230; // Perth
+const FEATURED_COUNT = 6;
+
+function initSearch(today) {
+  const form = document.getElementById('home-search');
+  const known = attachSuburbList(form.place, document.getElementById('home-place-list'));
+  form.checkIn.min = today;
+  form.checkIn.max = addDays(today, 365);
+  form.checkOut.min = addDays(today, 1);
+  form.checkIn.addEventListener('change', () => { if (form.checkIn.value) form.checkOut.min = addDays(form.checkIn.value, 1); });
+  const show = (id, text) => { const box = document.getElementById(id); box.textContent = text; box.hidden = !text; };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const placeId = form.place.value ? await resolveSuburb(form.place.value, known) : null;
+    const checkIn = form.checkIn.value || null;
+    const checkOut = form.checkOut.value || null;
+    const issues = searchIssues({ placeId, checkIn, checkOut }, today);
+    form.place.setAttribute('aria-invalid', String(issues.includes('place')));
+    show('home-place-error', issues.includes('place') ? TEXTS.chooseLocation : '');
+    show('home-dates-error', issues.includes('checkIn') ? TEXTS.checkIn : issues.includes('checkOut') ? TEXTS.checkOut : '');
+    if (issues.length) return; // UC-001 E1/E2
+    location.href = `search.html?${searchParamsFor({ placeId, checkIn, checkOut })}`;
+  });
+  form.hidden = false;
+}
+
+function homeCard(db, item, search) {
+  const noPhoto = () => el('span', { class: 'small' }, 'No photo yet');
+  const photo = el('div', { class: 'result-photo' }, noPhoto());
+  if (item.cover_path) {
+    const img = el('img', { src: db.storage.from('listing-photos').getPublicUrl(item.cover_path).data.publicUrl, alt: '', loading: 'lazy' });
+    img.addEventListener('error', () => photo.replaceChildren(noPhoto()));
+    photo.replaceChildren(img);
+  }
+  return el('a', { class: 'home-card', href: `listing.html?id=${encodeURIComponent(item.id)}&${search}`, 'data-id': item.id },
+    photo,
+    el('div', { class: 'result-body stack-tight' },
+      el('h3', { class: 'result-title' }, item.title),
+      el('span', { class: 'small text-2' }, `${item.suburb_name}, ${item.state}`),
+      el('span', { class: 'small' }, [PLACE_TYPE_LABELS[item.place_type], BATHROOM_LABELS[item.bathroom], item.bills_included ? 'Bills included' : null].filter(Boolean).join(' · ')),
+      el('span', { class: 'home-card-price' }, el('strong', {}, `$${item.weekly_price}`), el('span', { class: 'small text-2' }, ' / week'))));
+}
+
+// Newest first, like a search without dates or roster (BR-FIT-006). Hidden when there are none.
+async function loadHomes(db) {
+  const place = await getPlace(FEATURED_PLACE_ID);
+  if (!place) return;
+  const radiusKm = chosenRadius(50, place);
+  const { data, error } = await db.rpc('search_listings', { p_lat: place.lat, p_lng: place.lng, p_radius_km: radiusKm });
+  if (error || !data?.length) return;
+  const search = searchParamsFor({ placeId: place.id, radiusKm });
+  const newest = [...data].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at))).slice(0, FEATURED_COUNT);
+  document.getElementById('homes-all').href = `search.html?${search}`;
+  document.getElementById('home-cards').replaceChildren(...newest.map((item) => homeCard(db, item, search)));
+  document.getElementById('homes').hidden = false;
+}
+
+async function initProduct() {
+  const db = await getClient();
+  if (!db) return;
+  initSearch(todayInPerth());
+  await loadHomes(db);
+}
+
 init();
 initTracking();
+initProduct();
 initAnalytics();
 initAccountMenu(document.getElementById('account'));

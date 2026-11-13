@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
-  <!-- Coming soon page: indexed, collects no personal data, so it doesn't wait for Terms (decision-log.md Q-01). -->
-  <title>SwingMate · Coming soon · Find a home that fits your roster</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org https://*.google-analytics.com https://*.googletagmanager.com http://127.0.0.1:54321 http://localhost:54321; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <!-- Home (UC-001, frontend-migration.md): search and homes on the site, with a thin Coming soon banner
+       until the pilot opens (DEC-018). Indexed; the page itself collects no personal data (Q-01). -->
+  <title>SwingMate · Find a home that fits your roster</title>
   <meta name="description" content="SwingMate helps FIFO, DIDO and BIBO workers find a room for the nights they're actually in town. Pilot opening in Perth.">
   <link rel="canonical" href="https://swingmate.au/">
   <meta name="theme-color" content="#152238">
@@ -29,6 +30,7 @@
   <script type="module" src="app/pages/home.js"></script>
 </head>
 <body>
+  <p class="soon-banner" id="soon-banner">Coming soon · Pilot opening in Perth</p>
   <header class="site-header">
     <div class="wrap">
       <a class="brand" href="./" aria-label="SwingMate home">
@@ -47,20 +49,48 @@
   <main>
     <section class="hero">
       <div class="wrap stack">
-        <span class="pill">Coming soon · Pilot opening in Perth</span>
         <p class="micro">For FIFO, DIDO &amp; BIBO workers</p>
         <h1>Find a home that fits <span class="accent">your roster</span></h1>
         <p class="tagline">Different swings. Same home.</p>
         <p class="lead">SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
+        <!-- UC-001 step 1-4: where and, optionally, when. The results page takes it from there. -->
+        <form class="home-search card" id="home-search" action="search.html" novalidate hidden>
+          <div class="search-place stack-tight">
+            <label class="field">Location
+              <input type="text" name="place" list="home-place-list" autocomplete="off" placeholder="Suburb or city" required aria-describedby="home-place-error">
+            </label>
+            <datalist id="home-place-list"></datalist>
+            <span class="form-error" id="home-place-error" role="alert" hidden></span>
+          </div>
+          <label class="field">From
+            <input type="date" name="checkIn" aria-describedby="home-dates-error">
+          </label>
+          <label class="field">To
+            <input type="date" name="checkOut" aria-describedby="home-dates-error">
+          </label>
+          <button type="submit" class="btn btn-primary">Search homes</button>
+          <span class="form-error home-dates-error" id="home-dates-error" role="alert" hidden></span>
+        </form>
         <div class="cta-row">
-          <a class="btn btn-primary" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
           <a class="btn btn-secondary" id="cta-try" href="#your-nights">Try it with your roster</a>
+          <a class="btn-text" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
         </div>
         <ul class="ticks">
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Hosts verify their email and mobile before listing</li>
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Message hosts directly in SwingMate</li>
         </ul>
+      </div>
+    </section>
+
+    <!-- The newest homes around the pilot city, straight from the base (no example data, BR-TRU-006). -->
+    <section class="section" id="homes" aria-labelledby="homes-title" hidden>
+      <div class="wrap stack">
+        <div class="section-head">
+          <h2 id="homes-title">Homes around Perth</h2>
+          <a class="btn-text" id="homes-all" href="search.html">See all</a>
+        </div>
+        <div class="home-cards" id="home-cards"></div>
       </div>
     </section>
 
@@ -203,9 +233,10 @@
     <section class="section band" id="hosts" aria-labelledby="hosts-title">
       <div class="wrap stack">
         <h2 id="hosts-title">Have a room in Perth?</h2>
-        <p class="lead">Be one of the first hosts in the pilot. Send us a message on Instagram and we'll help you set up your listing when we open.</p>
+        <p class="lead">Be one of the first hosts in the pilot. List it for free, or message us on Instagram and we'll help you set it up.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" id="cta-host" href="https://www.instagram.com/swingmate.au/" rel="noopener">Message us on Instagram</a>
+          <a class="btn btn-primary" id="cta-list" href="list.html">List your place</a>
+          <a class="btn btn-secondary" id="cta-host" href="https://www.instagram.com/swingmate.au/" rel="noopener">Message us on Instagram</a>
         </div>
       </div>
     </section>
