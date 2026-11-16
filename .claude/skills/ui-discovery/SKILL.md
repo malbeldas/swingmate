@@ -30,12 +30,30 @@ Siempre:
 - `CLAUDE.md`
 - `specs/design-system.md`
 - `specs/frontend-migration.md`
+- `docs/design/taste.md`
+- `docs/design/anti-patterns.md`
+- `docs/design/references.md`
 
 Luego solo los BR/UC/AC de la historia afectada.
 
 No reinterpretar reglas de producto como decisiones visuales.
 
-## Paso 3 — Identificar la tarea crítica
+## Paso 3 — Extraer referencias antes de diseñar
+
+Para cada referencia elegida, registrar:
+
+- proporción foto/contenido;
+- densidad vertical;
+- escala tipográfica;
+- ancho de contenido;
+- cantidad de acciones primarias;
+- patrón de separación;
+- comportamiento mobile;
+- qué no se adopta.
+
+No usar “moderno”, “premium” o “limpio” como referencia suficiente.
+
+## Paso 4 — Identificar la tarea crítica
 
 Redactar una frase:
 
@@ -49,7 +67,7 @@ Luego identificar:
 - restricciones;
 - incertidumbres visuales reales.
 
-## Paso 4 — Separar decidido vs exploratorio
+## Paso 5 — Separar decidido vs exploratorio
 
 Crear dos listas:
 
@@ -61,7 +79,7 @@ Reglas, flujos, textos o patrones ya aprobados.
 
 Solo aspectos estructurales donde existe una decisión humana pendiente.
 
-## Paso 5 — Entregable
+## Paso 6 — Entregable
 
 Actualizar o crear `docs/design/experience-brief.md`, máximo 1–2 páginas cuando sea una historia acotada.
 
@@ -74,7 +92,8 @@ Debe contener:
 - estados;
 - restricciones;
 - criterios de éxito;
-- preguntas abiertas.
+- preguntas abiertas;
+- referencias usadas y por qué.
 
 ## Regla de parada
 
