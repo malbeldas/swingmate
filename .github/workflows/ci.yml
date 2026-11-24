@@ -58,6 +58,14 @@ jobs:
       - run: supabase start -x studio,imgproxy,vector,logflare,supavisor,postgres-meta
       - run: npm run local:config
       - run: npm run test:e2e
+      # The screenshots the E2E take (375 and 1280) go with every run, for the PR (CLAUDE.md §4.4).
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas
+          path: test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

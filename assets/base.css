@@ -284,6 +284,14 @@ label.btn { cursor: pointer; }
 }
 
 /* Message box on the detail (UC-004) */
+.message-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: var(--s-3) var(--s-4) calc(var(--s-3) + env(safe-area-inset-bottom)); background: var(--white); border-top: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.message-bar[hidden] { display: none; }
+.message-bar .btn { flex: none; }
+body.has-message-bar .listing-page { padding-bottom: 96px; }
+@media (min-width: 1024px) {
+  .message-bar { display: none; }
+  body.has-message-bar .listing-page { padding-bottom: 0; }
+}
 .message-box .date-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
 .message-box .notice.warn { background: var(--peach-soft); color: var(--peach-ink); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-weight: 600; }
 .message-box textarea[readonly] { background: var(--cream); }

@@ -258,10 +258,12 @@ async function render() {
   state.fitClass = view.fit.fitClass ?? null;
   document.title = `${l.title} · SwingMate`;
 
+  // The message box opens the side column: the fit next to the title already answers "are my
+  // nights free?", so the next step is writing to the host (UC-004).
   const side = [
+    view.messageBox && messageBox(l), // BR-LST-008: never on the host's own listing
     calendar(view, need),
     view.editButton && el('a', { class: 'btn btn-primary btn-block', id: 'edit-listing', href: `list.html?id=${encodeURIComponent(l.id)}` }, TEXTS.editListing),
-    view.messageBox && messageBox(l), // BR-LST-008: never on the host's own listing
     await hostBlock(view, l),
     beforeYouAgree({ open: true }), // BR-TRU-008
     !view.editButton && el('button', { type: 'button', class: 'btn-text report-link', id: 'report-listing', onclick: reportListing }, REPORT_TEXTS.reportListing),
@@ -281,6 +283,36 @@ async function render() {
         locationSection(l)),
       el('aside', { class: 'stack' }, side)),
   ].filter(Boolean));
+  messageBar(view, l);
+}
+
+// On a phone the side column comes after the whole listing, so a bar at the bottom takes people to
+// the message box. It hides while the box is on screen, and on wide screens (base.css).
+let barObserver;
+function messageBar(view, l) {
+  const old = document.getElementById('message-bar');
+  if (old) old.replaceWith();
+  barObserver?.disconnect();
+  if (!view.messageBox) return;
+  const bar = el('div', { class: 'message-bar', id: 'message-bar' },
+    el('div', { class: 'stack-tight' },
+      el('strong', {}, `$${l.weekly_price}`, el('span', { class: 'small text-2' }, ' / week')),
+      el('span', { class: 'small text-2' }, BOX_TEXTS.barHint(Boolean(state.user)))),
+    el('a', {
+      class: 'btn btn-primary', id: 'message-bar-cta', href: '#message-box',
+      onclick: (e) => {
+        e.preventDefault();
+        document.getElementById('message-box')?.scrollIntoView({ block: 'start' });
+        document.getElementById('message-text')?.focus({ preventScroll: true });
+      },
+    }, BOX_TEXTS.heading(l.host.display_name)));
+  document.body.append(bar);
+  document.body.classList.add('has-message-bar');
+  const target = document.getElementById('message-box');
+  if (target && 'IntersectionObserver' in window) {
+    barObserver = new IntersectionObserver(([entry]) => { bar.hidden = entry.isIntersecting; });
+    barObserver.observe(target);
+  }
 }
 
 async function storeRoster(roster) {
