@@ -32,7 +32,8 @@ test('AC-001-1 searching from the home opens the results with the place and date
   await form.getByLabel('From', { exact: true }).fill(perthDay(7));
   await form.getByLabel('To', { exact: true }).fill(perthDay(21));
   await form.getByRole('button', { name: 'Search homes' }).click();
-  await expect(page).toHaveURL(new RegExp(`search\\.html\\?place=${BALDIVIS}&in=${perthDay(7)}&out=${perthDay(21)}`));
+  // The results page adds the radius it chose (search.js) once it loads, so it may or may not be there yet.
+  await expect(page).toHaveURL(new RegExp(`search\\.html\\?place=${BALDIVIS}(&radius=\\d+)?&in=${perthDay(7)}&out=${perthDay(21)}`));
   await expect(page.locator('#results-heading')).toHaveText(/near Baldivis, WA/);
 });
 
