@@ -516,3 +516,55 @@ body.has-message-bar .listing-page { padding-bottom: 96px; }
   .home-search .btn { height: 48px; }
 }
 @media (min-width: 1024px) { .home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* "Find my match" step by step (UC-002 A0, DEC-016): roster, next swing, place. Tokens only. */
+.home-search .home-find { grid-column: 1 / -1; justify-self: start; padding-left: 0; text-decoration: underline; text-underline-offset: 3px; }
+.find-wrap { max-width: 640px; display: flex; flex-direction: column; gap: var(--s-4); }
+.find-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.find-top .btn-text { padding-right: 0; }
+.find-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-1); }
+.find-progress span { height: 4px; border-radius: var(--r-pill); background: var(--line); }
+.find-progress span.on { background: var(--amber); }
+.find-title { font-size: var(--t-h1); line-height: var(--t-h1-lh); }
+.find-title:focus { outline: none; }
+.find-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.find-chip { min-height: 44px; padding: 0 var(--s-4); border-radius: var(--r-pill); border: 1.5px solid var(--line); background: var(--white); color: var(--navy); font: inherit; font-weight: 600; cursor: pointer; }
+.find-chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: var(--cream); }
+.find-chip:focus-visible, .find-day:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.find-other { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.find-other input { width: 100%; box-sizing: border-box; }
+.find-preview { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-4); }
+.find-strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; }
+.find-strip .night { min-height: 28px; }
+.find-preview-text { font-weight: 600; color: var(--navy); }
+.find-dates-link { align-self: flex-start; padding-left: 0; }
+.find-cal-box { display: flex; flex-direction: column; gap: var(--s-3); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-4); }
+.find-month { display: flex; align-items: center; justify-content: space-between; }
+.find-month .btn-text { font-size: var(--t-h3); min-width: 44px; min-height: 44px; }
+.find-month .btn-text:disabled { color: var(--line); cursor: default; }
+.find-month-title { font-size: var(--t-h3); line-height: var(--t-h3-lh); margin: 0; }
+.find-cal { display: flex; flex-direction: column; gap: var(--s-1); }
+.find-cal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-1); }
+.find-dow { text-align: center; font-size: var(--t-micro); font-weight: 600; color: var(--muted); }
+.find-day { min-height: 44px; border: 0; border-radius: var(--r-cell); background: var(--cream); color: var(--navy); font: inherit; font-size: var(--t-small); font-weight: 600; cursor: pointer; padding: 0; }
+.find-day:disabled { background: transparent; color: var(--muted); cursor: default; font-weight: 400; }
+.find-day.night { min-height: 44px; font-size: var(--t-small); }
+.find-day.picked { box-shadow: inset 0 0 0 3px var(--amber); }
+.find-day.night.away.picked { box-shadow: inset 0 0 0 3px var(--amber); }
+.find-summary { font-weight: 600; color: var(--navy); }
+.find-flights { border: 0; padding: 0; margin: 0; }
+.find-flights legend { padding: 0; margin-bottom: var(--s-1); color: var(--text-2); }
+.find-place { align-items: stretch; }
+.find-place input, .find-radius select { width: 100%; box-sizing: border-box; }
+.find-recap { padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+.find-recap-text { font-weight: 600; color: var(--navy); }
+.find-actions { display: flex; gap: var(--s-3); margin-top: var(--s-2); }
+.find-actions .btn { flex: 1; font: inherit; font-weight: 600; cursor: pointer; }
+.find-actions .btn-secondary { flex: 0 0 auto; }
+.find-actions .btn:disabled { opacity: 0.45; cursor: default; }
+@media (min-width: 768px) {
+  .find-page { padding-top: var(--s-12); }
+  .find-actions { justify-content: flex-end; }
+  .find-actions .btn { flex: 0 0 auto; min-width: 200px; }
+  .find-actions .btn-secondary { min-width: 0; }
+}
