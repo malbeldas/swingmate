@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { canContinue, monthTitle, monthWeeks, needText, paintMonth, patternPreview, patternText, shiftMonth } from '../../core/onboarding.js';
+import { canContinue, monthTitle, monthWeeks, needText, oppositeSwingDemo, paintMonth, patternPreview, patternText, shiftMonth } from '../../core/onboarding.js';
 import { makeRoster } from '../../core/roster.js';
 
 test('AC-002-6 the step 1 preview shows one cycle: days on site, the travel night and home', () => {
@@ -51,4 +51,14 @@ test('AC-002-6 each step asks for what it needs before Continue', () => {
   assert.equal(canContinue('start', { anchor: '2026-12-04' }, today), true);
   assert.equal(canContinue('place', { placeId: null }, today), false);
   assert.equal(canContinue('place', { placeId: 51230 }, today), true);
+});
+
+test('UC-001 the home picture puts the seeker in the room exactly while the host is on site', () => {
+  const demo = oppositeSwingDemo('2026-12-08', 28);
+  assert.equal(demo.length, 28);
+  assert.equal(demo[0].day, 8);
+  assert.ok(demo.every((d) => (d.host === 'away') === (d.you === 'home')));
+  assert.ok(demo.every((d) => (d.room === 'yours') === (d.host === 'away')));
+  assert.equal(demo.filter((d) => d.room === 'yours').length, 14);
+  assert.deepEqual(demo.slice(0, 4).map((d) => d.host), ['away', 'away', 'away', 'home']);
 });
