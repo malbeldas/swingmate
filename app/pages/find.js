@@ -27,7 +27,7 @@ const state = {
   pattern: null, daysOn: null, daysOff: null,
   anchor: null, month: monthOf(today()),
   fliesHomeLastDay: true, fliesOutFirstDay: true,
-  placeText: '', placeId: null, place: null, radiusKm: null,
+  placeText: '', placeId: null, place: null, radiusKm: null, resolving: null,
   known: new Map(),
   user: null,
 };
@@ -171,7 +171,8 @@ function stepPlace() {
     fillRadius();
     error.hidden = true;
   };
-  input.addEventListener('change', choose);
+  // Show my matches waits for this: the change fires on blur, just before the submit.
+  input.addEventListener('change', () => { state.resolving = choose(); });
   radius.addEventListener('change', () => { state.radiusKm = Number(radius.value); });
   const r = roster();
   return [
@@ -208,6 +209,7 @@ function go(step) {
 
 async function finish() {
   const input = form.querySelector('input[name="place"]');
+  await state.resolving;
   if (input && input.value !== state.placeText) {
     state.placeText = input.value;
     state.placeId = input.value ? await resolveSuburb(input.value, state.known) : null;
