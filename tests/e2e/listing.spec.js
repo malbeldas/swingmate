@@ -123,3 +123,27 @@ test('AC-001-8 the detail never scrolls sideways', async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
   await page.screenshot({ path: test.info().outputPath(`detail-${test.info().project.name}.png`), fullPage: true });
 });
+
+test('UC-004 the message box opens the side column, and on a phone a bar takes people to it', async ({ page }, testInfo) => {
+  await page.goto(`/listing.html?id=00000000-0000-0000-0000-00000000f001&${stay}`);
+  await expect(page.locator('aside > *').first()).toHaveAttribute('id', 'message-box');
+  const bar = page.locator('#message-bar');
+  await page.screenshot({ path: testInfo.outputPath(`contact-first-${testInfo.project.name}.png`) });
+  if (testInfo.project.name === 'desktop') {
+    await expect(bar).toBeHidden();
+    return;
+  }
+  await expect(bar).toBeVisible();
+  await expect(bar).toContainText('No account needed to write');
+  await bar.getByRole('link', { name: /^Message / }).click();
+  await expect(page.locator('#message-text')).toBeFocused();
+  await expect(page.locator('#message-box')).toBeInViewport();
+  await expect(bar).toBeHidden();
+  await page.screenshot({ path: testInfo.outputPath(`contact-box-${testInfo.project.name}.png`) });
+});
+
+test('BR-LST-008 a paused listing has no message bar', async ({ page }) => {
+  await page.goto(`/listing.html?id=${PAUSED}`);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.locator('#message-bar')).toHaveCount(0);
+});

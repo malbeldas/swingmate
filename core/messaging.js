@@ -42,6 +42,7 @@ export const TEXTS = {
 // The heading, hints and sent state of the message box, with the host's display name.
 export const BOX_TEXTS = {
   heading: (host) => `Message ${host}`,
+  barHint: (signedIn) => (signedIn ? 'Your dates go with the message' : 'No account needed to write'),
   sendHint: (signedIn, host) => (signedIn
     ? `Sends straight to ${host}. Your dates go with the message.`
     : 'You’ll sign up or log in when you press Send. Your message stays saved.'),

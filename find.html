@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://*.supabase.co https://tile.openstreetmap.org http://127.0.0.1:54321 http://localhost:54321; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; font-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'">
+  <!-- "Find my match" step by step (UC-002 A0 and UC-001, DEC-016): roster, next swing, place. Not indexed until the pilot opens (Q-01). -->
+  <meta name="robots" content="noindex">
+  <title>Find my match · SwingMate</title>
+  <meta name="theme-color" content="#152238">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/base.css">
+  <script type="module" src="app/pages/find.js"></script>
+</head>
+<body class="info-body">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./" aria-label="SwingMate home">
+        <img class="brand-mark" src="assets/favicon.svg" alt="" width="40" height="40">
+        <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      </a>
+      <div class="account" id="account" hidden></div>
+    </div>
+  </header>
+
+  <main class="section find-page">
+    <div class="wrap find-wrap">
+      <div class="find-top">
+        <p class="micro" id="find-step-label">Step 1 of 3</p>
+        <a class="btn-text" href="./" id="find-close">Close</a>
+      </div>
+      <div class="find-progress" aria-hidden="true"><span></span><span></span><span></span></div>
+      <!-- Each step is drawn by app/pages/find.js; without JavaScript the search page still works. -->
+      <form class="find-step stack" id="find-form" novalidate>
+        <noscript><p>This needs JavaScript. You can still <a href="search.html">search by place and dates</a>.</p></noscript>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="wordmark">Swing<span class="mate">Mate</span></span>
+      <nav class="footer-links" aria-label="About SwingMate">
+        <a href="how-it-works.html">How it works</a>
+        <a href="safety.html">Safety</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

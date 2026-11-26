@@ -129,6 +129,8 @@ test('UC-004 the sent state shows the dates and their nights', () => {
   assert.equal(BOX_TEXTS.sent('Hana'), 'Message sent to Hana');
   assert.match(BOX_TEXTS.sendHint(false, 'Hana'), /sign up or log in when you press Send/);
   assert.match(BOX_TEXTS.sendHint(true, 'Hana'), /^Sends straight to Hana/);
+  assert.equal(BOX_TEXTS.barHint(false), 'No account needed to write');
+  assert.equal(BOX_TEXTS.barHint(true), 'Your dates go with the message');
 });
 
 test('UC-004 E1 to E3 every refusal of start_conversation has its words', () => {
