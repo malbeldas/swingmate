@@ -26,10 +26,11 @@ PICKS = f'{OUT}/picks.json'
 API = 'https://commons.wikimedia.org/w/api.php'
 UA = 'SwingMate-UAT-photos/1.0 (test data script)'
 QUERIES = [
-    'bedroom interior unsplash', 'modern bedroom unsplash', 'bedroom pexels', 'hotel room interior unsplash',
-    'apartment interior unsplash', 'kitchen interior unsplash', 'modern kitchen pexels',
-    'living room interior unsplash', 'living room pexels', 'bathroom interior unsplash', 'bathroom pexels',
+    'bedroom unsplash', 'bedroom pexels', 'hotel room unsplash', 'hotel room bed', 'guest room bed',
+    'bedroom interior modern', 'bedroom apartment', 'double bed room', 'hostel room', 'bedroom Australia',
+    'kitchen interior unsplash', 'kitchen pexels', 'living room unsplash', 'living room pexels', 'bathroom unsplash',
 ]
+SKIP = re.compile(r'painting|drawing|museum|MET |castle|palace|HABS|LCCN|engraving|illustration|\\.tif', re.I)
 FREE = re.compile(r'^(cc0|public domain|pd)', re.I)
 
 
@@ -71,9 +72,9 @@ def candidates():
     os.makedirs(CANDIDATES, exist_ok=True)
     seen, found = set(), []
     for text in QUERIES:
-        pages = query({'generator': 'search', 'gsrnamespace': '6', 'gsrsearch': f'{text} filetype:bitmap', 'gsrlimit': '25', 'iiurlwidth': '480'})
+        pages = query({'generator': 'search', 'gsrnamespace': '6', 'gsrsearch': f'{text} filetype:bitmap', 'gsrlimit': '50', 'iiurlwidth': '480'})
         for item in map(describe, pages):
-            if item['title'] in seen or not FREE.match(item['licence']) or item['width'] < 1200 or item['width'] < item['height'] * 1.2:
+            if item['title'] in seen or SKIP.search(item['title']) or not FREE.match(item['licence']) or item['width'] < 1200 or item['width'] < item['height'] * 1.2:
                 continue
             seen.add(item['title'])
             try:
