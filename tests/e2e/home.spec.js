@@ -60,3 +60,17 @@ test('coming soon: indexable, with share tags and a way to follow the launch', a
   const robots = await page.request.get('/robots.txt');
   expect(await robots.text()).toContain('Sitemap: https://swingmate.au/sitemap.xml');
 });
+
+test('UC-001 the home explains sharing with two opposite swings and the room between them', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Different swings. Same home.');
+  const rows = page.locator('#swing-rows .swing-row');
+  await expect(rows).toHaveCount(3);
+  await expect(rows.nth(0).locator('.swing-cell')).toHaveCount(28);
+  // The room is the visitor's exactly on the nights the host is on site.
+  const hostAway = await rows.nth(0).locator('.swing-cell.away').count();
+  await expect(rows.nth(2).locator('.swing-cell.yours')).toHaveCount(hostAway);
+  await expect(rows.nth(1).locator('.swing-cell.home')).toHaveCount(hostAway);
+  await expect(rows.nth(0).locator('.swing-cell').first()).toHaveText('29');
+  await page.screenshot({ path: testInfo.outputPath(`home-v3-${testInfo.project.name}.png`), fullPage: true });
+});

@@ -42,8 +42,17 @@
 
   --r-sm: 8px; --r-md: 14px; --r-pill: 999px; --r-cell: 4px;
   --shadow-card: 0 1px 2px rgb(21 34 56 / 6%), 0 4px 16px rgb(21 34 56 / 6%);
+
+  /* V3 (proposed in the PR, design-system.md §3): display sizes for the big editorial headlines. */
+  --t-display: 44px; --t-display-lh: 46px;
+  --t-display-2: 32px; --t-display-2-lh: 36px;
+  --rule: 2px solid var(--navy);
 }
 
 @media (min-width: 768px) {
-  :root { --t-hero: 40px; --t-hero-lh: 46px; --gutter: 24px; }
+  :root { --t-hero: 40px; --t-hero-lh: 46px; --gutter: 24px; --t-display: 60px; --t-display-lh: 62px; --t-display-2: 48px; --t-display-2-lh: 52px; }
+}
+
+@media (min-width: 1100px) {
+  :root { --t-display: 72px; --t-display-lh: 74px; }
 }

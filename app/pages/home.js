@@ -6,6 +6,7 @@ import { initAnalytics, track } from '../analytics.js';
 import { initAccountMenu } from '../ui/account-menu.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
+import { oppositeSwingDemo } from '../../core/onboarding.js';
 import { attachSuburbList, getPlace, resolveSuburb } from '../suburbs.js';
 import {
   BATHROOM_LABELS, PLACE_TYPE_LABELS, TEXTS, chosenRadius, searchIssues, searchParamsFor,
@@ -196,6 +197,38 @@ function homeCard(db, item, search) {
       el('span', { class: 'home-card-price' }, el('strong', {}, `$${item.weekly_price}`), el('span', { class: 'small text-2' }, ' / week'))));
 }
 
+// The hero shows the newest real home with a photo and links to it (BR-TRU-006: real inventory
+// only, never a stock photo). Without one the copy takes the full width.
+function heroPhoto(db, item, search) {
+  if (!item) return;
+  const link = document.getElementById('hero-photo');
+  const img = document.getElementById('hero-photo-img');
+  img.addEventListener('error', () => { link.hidden = true; link.closest('.hero-grid').classList.remove('with-photo'); });
+  img.src = db.storage.from('listing-photos').getPublicUrl(item.cover_path).data.publicUrl;
+  img.alt = item.title;
+  link.href = `listing.html?id=${encodeURIComponent(item.id)}&${search}`;
+  document.getElementById('hero-photo-title').textContent = item.title;
+  document.getElementById('hero-photo-line').textContent = `${item.suburb_name}, ${item.state} · $${item.weekly_price} a week`;
+  link.hidden = false;
+  link.closest('.hero-grid').classList.add('with-photo');
+}
+
+// Two opposite swings and the room between them, from today (UC-001, DEC-016).
+const SWING_ROWS = [
+  ['host', 'The host', '7 on site, 7 at home', (d) => d.host],
+  ['you', 'You', 'The opposite swing', (d) => d.you],
+  ['room', 'The room', 'Yours while the host is on site', (d) => d.room],
+];
+const SWING_TEXT = { away: 'on site', home: 'home in town', yours: 'your night in the room', host: 'the host’s night' };
+
+function renderSwingDemo(today) {
+  const demo = oppositeSwingDemo(today, 28);
+  document.getElementById('swing-rows').replaceChildren(...SWING_ROWS.map(([key, name, line, kind]) => el('div', { class: `swing-row ${key}` },
+    el('div', { class: 'swing-who' }, el('strong', {}, name), el('span', { class: 'small text-2' }, line)),
+    el('div', { class: 'swing-cells', role: 'list', 'aria-label': `${name}: next four weeks` },
+      demo.map((d) => el('span', { class: `swing-cell ${kind(d)}`, role: 'listitem', 'aria-label': `${d.day}: ${SWING_TEXT[kind(d)]}` }, String(d.day)))))));
+}
+
 // Newest first, like a search without dates or roster (BR-FIT-006). Hidden when there are none.
 async function loadHomes(db) {
   const place = await getPlace(FEATURED_PLACE_ID);
@@ -207,6 +240,7 @@ async function loadHomes(db) {
   const newest = [...data].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at))).slice(0, FEATURED_COUNT);
   document.getElementById('homes-all').href = `search.html?${search}`;
   document.getElementById('home-cards').replaceChildren(...newest.map((item) => homeCard(db, item, search)));
+  heroPhoto(db, newest.find((item) => item.cover_path), search);
   document.getElementById('homes').hidden = false;
 }
 
@@ -218,6 +252,7 @@ async function initProduct() {
 }
 
 init();
+renderSwingDemo(todayInPerth());
 initTracking();
 initProduct();
 initAnalytics();

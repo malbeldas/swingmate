@@ -29,6 +29,10 @@ insert into public.conversations (id, listing_id, seeker_id, host_id, stay_from,
 -- The host's reply in c1, the last message before the question.
 insert into public.messages (conversation_id, sender_id, kind, body)
   values ('00000000-0000-0000-0000-0000000033c1', '00000000-0000-0000-0000-0000000033a0', 'text', 'Sure, come and see it');
+-- Dated 14 days back: in one transaction now() is the same for every insert, so without it the
+-- reply and the question tie on created_at and "the last message" depends on row order.
+update public.messages set created_at = now() - interval '14 days'
+  where conversation_id = '00000000-0000-0000-0000-0000000033c1';
 update public.conversations set last_message_at = now() - interval '14 days', host_read_at = now(), seeker_read_at = now()
   where id = '00000000-0000-0000-0000-0000000033c1';
 

@@ -47,41 +47,59 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="wrap stack">
-        <p class="micro">For FIFO, DIDO &amp; BIBO workers</p>
-        <h1>Find a home that fits <span class="accent">your roster</span></h1>
-        <p class="tagline">Different swings. Same home.</p>
-        <p class="lead">SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
-        <!-- UC-001 step 1-4: where and, optionally, when. The results page takes it from there. -->
-        <form class="home-search card" id="home-search" action="search.html" novalidate hidden>
-          <div class="search-place stack-tight">
-            <label class="field">Location
-              <input type="text" name="place" list="home-place-list" autocomplete="off" placeholder="Suburb or city" required aria-describedby="home-place-error">
+    <section class="hero hero-v3">
+      <div class="wrap hero-grid">
+        <div class="hero-copy stack">
+          <p class="micro eyebrow">For FIFO, DIDO &amp; BIBO workers · Perth first</p>
+          <h1 class="display">Different swings. <span class="accent">Same home.</span></h1>
+          <p class="lead">When you're home on R&amp;R, someone else is out on site. SwingMate matches rooms to the nights you're actually in town, so you only see places that work with your swing.</p>
+          <!-- UC-001 step 1-4: where and, optionally, when. The results page takes it from there. -->
+          <form class="home-search card" id="home-search" action="search.html" novalidate hidden>
+            <div class="search-place stack-tight">
+              <label class="field">Location
+                <input type="text" name="place" list="home-place-list" autocomplete="off" placeholder="Suburb or city" required aria-describedby="home-place-error">
+              </label>
+              <datalist id="home-place-list"></datalist>
+              <span class="form-error" id="home-place-error" role="alert" hidden></span>
+            </div>
+            <label class="field">From
+              <input type="date" name="checkIn" aria-describedby="home-dates-error">
             </label>
-            <datalist id="home-place-list"></datalist>
-            <span class="form-error" id="home-place-error" role="alert" hidden></span>
+            <label class="field">To
+              <input type="date" name="checkOut" aria-describedby="home-dates-error">
+            </label>
+            <button type="submit" class="btn btn-primary">Search homes</button>
+            <span class="form-error home-dates-error" id="home-dates-error" role="alert" hidden></span>
+            <!-- UC-002 A0 (DEC-016): the guided way in, roster first. -->
+            <a class="btn-text home-find" id="home-find" href="find.html">Work a roster? Find your match step by step</a>
+          </form>
+          <div class="cta-row">
+            <a class="btn btn-secondary" id="cta-try" href="#your-nights">Try it with your roster</a>
+            <a class="btn-text" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
           </div>
-          <label class="field">From
-            <input type="date" name="checkIn" aria-describedby="home-dates-error">
-          </label>
-          <label class="field">To
-            <input type="date" name="checkOut" aria-describedby="home-dates-error">
-          </label>
-          <button type="submit" class="btn btn-primary">Search homes</button>
-          <span class="form-error home-dates-error" id="home-dates-error" role="alert" hidden></span>
-          <!-- UC-002 A0 (DEC-016): the guided way in, roster first. -->
-          <a class="btn-text home-find" id="home-find" href="find.html">Work a roster? Find your match step by step</a>
-        </form>
-        <div class="cta-row">
-          <a class="btn btn-secondary" id="cta-try" href="#your-nights">Try it with your roster</a>
-          <a class="btn-text" id="cta-instagram" href="https://www.instagram.com/swingmate.au/" rel="noopener">Follow the launch on Instagram</a>
+          <ul class="ticks">
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Hosts verify their email and mobile before listing</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Message hosts directly in SwingMate</li>
+          </ul>
         </div>
-        <ul class="ticks">
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Match by roster and real availability</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Hosts verify their email and mobile before listing</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Message hosts directly in SwingMate</li>
-        </ul>
+        <!-- The newest real home, from the base (BR-TRU-006): never a stock photo posing as a listing. -->
+        <a class="hero-photo" id="hero-photo" hidden>
+          <img id="hero-photo-img" alt="">
+          <span class="hero-caption"><strong id="hero-photo-title"></strong><span id="hero-photo-line"></span></span>
+        </a>
+      </div>
+      <!-- UC-001, DEC-016: the idea in one picture. An explainer, not a listing (no names, prices or photos). -->
+      <div class="wrap">
+        <figure class="swing-demo" id="swing-demo" aria-labelledby="swing-demo-title">
+          <figcaption class="micro" id="swing-demo-title">How sharing works · next four weeks</figcaption>
+          <div class="swing-rows" id="swing-rows"></div>
+          <div class="legend">
+            <span><span class="swatch away" aria-hidden="true"></span>On site</span>
+            <span><span class="swatch home" aria-hidden="true"></span>Home in town</span>
+            <span><span class="swatch free" aria-hidden="true"></span>Your night in the room</span>
+          </div>
+        </figure>
       </div>
     </section>
 

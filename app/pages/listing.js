@@ -268,22 +268,32 @@ async function render() {
     beforeYouAgree({ open: true }), // BR-TRU-008
     !view.editButton && el('button', { type: 'button', class: 'btn-text report-link', id: 'report-listing', onclick: reportListing }, REPORT_TEXTS.reportListing),
   ];
+  // Title first, then the photos big under it, then the nights (V3: photos build trust, the
+  // roster answer comes right after).
   main.replaceChildren(...[
     backLink(l),
     view.label && el('p', { class: 'status-label', id: 'status-label', role: 'status' }, view.label),
+    el('div', { class: 'detail-head' },
+      el('div', { class: 'stack-tight' },
+        el('h1', { class: 'display-2' }, l.title), el('span', { class: 'text-2' }, subtitle(l))),
+      el('div', { class: 'detail-price' }, el('strong', {}, `$${l.weekly_price}`), el('span', { class: 'small text-2' }, priceLine(l)),
+        view.messageBox && el('a', { class: 'btn btn-primary detail-cta', id: 'detail-cta', href: '#message-box', onclick: goToBox }, BOX_TEXTS.heading(l.host.display_name)),
+        !view.editButton && saveButton(l.id))), // UC-005, not on the host's own listing
     gallery(l, db),
     el('div', { class: 'detail-layout' },
       el('div', { class: 'stack' },
-        el('div', { class: 'detail-head' },
-          el('div', { class: 'stack-tight' }, el('h1', {}, l.title), el('span', { class: 'small text-2' }, subtitle(l))),
-          el('div', { class: 'detail-price' }, el('strong', {}, `$${l.weekly_price}`), el('span', { class: 'small text-2' }, priceLine(l)),
-            !view.editButton && saveButton(l.id))), // UC-005, not on the host's own listing
         fitBlock(view, need),
         about(view, l),
         locationSection(l)),
       el('aside', { class: 'stack' }, side)),
   ].filter(Boolean));
   messageBar(view, l);
+}
+
+function goToBox(e) {
+  e.preventDefault();
+  document.getElementById('message-box')?.scrollIntoView({ block: 'start' });
+  document.getElementById('message-text')?.focus({ preventScroll: true });
 }
 
 // On a phone the side column comes after the whole listing, so a bar at the bottom takes people to
@@ -298,14 +308,7 @@ function messageBar(view, l) {
     el('div', { class: 'stack-tight' },
       el('strong', {}, `$${l.weekly_price}`, el('span', { class: 'small text-2' }, ' / week')),
       el('span', { class: 'small text-2' }, BOX_TEXTS.barHint(Boolean(state.user)))),
-    el('a', {
-      class: 'btn btn-primary', id: 'message-bar-cta', href: '#message-box',
-      onclick: (e) => {
-        e.preventDefault();
-        document.getElementById('message-box')?.scrollIntoView({ block: 'start' });
-        document.getElementById('message-text')?.focus({ preventScroll: true });
-      },
-    }, BOX_TEXTS.heading(l.host.display_name)));
+    el('a', { class: 'btn btn-primary', id: 'message-bar-cta', href: '#message-box', onclick: goToBox }, BOX_TEXTS.heading(l.host.display_name)));
   document.body.append(bar);
   document.body.classList.add('has-message-bar');
   const target = document.getElementById('message-box');

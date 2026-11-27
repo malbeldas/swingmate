@@ -129,10 +129,17 @@ test('UC-004 the message box opens the side column, and on a phone a bar takes p
   await expect(page.locator('aside > *').first()).toHaveAttribute('id', 'message-box');
   const bar = page.locator('#message-bar');
   await page.screenshot({ path: testInfo.outputPath(`contact-first-${testInfo.project.name}.png`) });
+  // V3: the title comes first, the photos right under it, with the price and "Message …" beside it on wide screens.
+  const head = page.locator('.detail-head');
+  const gallery = page.locator('.gallery');
+  expect((await head.boundingBox()).y).toBeLessThan((await gallery.boundingBox()).y);
   if (testInfo.project.name === 'desktop') {
     await expect(bar).toBeHidden();
+    await page.locator('#detail-cta').click();
+    await expect(page.locator('#message-text')).toBeFocused();
     return;
   }
+  await expect(page.locator('#detail-cta')).toBeHidden();
   await expect(bar).toBeVisible();
   await expect(bar).toContainText('No account needed to write');
   await bar.getByRole('link', { name: /^Message / }).click();

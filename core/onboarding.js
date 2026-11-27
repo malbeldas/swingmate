@@ -74,3 +74,17 @@ export function canContinue(step, { pattern, daysOn, daysOff, anchor, placeId } 
   if (step === 'place') return Boolean(placeId);
   return false;
 }
+
+// The home's "different swings, same home" picture (UC-001, DEC-016): a host and a seeker on
+// opposite 7:7 swings over `days` days from `from`, and which nights the room is the seeker's.
+// It is an explainer, not a listing (BR-TRU-006): no names, no prices, no photos.
+export function oppositeSwingDemo(from, days = 28) {
+  const host = makeRoster({ daysOn: 7, daysOff: 7, anchor: addDays(from, -4), fliesHomeLastDay: false, fliesOutFirstDay: true });
+  const you = makeRoster({ daysOn: 7, daysOff: 7, anchor: addDays(from, 3), fliesHomeLastDay: false, fliesOutFirstDay: true });
+  return Array.from({ length: days }, (_, i) => {
+    const date = addDays(from, i);
+    const hostKind = nightKind(host, date);
+    const youKind = nightKind(you, date);
+    return { date, day: Number(date.slice(8, 10)), host: hostKind, you: youKind, room: hostKind === 'away' && youKind !== 'away' ? 'yours' : 'host' };
+  });
+}

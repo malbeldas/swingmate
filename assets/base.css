@@ -568,3 +568,70 @@ body.has-message-bar .listing-page { padding-bottom: 96px; }
   .find-actions .btn { flex: 0 0 auto; min-width: 200px; }
   .find-actions .btn-secondary { min-width: 0; }
 }
+
+/* V3 visual (proposed in the PR for design-system.md): editorial headlines, flat surfaces with
+   rules instead of shadows, a navy footer, the home photo and the opposite-swing strips. Tokens only. */
+h1, h2 { letter-spacing: -0.02em; }
+.site-header { background: var(--cream); }
+.card, .result-card, .home-card { box-shadow: none; }
+.eyebrow { color: var(--amber-ink); }
+.site-footer { background: var(--navy); border-top: 0; color: var(--line); }
+.site-footer .wordmark, .footer-links a { color: var(--cream); }
+.site-footer a { color: var(--cream); }
+
+.display { font-size: var(--t-display); line-height: var(--t-display-lh); letter-spacing: -0.04em; }
+.display .accent { display: block; color: var(--amber-ink); }
+.display-2 { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
+
+.hero-v3 { padding: var(--s-8) 0; }
+.hero h1.display { font-size: var(--t-display); line-height: var(--t-display-lh); letter-spacing: -0.04em; }
+.hero-v3 .lead { font-size: var(--t-h3); line-height: var(--t-h3-lh); font-weight: 400; max-width: 40ch; }
+.hero-grid { display: grid; gap: var(--s-6); }
+.hero-copy { min-width: 0; }
+.hero-photo { position: relative; display: block; border-radius: var(--r-md); overflow: hidden; aspect-ratio: 4 / 3; background: var(--sand); color: var(--navy); text-decoration: none; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-caption { position: absolute; left: var(--s-3); bottom: var(--s-3); max-width: calc(100% - 2 * var(--s-3)); display: flex; flex-direction: column; background: var(--white); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-size: var(--t-small); line-height: var(--t-small-lh); }
+.hero-photo:hover .hero-caption strong, .hero-photo:focus-visible .hero-caption strong { text-decoration: underline; }
+.hero-v3 .home-search .btn { grid-column: 1 / -1; }
+@media (min-width: 1024px) {
+  .hero-grid.with-photo { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; gap: var(--s-8); }
+  .hero-grid.with-photo .hero-photo { margin-top: var(--s-12); }
+  .hero-grid.with-photo .home-search { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero-grid.with-photo .home-search .search-place, .hero-grid.with-photo .home-search .btn { grid-column: 1 / -1; }
+}
+
+.swing-demo { margin: var(--s-8) 0 0; padding-top: var(--s-4); border-top: var(--rule); display: flex; flex-direction: column; gap: var(--s-4); }
+.swing-rows { display: flex; flex-direction: column; gap: var(--s-3); }
+.swing-row { display: grid; gap: var(--s-1); }
+.swing-who { display: flex; flex-direction: column; }
+.swing-cells { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 2px; }
+.swing-cell { min-height: 30px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-cell); font-size: var(--t-micro); line-height: var(--t-micro-lh); font-weight: 600; }
+.swing-cell:nth-child(n + 15) { display: none; }
+.swing-cell.away { background: var(--navy); color: var(--cream); }
+.swing-cell.home { background: var(--amber); color: var(--navy); }
+.swing-cell.yours { background: var(--teal); color: var(--white); }
+.swing-cell.host { background: var(--sand); color: var(--muted); }
+@media (min-width: 768px) {
+  .swing-row { grid-template-columns: 200px minmax(0, 1fr); align-items: center; gap: var(--s-4); }
+  .swing-cells { grid-template-columns: repeat(28, minmax(0, 1fr)); gap: 3px; }
+  .swing-cell { min-height: 40px; }
+  .swing-cell:nth-child(n + 15) { display: flex; }
+}
+
+/* Detail: title and price first, then the photos big, then the nights (V3). */
+.listing-page .detail-head { align-items: flex-end; }
+.listing-page .detail-head .text-2 { max-width: 60ch; }
+.detail-cta { display: none; }
+@media (min-width: 768px) {
+  .listing-page .detail-price { align-items: flex-end; text-align: right; }
+}
+@media (min-width: 1024px) {
+  .detail-cta { display: inline-flex; margin-top: var(--s-2); }
+  .gallery { grid-template-rows: repeat(2, 240px); }
+  .gallery-item { aspect-ratio: auto; }
+}
+
+/* Results and the guided search take the bigger headline too. */
+.results-head h1 { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
+.find-title { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
+@media (max-width: 1023px) { .hero-v3 .ticks { display: none; } }
