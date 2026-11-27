@@ -30,7 +30,7 @@ QUERIES = [
     'bedroom interior modern', 'bedroom apartment', 'double bed room', 'hostel room', 'bedroom Australia',
     'kitchen interior unsplash', 'kitchen pexels', 'living room unsplash', 'living room pexels', 'bathroom unsplash',
 ]
-SKIP = re.compile(r'painting|drawing|museum|MET |castle|palace|HABS|LCCN|engraving|illustration|\\.tif', re.I)
+SKIP = re.compile(r'painting|drawing|museum|MET |castle|palace|HABS|LCCN|engraving|illustration|\.tif', re.I)
 FREE = re.compile(r'^(cc0|public domain|pd)', re.I)
 
 
