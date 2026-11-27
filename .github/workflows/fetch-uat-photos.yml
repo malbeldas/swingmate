@@ -3,7 +3,7 @@
 name: Fotos de prueba UAT (temporal)
 on:
   pull_request:
-    paths: ['scripts/uat/fetch-photos.py', '.github/workflows/fetch-uat-photos.yml']
+    paths: ['scripts/uat/fetch-photos.py', 'scripts/uat/photos/picks.json', '.github/workflows/fetch-uat-photos.yml']
 permissions:
   contents: write
 jobs:
