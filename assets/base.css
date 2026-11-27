@@ -635,3 +635,46 @@ h1, h2 { letter-spacing: -0.02em; }
 .results-head h1 { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
 .find-title { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
 @media (max-width: 1023px) { .hero-v3 .ticks { display: none; } }
+
+/* Motion (app/ui/motion.js): smooth in-page scroll, sections that fade up into view, strips that
+   fill cell by cell and a short ring where a link lands. Off for prefers-reduced-motion. */
+section[id], [id='your-nights'] .card { scroll-margin-top: var(--s-6); }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .motion .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .motion .reveal.in { opacity: 1; transform: none; }
+  .cells-play > * { animation: cell-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 18ms); }
+  .arrive { animation: arrive 1.6s ease-out; }
+}
+@keyframes cell-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes arrive { 0% { box-shadow: 0 0 0 0 var(--amber); } 25% { box-shadow: 0 0 0 6px var(--amber); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* V3 results: a numbered ledger instead of floating cards; the search sits on a rule. */
+.results { counter-reset: result; }
+.results .result-card { counter-increment: result; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; padding: var(--s-4) 0; gap: var(--s-3); }
+.results .result-card:first-of-type { border-top: var(--rule); }
+.results .result-photo { border-radius: var(--r-md); overflow: hidden; }
+.results .result-body { padding: 0; }
+.results .result-title::before { content: counter(result, decimal-leading-zero) ' '; color: var(--muted); font-weight: 700; }
+.results .result-price strong { font-size: var(--t-h2); line-height: var(--t-h2-lh); }
+.search-page .search-bar, .search-page .filters { box-shadow: none; }
+@media (min-width: 768px) {
+  .results .result-card { grid-template-columns: 240px minmax(0, 1fr); gap: var(--s-5); padding: var(--s-5) 0; }
+  .results .result-photo { aspect-ratio: 4 / 3; min-height: 0; align-self: start; }
+}
+
+/* V3 conversation: messages as lines with a coloured edge (amber yours, navy theirs), not bubbles. */
+.thread { gap: var(--s-4); padding: var(--s-2) var(--s-1); }
+.thread .bubble { max-width: 100%; justify-self: stretch; background: transparent; color: var(--navy); border-radius: 0; border-left: 3px solid var(--navy); padding: 0 0 0 var(--s-3); }
+.thread .bubble.mine { border-left-color: var(--amber); }
+.thread .bubble-time { order: -1; justify-self: start; opacity: 1; color: var(--muted); font-weight: 600; }
+.thread .day-label { margin-top: var(--s-2); }
+.conversation-link[aria-current='page'] { background: var(--sand); box-shadow: inset 3px 0 0 var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+.composer { border-top: var(--rule); padding-top: var(--s-3); }
+
+/* V3 host availability: bigger nights, rounded only at the ends of each week. */
+.night-picker button.night { min-height: 40px; font-weight: 600; border-radius: 0; }
+.night-picker .week button.night:first-of-type { border-radius: var(--r-pill) 0 0 var(--r-pill); }
+.night-picker .week button.night:last-of-type { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
+#places-title { font-size: var(--t-display-2); line-height: var(--t-display-2-lh); letter-spacing: -0.03em; }
+.results .result-top, .results .result-bottom, .results .card-weeks { align-self: stretch; }
