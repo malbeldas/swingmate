@@ -13,6 +13,8 @@ import os
 import re
 import shutil
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -32,9 +34,17 @@ FREE = re.compile(r'^(cc0|public domain|pd)', re.I)
 
 
 def get(url):
-    req = urllib.request.Request(url, headers={'User-Agent': UA})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return r.read()
+    # Commons rate-limits bursts (HTTP 429): go slowly and back off.
+    for attempt in range(6):
+        time.sleep(0.6)
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': UA})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or attempt == 5:
+                raise
+            time.sleep(int(e.headers.get('Retry-After') or 0) or 5 * (attempt + 1))
 
 
 def query(params):
@@ -61,7 +71,7 @@ def candidates():
     os.makedirs(CANDIDATES, exist_ok=True)
     seen, found = set(), []
     for text in QUERIES:
-        pages = query({'generator': 'search', 'gsrnamespace': '6', 'gsrsearch': f'{text} filetype:bitmap', 'gsrlimit': '40', 'iiurlwidth': '480'})
+        pages = query({'generator': 'search', 'gsrnamespace': '6', 'gsrsearch': f'{text} filetype:bitmap', 'gsrlimit': '25', 'iiurlwidth': '480'})
         for item in map(describe, pages):
             if item['title'] in seen or not FREE.match(item['licence']) or item['width'] < 1200 or item['width'] < item['height'] * 1.2:
                 continue
