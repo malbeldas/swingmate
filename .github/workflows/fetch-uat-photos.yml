@@ -1,0 +1,25 @@
+# Temporary: fetches the free UAT test photos once and commits them to the PR branch.
+# Removed in the same PR once the photos are in (the session network can't reach Commons).
+name: Fotos de prueba UAT (temporal)
+on:
+  pull_request:
+    paths: ['scripts/uat/fetch-photos.py', '.github/workflows/fetch-uat-photos.yml']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - run: pip install pillow
+      - run: python3 scripts/uat/fetch-photos.py
+      - name: Commit the photos
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
+          git add scripts/uat/photos
+          git commit -m 'UAT test photos from Wikimedia Commons (CC0 / public domain)' || exit 0
+          git push

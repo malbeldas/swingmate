@@ -7,6 +7,7 @@ import { initAccountMenu } from '../ui/account-menu.js';
 import { getClient } from '../db.js';
 import { el } from '../ui/dom.js';
 import { oppositeSwingDemo } from '../../core/onboarding.js';
+import { highlight, playCells, reveal } from '../ui/motion.js';
 import { attachSuburbList, getPlace, resolveSuburb } from '../suburbs.js';
 import {
   BATHROOM_LABELS, PLACE_TYPE_LABELS, TEXTS, chosenRadius, searchIssues, searchParamsFor,
@@ -85,6 +86,8 @@ function render(form, today) {
   }
   strip.replaceChildren(...cells);
   renderExample(roster, today);
+  // Once the strips have been seen, a new roster fills them again cell by cell.
+  if (strip.dataset.seen) { playCells(strip); playCells(document.getElementById('example-strip')); }
 }
 
 function nightCell(night, kind, label) {
@@ -251,8 +254,25 @@ async function initProduct() {
   await loadHomes(db);
 }
 
+// Sections fade up into view; the strips fill when they arrive, and "Try it with your roster"
+// glides down (CSS smooth scroll) and rings the roster card once it lands.
+function initMotion() {
+  const strip = document.getElementById('strip');
+  const sections = document.querySelectorAll('main > section:not(.hero), #swing-demo, #your-nights .card');
+  reveal(sections, (element) => {
+    if (element.id === 'swing-demo') element.querySelectorAll('.swing-cells').forEach(playCells);
+    if (element.contains(strip)) { strip.dataset.seen = '1'; playCells(strip); }
+    if (element.querySelector('#example-strip')) playCells(document.getElementById('example-strip'));
+  });
+  document.getElementById('cta-try')?.addEventListener('click', () => {
+    const card = document.querySelector('#your-nights .card');
+    setTimeout(() => { highlight(card); playCells(strip); }, 650);
+  });
+}
+
 init();
 renderSwingDemo(todayInPerth());
+initMotion();
 initTracking();
 initProduct();
 initAnalytics();

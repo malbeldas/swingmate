@@ -92,13 +92,19 @@ jobs:
           if [ "$ACCION" = cargar ]; then
             sql < scripts/uat/load.sql | jq .
             list=$(ids)
+            # Fotos libres (scripts/uat/photos/CREDITS.md): cada aviso abre con un dormitorio distinto
+            # (bed-N) y suma dos ambientes (room-N), rotando para que no se repitan seguidas.
+            nb=$(ls scripts/uat/photos/bed-*.jpg | wc -l); nr=$(ls scripts/uat/photos/room-*.jpg | wc -l)
+            k=0
             for id in $list; do
               for i in 0 1 2; do
+                if [ "$i" = 0 ]; then file="bed-$((k % nb)).jpg"; else file="room-$(((2 * k + i - 1) % nr)).jpg"; fi
                 curl -sS --fail-with-body -o /dev/null -X POST "$URL/storage/v1/object/listing-photos/$id/uat-$i.jpg" \
                   -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H 'x-upsert: true' -H 'Content-Type: image/jpeg' \
-                  --data-binary "@scripts/uat/photos/uat-$i.jpg"
+                  --data-binary "@scripts/uat/photos/$file"
               done
               echo "Fotos subidas: $id"
+              k=$((k + 1))
             done
           else
             list=$(ids)
