@@ -17,12 +17,14 @@ OUT = 'scripts/uat/photos'
 API = 'https://commons.wikimedia.org/w/api.php'
 UA = 'SwingMate-UAT-photos/1.0 (test data script)'
 # role, Commons search, how many
+# Modern photos only: Commons keeps CC0 copies of Unsplash and Pexels photos, marked in the title.
 WANTED = [
-    ('bed', 'bedroom interior', 8),
-    ('room', 'kitchen interior home', 3),
-    ('room', 'living room interior', 3),
-    ('room', 'bathroom interior home', 2),
+    ('bed', ['bedroom unsplash', 'bedroom pexels', 'bed room interior unsplash'], 8),
+    ('room', ['kitchen unsplash', 'kitchen pexels'], 3),
+    ('room', ['living room unsplash', 'living room pexels', 'lounge room unsplash'], 3),
+    ('room', ['bathroom unsplash', 'bathroom pexels'], 2),
 ]
+MODERN = re.compile(r'unsplash|pexels', re.I)
 FREE = re.compile(r'^(cc0|public domain|pd)', re.I)
 
 
@@ -44,7 +46,7 @@ def search(text):
         info = (page.get('imageinfo') or [{}])[0]
         meta = info.get('extmetadata', {})
         licence = meta.get('LicenseShortName', {}).get('value', '')
-        if not FREE.match(licence.strip()):
+        if not FREE.match(licence.strip()) or not MODERN.search(page['title']):
             continue
         if info.get('width', 0) < 1200 or info.get('width', 0) < info.get('height', 1) * 1.2:
             continue
@@ -53,8 +55,16 @@ def search(text):
                'licence': licence, 'author': author}
 
 
+def colourful(im):
+    # Drops black-and-white and sepia scans: mean saturation must be clear of grey.
+    sat = im.convert('HSV').getchannel('S').resize((64, 48))
+    return sum(sat.getdata()) / (64 * 48) > 40
+
+
 def crop(raw):
     im = Image.open(io.BytesIO(raw)).convert('RGB')
+    if not colourful(im):
+        raise ValueError('not colour')
     w, h = im.size
     target = 4 / 3
     if w / h > target:
@@ -70,9 +80,10 @@ def main():
     counts = {'bed': 0, 'room': 0}
     credits = ['# UAT test photos', '', 'From Wikimedia Commons, CC0 or public domain only. UAT test data only (DEC-017).', '']
     seen = set()
-    for role, text, n in WANTED:
+    for role, texts, n in WANTED:
         got = 0
-        for item in search(text):
+        items = (item for text in texts for item in search(text))
+        for item in items:
             if got >= n or item['title'] in seen:
                 continue
             try:
@@ -86,9 +97,9 @@ def main():
             got += 1
             seen.add(item['title'])
             credits.append(f"- `{name}`: [{item['title']}]({item['page']}) · {item['author']} · {item['licence']}")
-        print(role, text, got)
+        print(role, texts, got)
     open(f'{OUT}/CREDITS.md', 'w').write('\n'.join(credits) + '\n')
-    if counts['bed'] < 3 or counts['room'] < 3:
+    if counts['bed'] < 4 or counts['room'] < 4:
         sys.exit(f'Not enough free photos: {counts}')
 
 
